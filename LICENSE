@@ -1,8 +1,23 @@
 Copyright (c) 2026 Yusuf Günay.
 
-Bu yazılım Yusuf Günay tarafından geliştirilmiştir; bu telif bildirimi korunmalıdır.
-This software was created by Yusuf Günay; this copyright notice must be retained.
+Bu yazılım ve bilişsel mimari Yusuf Günay tarafından geliştirilmiştir; bu telif bildirimi korunmalıdır.
+This software and cognitive architecture were created by Yusuf Günay; this copyright notice must be retained.
 Değiştirdiğin Mozilla Public License kapsamındaki dosyalar aynı lisansla açık kalır; kendi eklediğin ayrı kodu kapalı tutabilirsin.
+
+Akademik ve Bilimsel Atıf Şartı / Academic & Scientific Attribution Requirement:
+Bu depodaki bilişsel mimariyi (4-Layer PAWA Brain), matematiksel formülasyonu (paper/WHITEPAPER.md),
+persona şemalarını veya hedef analiz protokollerini tez, akademik makale, teknik rapor, konferans bildirisi
+ya da bilimsel yayında kullanan, referans alan veya kıyaslayan herkes, kaynakçada "Yusuf Günay" adına ve
+"PAWA: Persona-Aligned World Autonomy for Single-Player Games" eserine (bkz. CITATION.cff) açıkça atıf
+yapmakla yükümlüdür. Makale ve tez metinleri Creative Commons Attribution 4.0 International (CC BY 4.0)
+kapsamında yalnızca "Yusuf Günay" adına açık atıf yapılması şartıyla kullanılabilir.
+
+Any thesis, dissertation, academic paper, technical report, or scientific publication that uses, benchmarks,
+adapts, or builds upon the PAWA cognitive architecture, mathematical specifications (paper/WHITEPAPER.md),
+persona schemas, or target protocols must explicitly cite "Yusuf Günay" as the original author (see CITATION.cff).
+All research documentation and whitepapers in this repository are licensed under Creative Commons Attribution 4.0
+International (CC BY 4.0), which legally requires explicit attribution to "Yusuf Günay" in any academic or
+derivative written work.
 
 ---
 

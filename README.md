@@ -160,6 +160,9 @@ If you build upon PAWA's cognitive architecture, persona schemas, or target adap
 }
 ```
 
-## License
+## License & Mandatory Academic Attribution
 
-Licensed under the **Mozilla Public License 2.0 (MPL-2.0)**. See [LICENSE](LICENSE) for full terms. Modifications to PAWA's core files remain open under MPL-2.0, while separate game-specific adapters may be combined cleanly. Copyright (c) 2026 Yusuf Günay.
+PAWA employs a dual-protection structure designed for open-source scientific software:
+
+1. **Software & SDK (`packages/`, `skills/`, `targets/`):** Licensed under the **Mozilla Public License 2.0 (MPL-2.0)**. Any modification or redistribution of covered files must retain the copyright notice crediting **Yusuf Günay** ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)).
+2. **Whitepaper, Mathematical Formulation & Research Protocols (`paper/`, `schemas/`):** Licensed under **Creative Commons Attribution 4.0 International (CC BY 4.0)**. Any academic thesis, dissertation, conference proceeding, preprint, or technical report that uses, benchmarks, or references PAWA is **legally required** to credit **Yusuf Günay** by name via the citation above ([`CITATION.cff`](CITATION.cff)).
