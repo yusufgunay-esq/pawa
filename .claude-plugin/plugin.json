@@ -1,0 +1,7 @@
+{
+  "name": "autopilot-anything",
+  "version": "0.1.0",
+  "description": "Give any single-player game an autopilot: reverse engineer it with REA, then build a hotkey mod where an AI plays your character or skips combat with a cinematic.",
+  "author": { "name": "Yusuf Günay" },
+  "keywords": ["game-ai", "autopilot", "modding", "reverse-engineering", "rea", "auto-battle"]
+}
