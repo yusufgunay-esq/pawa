@@ -9,7 +9,7 @@
       "cinematicFlair": 0.92,
       "reactionDelayMs": 85,
       "preferredRange": 4.5,
-      "defaultPresentationMode": "CINEMATIC_LIVE",
+      "defaultPresentationMode": "TACTICAL",
       "notes": "High precision, prioritizes parries, disarm finishers, and cover-to-cover advances. Ideal for narrative espionage and action thrillers where repetitive firefights break immersion."
     },
     {

@@ -19,15 +19,16 @@
 
 ---
 
-## 2. The Five Mandatory Seams
+## 2. Core Seams & Optional Phase-2 Extensions
 
-| Seam ID | Subsystem | Symbol / RVA / Signature | Discovery Method (REA) |
-|---|---|---|---|
-| `Seam.Input` | Player Controller & Motor Intent | | |
-| `Seam.NpcAI` | Native NPC / Companion Brain Entry | | |
-| `Seam.Perception` | Entity List, Health, Wind-Up Telegraph | | |
-| `Seam.Camera` | FOV, Orbit Transform & Time-Dilation | | |
-| `Seam.Encounter` | Encounter Start/End & Quest Callbacks | | |
+| Seam ID | Tier | Subsystem | Symbol / RVA / Signature | Discovery Method (REA) |
+|---|---|---|---|---|
+| `Seam.Input` | **Core (Mandatory)** | Player Controller & Motor Intent | | |
+| `Seam.Perception` | **Core (Mandatory)** | Entity List, Health, Wind-Up Telegraph | | |
+| `Seam.NpcAI` | **Core (Mandatory)** | Native NPC / Companion Brain Entry | | |
+| `Ext.Camera` | *Optional (Phase 2)* | FOV, Orbit Transform & Time-Dilation | | |
+| `Ext.Audio` | *Optional (Phase 2)* | Dynamic Combat Music / Stinger Trigger | | |
+| `Ext.Encounter` | *Optional (Phase 2)* | Fast-Resolve Encounter Callbacks | | |
 
 ---
 

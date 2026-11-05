@@ -7,21 +7,22 @@ metadata:
 
 # PAWA — Persona-Aligned World Autonomy
 
-PAWA transforms any single-player game into an autonomous, narrative-consistent experience. With a single hotkey (`F5` to toggle autonomy, `F6` to cycle presentation mode), the player character is handed over to a **Persona-Aligned Proxy Agent** that fights, dodges, parries, and executes abilities with the competence expected of the story's protagonist.
-
-Unlike naive `is_human = false` bot flags that blindly charge the nearest enemy, PAWA enforces a **Shared 4-Layer Cognitive Architecture** (`packages/pawa-brain-*`) paired with a **Tri-Modal Presentation Director**.
+PAWA transforms any single-player game into an autonomous, narrative-consistent experience. With a single hotkey (`F5`), the player character is handed over to a **Persona-Aligned Proxy Agent** that fights, dodges, parries, and executes abilities in real time with the competence expected of the story's protagonist—while keeping the game's native camera and flow completely intact (like *Left 4 Dead 2* or *Warband* `F5`, but powered by a genuine 4-layer tactical brain instead of a naive bot).
 
 ---
 
-## 1. User-Selectable Presentation Modes (`F6` Cycle)
+## 1. Core vs. Optional Extensions
 
-The user decides at any moment whether combat should be played out normally, directed like an action film, or resolved cinematically:
+PAWA strictly separates **Core Gameplay Autonomy** (mandatory for every target) from **Optional Aesthetic Extensions** (camera, music, fast-resolve, which are added only if requested later):
 
-| Mode ID | Name | Behavior & Camera Mechanics |
-|---|---|---|
-| `TACTICAL` | **Live Combat (Standard Camera)** | The PAWA Brain fights in real time using the game's standard player camera. The user watches or intervenes at any second without camera cuts. |
-| `CINEMATIC_LIVE` | **Live Combat (Action Director Camera)** | The PAWA Brain fights in real time while the Presentation Director dynamically orbits the camera, narrows FOV (`0.85x`) on parries/counters, and triggers brief hit-stop slow-motion (`0.35x` time scale) on finishers. |
-| `CINEMATIC_RESOLVE` | **Cinematic Fast-Resolve** | Initiates a dramatic finisher camera cut (`FINISH_CUT`) while firing the game's native encounter-resolution pipeline in the player's favor—preserving all quest triggers, XP, and narrative continuity. |
+### Core Mode (Default & Mandatory)
+- **`TACTICAL` (Native Live Combat):** Press `F5` and the 4-Layer PAWA Brain (`packages/pawa-brain-*`) takes control of the player character directly in the live game world. The native player camera stays untouched; the user can watch the fight unfold naturally or take back control at any instant.
+
+### Optional Post-Core Extensions (Phase 2 — Only When Requested)
+Once core combat autonomy works flawlessly, a target may optionally wire secondary extensions (`F6`):
+- **Extension A (`Ext.Camera` — Dynamic Action Camera):** Subtle FOV framing and hit-stop slow-motion on parries/finishers (`CINEMATIC_LIVE`).
+- **Extension B (`Ext.Audio` — Reactive Combat Music / Stingers):** Dynamic intensity layers or protagonist theme stingers triggered when autonomy engages or high-utility finishers land.
+- **Extension C (`Ext.Resolve` — Fast Encounter Resolve):** Choreographed transition that fires native encounter-victory hooks (`CINEMATIC_RESOLVE`).
 
 ---
 
@@ -35,19 +36,19 @@ The user decides at any moment whether combat should be played out normally, dir
 
 ## 3. End-to-End PAWA Engineering Workflow
 
-When asked to **"PAWA `<game>`"**, execute these seven stages in order and record every symbol/address in `targets/<game>/REPORT.md` (copied from `targets/_template/REPORT.md`):
+When asked to **"PAWA `<game>`"**, execute these stages in order and record every symbol/address in `targets/<game>/REPORT.md`:
 
 ### Stage 1: Binary & Engine Reconnaissance (via REA)
 1. Identify the engine and runtime (`Unity Mono`, `Unity IL2CPP`, `Unreal Engine 4/5`, `AnvilNext`, `REDengine`, `Source`, or custom C++) using REA (`open_binary`, `binary_overview`, `inspect_managed_artifact`).
 2. Consult [references/engines.md](references/engines.md) to select the appropriate non-destructive loader and matching PAWA Brain package (`pawa-brain-cs`, `pawa-brain-cpp`, `pawa-brain-lua`, or `pawa-brain-ts`).
 
-### Stage 2: Five-Seam Extraction
-Using REA static cross-references (`xrefs`, `search_strings`, `procedure_pseudo_code`) and runtime observation, locate the **Five Mandatory Seams**:
-1. **Player Controller & Input Poll (`Seam.Input`):** Where hardware inputs are read or translated into motor intents (`Move`, `LightAttack`, `HeavyAttack`, `Parry`, `Dodge`, `UseAbility`).
-2. **NPC / Companion Brain Entry (`Seam.NpcAI`):** Existing Behavior Tree, Utility evaluator, or combat state machine used by elite NPCs or companions.
-3. **Perceptual World State (`Seam.Perception`):** Entity list iteration, health/stamina ratios, enemy attack telegraphing (`isWindUp` / animation montage flags), and faction/aggro tables.
-4. **Camera & Time-Dilation Controller (`Seam.Camera`):** Global or local time scale (`Time.timeScale`, `slomo`), camera FOV, and target lock/orbit transforms required for `CINEMATIC_LIVE`.
-5. **Encounter Lifecycle & Quest Hooks (`Seam.Encounter`):** Combat state flags and native enemy-defeated callbacks required so `CINEMATIC_RESOLVE` never soft-locks quest progression.
+### Stage 2: Three Core Seams Extraction
+Using REA static cross-references (`xrefs`, `search_strings`, `procedure_pseudo_code`) and runtime observation, locate the **Three Core Seams** required for live autonomous combat:
+1. **Player Controller & Input Poll (`Seam.Input` — Core):** Where hardware inputs are read or translated into motor intents (`Move`, `LightAttack`, `HeavyAttack`, `Parry`, `Dodge`, `UseAbility`).
+2. **Perceptual World State (`Seam.Perception` — Core):** Entity list iteration, health/stamina ratios, enemy attack telegraphing (`isWindUp` / animation montage flags), and faction/aggro tables.
+3. **NPC / Companion Brain Entry (`Seam.NpcAI` — Core):** Existing Behavior Tree, Utility evaluator, or combat state machine used by elite NPCs or companions (for Strategy S1/S2).
+
+*(Optional Phase 2 Seams — only locate if the user explicitly asks for camera, music, or skip extensions: `Ext.Camera` for FOV/time-dilation, `Ext.Audio` for music/stinger triggers, `Ext.Encounter` for fast-resolve callbacks.)*
 
 ### Stage 3: Strategy Selection (`S1` → `S5` Ladder)
 Select the highest-fidelity strategy from [references/strategies.md](references/strategies.md) and document why any simpler tier was insufficient:

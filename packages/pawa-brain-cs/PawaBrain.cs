@@ -157,7 +157,7 @@ namespace Pawa.Brain
     public sealed class PawaBrainKernel
     {
         private readonly ContextSteering16 _steering = new ContextSteering16();
-        public PresentationMode ActiveMode { get; set; } = PresentationMode.CinematicLive;
+        public PresentationMode ActiveMode { get; set; } = PresentationMode.Tactical;
 
         public void CyclePresentationMode()
         {

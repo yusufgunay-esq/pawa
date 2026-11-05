@@ -26,16 +26,16 @@ Narrative-driven games frequently cast the player as an elite covert operative, 
 
 ---
 
-## 1. User-Controlled Presentation Tri-State (`F5` / `F6`)
+## 1. Core Gameplay Autonomy First (Optional Extensions Later)
 
-PAWA decouples **Cognitive Decision-Making** from **Visual Presentation**. Rather than forcing either a passive skip or a static camera, the user controls how encounters unfold in real time:
+PAWA is engineered around a strict separation of concerns: **Core Live Combat Autonomy** comes first. Many players simply want a single hotkey (`F5`) that makes their character fight intelligently in real time—just like *Left 4 Dead 2* idle takeover or *Warband* `F5`, except powered by a 4-layer tactical brain that parries, dodges, and uses the player's build.
 
-| Hotkey / State | Mode Identifier | Runtime Behavior & Camera Direction |
+| Layer / Tier | Identifier | Scope & Runtime Behavior |
 |---|---|---|
-| `F5` Toggle | **Autonomy Hand-Off** | Instant, zero-stutter transfer between human hardware input and the PAWA Proxy Agent. Auto-disengages on cutscenes, dialogues, menus, and loading screens. |
-| `F6` Mode 1 | `TACTICAL` | **Live Combat (Standard Camera):** The 4-Layer PAWA Brain fights in real time (parrying wind-ups, chaining abilities, repositioning) while keeping the native player camera untouched. |
-| `F6` Mode 2 | `CINEMATIC_LIVE` | **Live Combat (Action Director Camera):** The PAWA Brain fights live while the Presentation Director dynamically frames targets, narrows FOV (`0.85x`) on deflects, and triggers hit-stop slow-motion (`0.35x` time scale) on finishers. |
-| `F6` Mode 3 | `CINEMATIC_RESOLVE` | **Choreographed Fast-Resolve:** Executes a dramatic finisher camera cut (`FINISH_CUT`) while invoking the engine's native encounter-victory callbacks (`Seam.Encounter`), preserving all quest flags, XP, and narrative flow. |
+| **Core (Mandatory)** | `TACTICAL` (`F5` Toggle) | **Pure Live Combat (Native Camera):** Instant, zero-stutter hand-off between human input and the 4-Layer PAWA Brain. The character fights live in the world while keeping the game's standard camera untouched. |
+| **Extension 1 (Optional)** | `Ext.Camera` (`CINEMATIC_LIVE`) | **Dynamic Action Camera:** Post-core optional plugin that orbits the camera or triggers brief hit-stop slow-motion on parries and finishers. |
+| **Extension 2 (Optional)** | `Ext.Audio` | **Reactive Combat Music / Stingers:** Post-core optional hook that swells dynamic combat music or protagonist theme stingers during high-utility maneuvers. |
+| **Extension 3 (Optional)** | `Ext.Resolve` (`CINEMATIC_RESOLVE`) | **Choreographed Fast-Resolve:** Post-core optional hook for players who prefer to resolve filler encounters via native encounter-completion callbacks. |
 
 ---
 
@@ -90,17 +90,18 @@ Because game modding spans managed C#, native C++, embedded Lua, and out-of-proc
 
 ---
 
-## 4. The Five-Seam REA Reconnaissance Protocol
+## 4. The Three Core Seams (+ Optional Phase-2 Extensions)
 
-When an AI agent is instructed to **PAWA a target game**, it follows [skills/pawa/SKILL.md](skills/pawa/SKILL.md) to extract five architectural seams using REA before writing a single line of mod code:
+When an AI agent is instructed to **PAWA a target game**, it follows [skills/pawa/SKILL.md](skills/pawa/SKILL.md) to extract the **Three Core Seams** using REA. Camera, reactive music, and fast-resolve hooks remain strictly optional Phase-2 extensions:
 
-| Seam Identifier | Target Subsystem | Required Binary Evidence |
-|---|---|---|
-| `Seam.Input` | Player Controller & Action Dispatch | Internal command handlers (`Move`, `Attack`, `Parry`, `Dodge`, `UseAbility`). |
-| `Seam.NpcAI` | Native NPC / Companion Brain | Existing Behavior Tree, combat evaluator, or dormant autoplay switch. |
-| `Seam.Perception` | World State & Telegraphing | Active entity array, health/stamina offsets, and enemy attack wind-up flags. |
-| `Seam.Camera` | Presentation & Time Dilation | Camera FOV/orbit transform and global/local `timeScale` hooks. |
-| `Seam.Encounter` | Encounter Lifecycle & Quests | Combat start/end events and native enemy-defeated callbacks. |
+| Seam / Extension | Tier | Target Subsystem | Required Binary Evidence |
+|---|---|---|---|
+| `Seam.Input` | **Core (Mandatory)** | Player Controller & Action Dispatch | Internal command handlers (`Move`, `Attack`, `Parry`, `Dodge`, `UseAbility`). |
+| `Seam.Perception` | **Core (Mandatory)** | World State & Telegraphing | Active entity array, health/stamina offsets, and enemy attack wind-up flags. |
+| `Seam.NpcAI` | **Core (Mandatory)** | Native NPC / Companion Brain | Existing Behavior Tree, combat evaluator, or dormant autoplay switch. |
+| `Ext.Camera` | *Optional (Phase 2)* | Action Camera & Time Dilation | Camera FOV/orbit transform and `timeScale` hooks (`CINEMATIC_LIVE`). |
+| `Ext.Audio` | *Optional (Phase 2)* | Reactive Combat Music / Stingers | Dynamic music intensity / protagonist theme trigger hooks. |
+| `Ext.Encounter` | *Optional (Phase 2)* | Encounter Lifecycle & Quests | Native encounter-completion callbacks (`CINEMATIC_RESOLVE`). |
 
 ---
 

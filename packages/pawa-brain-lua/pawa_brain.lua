@@ -53,7 +53,7 @@ function PawaBrain.new(persona)
         cinematicFlair = 0.85,
         preferredRange = 2.2
     }
-    self.presentationMode = PawaBrain.Modes.CINEMATIC_LIVE
+    self.presentationMode = PawaBrain.Modes.TACTICAL
     self.directions = {}
     for i = 1, 16 do
         local angle = ((i - 1) / 16.0) * math.pi * 2.0

@@ -181,7 +181,7 @@ public:
 
 private:
     std::array<Vec3, 16> dirs_{};
-    PresentationMode active_mode_{PresentationMode::CinematicLive};
+    PresentationMode active_mode_{PresentationMode::Tactical};
 
     [[nodiscard]] Vec3 compute_steering(
         const Vec3& self_pos,
