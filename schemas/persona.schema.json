@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yusufgunay-esq/pawa/schemas/persona.schema.json",
+  "title": "PAWA Protagonist Persona Profile",
+  "description": "Defines the behavioral parameters, utility response weights, and presentation preferences for a protagonist proxy agent.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "archetype",
+    "aggression",
+    "discipline",
+    "cinematicFlair",
+    "reactionDelayMs",
+    "preferredRange",
+    "defaultPresentationMode"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+    "name": { "type": "string" },
+    "archetype": {
+      "type": "string",
+      "enum": ["TACTICAL_OPERATIVE", "AGGRESSIVE_VANGUARD", "ARCANE_SCHOLAR", "RANGED_SKIRMISHER", "GUARDIAN"]
+    },
+    "aggression": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "discipline": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "cinematicFlair": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "reactionDelayMs": { "type": "integer", "minimum": 20, "maximum": 500 },
+    "preferredRange": { "type": "number", "minimum": 0.5, "maximum": 100.0 },
+    "defaultPresentationMode": {
+      "type": "string",
+      "enum": ["TACTICAL", "CINEMATIC_LIVE", "CINEMATIC_RESOLVE"]
+    }
+  }
+}

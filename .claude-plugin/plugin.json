@@ -1,7 +1,21 @@
 {
-  "name": "autopilot-anything",
-  "version": "0.1.0",
-  "description": "Give any single-player game an autopilot: reverse engineer it with REA, then build a hotkey mod where an AI plays your character or skips combat with a cinematic.",
-  "author": { "name": "Yusuf Günay" },
-  "keywords": ["game-ai", "autopilot", "modding", "reverse-engineering", "rea", "auto-battle"]
+  "name": "pawa",
+  "displayName": "PAWA — Persona-Aligned World Autonomy",
+  "version": "1.0.0",
+  "description": "Reverse engineer single-player games with REA and inject a 4-layer autonomous protagonist brain (GOAP + Compensated Utility AI + Context Steering) with Tactical, Cinematic Live, and Cinematic Resolve modes.",
+  "author": {
+    "name": "Yusuf Günay"
+  },
+  "license": "MPL-2.0",
+  "keywords": [
+    "pawa",
+    "game-ai",
+    "goap",
+    "utility-ai",
+    "context-steering",
+    "autonomous-agent",
+    "reverse-engineering",
+    "rea",
+    "modding"
+  ]
 }

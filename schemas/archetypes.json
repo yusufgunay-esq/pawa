@@ -1,0 +1,40 @@
+{
+  "personas": [
+    {
+      "id": "covert_operative",
+      "name": "Covert Espionage Operative",
+      "archetype": "TACTICAL_OPERATIVE",
+      "aggression": 0.72,
+      "discipline": 0.94,
+      "cinematicFlair": 0.92,
+      "reactionDelayMs": 85,
+      "preferredRange": 4.5,
+      "defaultPresentationMode": "CINEMATIC_LIVE",
+      "notes": "High precision, prioritizes parries, disarm finishers, and cover-to-cover advances. Ideal for narrative espionage and action thrillers where repetitive firefights break immersion."
+    },
+    {
+      "id": "spartan_mercenary",
+      "name": "Mythic Vanguard Mercenary",
+      "archetype": "AGGRESSIVE_VANGUARD",
+      "aggression": 0.88,
+      "discipline": 0.85,
+      "cinematicFlair": 0.84,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2,
+      "defaultPresentationMode": "TACTICAL",
+      "notes": "Designed for open-world action RPGs (e.g., Assassin's Creed Odyssey). Aggressive gap-closing, active parry-counters on enemy wind-up, and dynamic ability rotation."
+    },
+    {
+      "id": "tactical_commander",
+      "name": "Battlefield Field Commander",
+      "archetype": "GUARDIAN",
+      "aggression": 0.58,
+      "discipline": 0.92,
+      "cinematicFlair": 0.60,
+      "reactionDelayMs": 110,
+      "preferredRange": 2.8,
+      "defaultPresentationMode": "TACTICAL",
+      "notes": "Replaces naive 'F5 charge-nearest' bots in sandbox battle simulators with formation-aware positioning, directional blocking, and threat-weighted target selection."
+    }
+  ]
+}
