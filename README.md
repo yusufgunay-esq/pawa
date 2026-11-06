@@ -42,6 +42,8 @@ AUTOMA is engineered around a strict separation of concerns: **Core Gameplay Aut
 | `SHADOW_SURVIVAL` | **Boss Pattern Coach (Zero Offense)** | Enters strict `DEFENSIVE` stance—never attacking, only weaving, spacing, and parrying every boss combo via 16-Slot Context Steering so the player can study brutal boss patterns safely before taking over. |
 | `COMMANDER` | **Macro Tactical Commander** | The player issues high-level doctrine orders (*"Focus Ranged"*, *"Hold Ground"*, *"All-Out Assault"*) while AUTOMA executes the low-level motor combat. |
 
+> **Modes combine.** The five modes are named presets. The target design ([docs/ROADMAP.md](docs/ROADMAP.md)) makes them composable behavior flags, so a command like *"loot and fight, but only parry while I drive"* can activate several at once.
+
 ### B. Optional Post-Core Extensions (Phase 2 — Added Only When Requested)
 
 | Extension ID | Name | Optional Capability |
