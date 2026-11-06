@@ -29,5 +29,13 @@ Conflict rules (fixed, so all four SDKs agree):
 
 Work remaining: replace the enum with flags in `automa-brain-ts/cs/cpp/lua`, add combination scenarios to `packages/conformance`, regenerate fixtures, run `npm test`.
 
+## Suggestions and shared learning (Phase 1.5)
+1. **Hand-over first, advice second.** The user hands a character to the AI (F5). Afterwards the agent may *suggest* additions to that character ("dies to archers: add `DEFENSIVE` vs ranged", "raise `reactionDelayMs`"). Suggestions are shown, never applied without the user's yes.
+2. **Shared learning into this repo.** What users' agents learn (profiles that worked, tuning results, seam notes) is contributed to `yusufgunay-esq/automa` through `scripts/contribute-recipe.mjs`:
+   - **Opt-in only**, asked once per contribution; no silent uploads.
+   - **Pull request only**, never a direct push: the maintainer reviews every contribution.
+   - **Hygiene audit before upload:** no game binaries or assets, no personal paths, no keys, no raw telemetry that identifies a person. Only profile JSON, anonymized tuning numbers and seam notes.
+   - Stored under `targets/<game-slug>/` (profile, REPORT) and `learned/<game-slug>/` (tuning results), so the next user's agent starts from what earlier users found.
+
 ## Phase 2 (next step)
 **Protagonist Fidelity:** REA derives the story protagonist's real fighting style into the same profile schema, for a narrative-consistent takeover.
