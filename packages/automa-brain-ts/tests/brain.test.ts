@@ -2,6 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   AutomaBrain,
+  Behavior,
+  AUTONOMY_PRESETS,
   ContextSteering,
   GoapPlanner,
   TacticalBlackboard,
@@ -201,4 +203,38 @@ test('Autonomy Modes: SHADOW_SURVIVAL strictly evades/deflects without attacking
   );
   assert.equal(grind.immediateCommand, 'CRUISE_OR_LOOT');
   assert.ok(grind.steeringMove.x > 0.9, 'Should steer directly toward open-world waypoint');
+});
+
+const SELF: EntitySnapshot = {
+  id: 'player_0', position: { x: 0, y: 0, z: 0 }, velocity: { x: 0, y: 0, z: 0 },
+  healthRatio: 0.9, staminaRatio: 0.9, isAttacking: false, isWindUp: false, isRanged: false, threatWeight: 1.0,
+};
+const FOE: EntitySnapshot = { ...SELF, id: 'foe', position: { x: 2, y: 0, z: 0 }, healthRatio: 0.8, threatWeight: 2.0 };
+
+test('Behaviors: legacy names equal their preset masks, bit for bit', () => {
+  for (const [name, mask] of Object.entries(AUTONOMY_PRESETS)) {
+    for (const hostiles of [[], [FOE], [{ ...FOE, isWindUp: true }]]) {
+      const a = new AutomaBrain().tick(SELF, hostiles, PROTAGONIST_OPERATIVE, 'TACTICAL', name as never, { x: 9, y: 0, z: 0 });
+      const b = new AutomaBrain().tick(SELF, hostiles, PROTAGONIST_OPERATIVE, 'TACTICAL', mask, { x: 9, y: 0, z: 0 });
+      assert.deepEqual({ ...a, autonomyMode: 0 }, { ...b, autonomyMode: 0 }, name);
+    }
+  }
+});
+
+test('Behaviors: conflict rules', () => {
+  const wp = { x: 9, y: 0, z: 0 };
+  const t = (m: number, h: EntitySnapshot[]) => new AutomaBrain().tick(SELF, h, PROTAGONIST_OPERATIVE, 'TACTICAL', m, wp);
+  const z = t(0, [FOE]);
+  assert.equal(z.interceptHumanInput, false);
+  assert.equal(z.immediateCommand, 'HUMAN_PASS_THROUGH');
+  assert.equal(z.speedMultiplier, 0);
+  assert.equal(t(Behavior.CRUISE | Behavior.COMBAT, []).immediateCommand, 'CRUISE_OR_LOOT');
+  assert.notEqual(t(Behavior.CRUISE | Behavior.COMBAT, [FOE]).immediateCommand, 'CRUISE_OR_LOOT');
+  assert.equal(t(Behavior.ASSIST | Behavior.CRUISE, []).immediateCommand, 'CRUISE_OR_LOOT');
+  assert.equal(t(Behavior.ASSIST | Behavior.CRUISE, [FOE]).immediateCommand, 'HUMAN_PASS_THROUGH');
+  assert.equal(t(Behavior.ASSIST | Behavior.CRUISE, [{ ...FOE, isWindUp: true }]).interceptHumanInput, true);
+  assert.equal(t(Behavior.ASSIST | Behavior.COMBAT, [FOE]).interceptHumanInput, true);
+  const d = t(Behavior.DEFENSIVE | Behavior.COMBAT, [{ ...FOE, healthRatio: 0.1 }]);
+  assert.equal(d.stance, 'DEFENSIVE');
+  assert.notEqual(d.selectedUtilityAction, 'EXECUTE_FINISHER');
 });

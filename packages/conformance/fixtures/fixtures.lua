@@ -10,6 +10,7 @@ return {
     },
     presentation = 0,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -22,6 +23,7 @@ return {
     },
     presentation = 1,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -34,6 +36,7 @@ return {
     },
     presentation = 1,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -46,6 +49,7 @@ return {
     },
     presentation = 0,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -59,6 +63,7 @@ return {
     },
     presentation = 0,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -74,6 +79,7 @@ return {
     },
     presentation = 0,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -86,6 +92,7 @@ return {
     },
     presentation = 0,
     autonomy = 1,
+    behaviors = 2,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -98,6 +105,7 @@ return {
     },
     presentation = 0,
     autonomy = 1,
+    behaviors = 2,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -110,6 +118,7 @@ return {
     },
     presentation = 0,
     autonomy = 3,
+    behaviors = 8,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -120,6 +129,7 @@ return {
     hostiles = {},
     presentation = 0,
     autonomy = 2,
+    behaviors = 5,
     hasWaypoint = true,
     waypoint = { x = 50.0, y = 0.0, z = 0.0 }
   },
@@ -130,6 +140,7 @@ return {
     hostiles = {},
     presentation = 0,
     autonomy = 2,
+    behaviors = 5,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -142,6 +153,7 @@ return {
     },
     presentation = 0,
     autonomy = 4,
+    behaviors = 17,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -152,6 +164,7 @@ return {
     hostiles = {},
     presentation = 0,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -164,6 +177,7 @@ return {
     },
     presentation = 2,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -176,6 +190,7 @@ return {
     },
     presentation = 0,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -189,6 +204,7 @@ return {
     },
     presentation = 1,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   },
@@ -201,7 +217,134 @@ return {
     },
     presentation = 0,
     autonomy = 0,
+    behaviors = 1,
     hasWaypoint = false,
     waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "combo-cruise-combat-ambush",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "ambusher_1", position = { x = 2.4, y = 0.0, z = 0.5 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = true, isRanged = false, threatWeight = 1.6 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 5,
+    hasWaypoint = true,
+    waypoint = { x = 40.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "combo-cruise-combat-clear",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {},
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 5,
+    hasWaypoint = true,
+    waypoint = { x = 0.0, y = 0.0, z = 30.0 }
+  },
+  {
+    id = "combo-assist-cruise-clear",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {},
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 6,
+    hasWaypoint = true,
+    waypoint = { x = -25.0, y = 0.0, z = 10.0 }
+  },
+  {
+    id = "combo-assist-cruise-calm",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "boss_1", position = { x = 2.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.8, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 2.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 6,
+    hasWaypoint = true,
+    waypoint = { x = 40.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "combo-assist-cruise-windup",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "boss_1", position = { x = 2.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.8, staminaRatio = 0.7, isAttacking = false, isWindUp = true, isRanged = false, threatWeight = 2.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 6,
+    hasWaypoint = true,
+    waypoint = { x = 40.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "combo-assist-combat-enemy",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "boss_1", position = { x = 2.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.8, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 2.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 3,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "combo-defensive-command",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "boss_1", position = { x = 1.5, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.1, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 2.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 24,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "combo-defensive-combat",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "guard_1", position = { x = 2.4, y = 0.0, z = 0.2 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.18, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 9,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "combo-mask-zero",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "boss_1", position = { x = 2.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.8, staminaRatio = 0.7, isAttacking = false, isWindUp = true, isRanged = false, threatWeight = 2.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 0,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "combo-cruise-only-enemy",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "h1", position = { x = 3.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 4,
+    hasWaypoint = true,
+    waypoint = { x = 40.0, y = 0.0, z = 0.0 }
   }
 }

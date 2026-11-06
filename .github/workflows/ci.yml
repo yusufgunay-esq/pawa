@@ -1,0 +1,29 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install g++ and Lua
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-12 lua5.4
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
+      - name: Unit tests, profile validation, fixture freshness
+        run: |
+          npm run test:ts
+          npm run validate
+          npm run fixtures:check
+      - name: Native conformance runners (C#, C++20, Lua 5.4) - all strict
+        run: npm run conformance:all

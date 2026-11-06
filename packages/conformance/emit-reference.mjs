@@ -12,7 +12,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { AutomaBrain } from '../automa-brain-ts/src/index.ts';
+import { AutomaBrain, resolveBehaviors } from '../automa-brain-ts/src/index.ts';
 import { SCENARIOS } from './scenarios.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -52,6 +52,6 @@ mkdirSync(join(HERE, 'fixtures'), { recursive: true });
 
 const decisions = SCENARIOS.map(runScenario);
 writeFileSync(join(HERE, 'fixtures', 'expected.json'), JSON.stringify(decisions, null, 2) + '\n', 'utf8');
-writeFileSync(join(HERE, 'fixtures', 'scenarios.json'), JSON.stringify(SCENARIOS, null, 2) + '\n', 'utf8');
+writeFileSync(join(HERE, 'fixtures', 'scenarios.json'), JSON.stringify(SCENARIOS.map((s) => ({ ...s, behaviors: resolveBehaviors(s.autonomy) })), null, 2) + '\n', 'utf8');
 
 console.log(`[conformance] TS reference emitted ${decisions.length} decisions -> fixtures/expected.json`);

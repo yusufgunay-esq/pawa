@@ -33,6 +33,38 @@ namespace Automa.Brain
         Commander = 4
     }
 
+    /// <summary>
+    /// Composable behavior flags. The five AutonomyMode names are presets over these.
+    /// Conflict rules: DEFENSIVE overrides offense; ASSIST is inert while COMBAT is set AND an enemy exists;
+    /// CRUISE runs only while no enemy exists; ASSIST+CRUISE: cruise when clear, human pass-through + reflex
+    /// intercept when an enemy exists; no active behavior => human input passes, AUTOMA idle.
+    /// </summary>
+    [Flags]
+    public enum Behaviors
+    {
+        None = 0,
+        Combat = 1,
+        Assist = 2,
+        Cruise = 4,
+        Defensive = 8,
+        Command = 16
+    }
+
+    public static class AutonomyPresets
+    {
+        public static Behaviors Of(AutonomyMode mode)
+        {
+            switch (mode)
+            {
+                case AutonomyMode.CoPilot: return Behaviors.Assist;
+                case AutonomyMode.GrindAutopilot: return Behaviors.Cruise | Behaviors.Combat;
+                case AutonomyMode.ShadowSurvival: return Behaviors.Defensive;
+                case AutonomyMode.Commander: return Behaviors.Combat | Behaviors.Command;
+                default: return Behaviors.Combat;
+            }
+        }
+    }
+
     public enum PresentationMode
     {
         Tactical = 0,
@@ -98,7 +130,8 @@ namespace Automa.Brain
 
     public struct AutomaDecision
     {
-        public AutonomyMode AutonomyMode;
+        public AutonomyMode AutonomyMode;   // legacy name echo (FullCombat when ticked by mask)
+        public Behaviors Behaviors;         // resolved flag mask actually used
         public TacticalStance Stance;
         public bool InterceptHumanInput;
         public string SelectedUtilityAction;
@@ -116,6 +149,13 @@ namespace Automa.Brain
         public WorldState() : base(StringComparer.Ordinal) { }
 
         public WorldState(WorldState other) : base(other, StringComparer.Ordinal) { }
+
+        /// <summary>True only when the key is present AND equals value (mirrors TS `current[k] === v`).</summary>
+        public bool Holds(string key, bool value)
+        {
+            bool v;
+            return TryGetValue(key, out v) && v == value;
+        }
     }
 
     // ========================================================================
@@ -722,12 +762,33 @@ namespace Automa.Brain
             AutonomyMode autonomy = AutonomyMode.FullCombat,
             Vec3? waypointOrLootPos = null)
         {
+            AutomaDecision d = TickBehaviors(self, hostiles, profile, presentation, AutonomyPresets.Of(autonomy), waypointOrLootPos);
+            d.AutonomyMode = autonomy;
+            return d;
+        }
+
+        public AutomaDecision TickBehaviors(
+            EntitySnapshot self,
+            IList<EntitySnapshot> hostiles,
+            BehaviorProfile profile,
+            PresentationMode presentation,
+            Behaviors behaviors,
+            Vec3? waypointOrLootPos = null)
+        {
             // 1. Layer 2 — blackboard + influence map
             Blackboard.PresentationMode = presentation;
             Blackboard.Refresh(self, hostiles, profile);
 
+            // [FLAGS] resolve behaviors (identical block in every port)
+            bool hasEnemy = Blackboard.Hostiles.Count > 0;
+            bool fCombat = (behaviors & Behaviors.Combat) != 0;
+            bool fDefensive = (behaviors & Behaviors.Defensive) != 0;
+            bool assistActive = (behaviors & Behaviors.Assist) != 0 && !(fCombat && hasEnemy);
+            bool cruiseActive = (behaviors & Behaviors.Cruise) != 0 && !hasEnemy;
+            bool inactive = !(fCombat || fDefensive || assistActive || cruiseActive);
+
             // 2. Layer 4 — stance & high-level goal
-            TacticalStance stance = autonomy == AutonomyMode.ShadowSurvival
+            TacticalStance stance = fDefensive
                 ? TacticalStance.Defensive
                 : EvaluateStance();
             Blackboard.Stance = stance;
@@ -740,10 +801,10 @@ namespace Automa.Brain
             for (int i = 0; i < _utilityActions.Length; i++)
             {
                 UtilityAction ua = _utilityActions[i];
-                if (autonomy == AutonomyMode.ShadowSurvival &&
+                if (fDefensive &&
                     (ua.Id == "STRIKE_COMBO" || ua.Id == "EXECUTE_FINISHER"))
                 {
-                    continue; // Shadow Survival never attacks
+                    continue; // DEFENSIVE never attacks
                 }
                 double jittered = ua.Score(Blackboard) + _jitter.Next(profile.Discipline);
                 double s = AutomaMath.Clamp01(jittered);
@@ -766,7 +827,17 @@ namespace Automa.Brain
                 : (goapPlanNames.Length > 0 ? goapPlanNames[0] : bestUtility.Id);
             bool interceptHumanInput = true;
 
-            if (autonomy == AutonomyMode.CoPilot)
+            if (inactive)
+            {
+                // [FLAGS] no active behavior: human input passes, AUTOMA does nothing
+                interceptHumanInput = false;
+                immediateCommand = "HUMAN_PASS_THROUGH";
+            }
+            else if (cruiseActive)
+            {
+                immediateCommand = waypointOrLootPos.HasValue ? "CRUISE_OR_LOOT" : "IDLE_SCAN";
+            }
+            else if (assistActive)
             {
                 bool isUrgentReflex =
                     (bestUtility.Id == "DEFLECT_COUNTER" || bestUtility.Id == "EVADE_REPOSITION") &&
@@ -774,14 +845,10 @@ namespace Automa.Brain
                 interceptHumanInput = isUrgentReflex || self.HealthRatio < 0.25;
                 if (!interceptHumanInput) immediateCommand = "HUMAN_PASS_THROUGH";
             }
-            else if (autonomy == AutonomyMode.GrindAutopilot && Blackboard.Hostiles.Count == 0)
-            {
-                immediateCommand = waypointOrLootPos.HasValue ? "CRUISE_OR_LOOT" : "IDLE_SCAN";
-            }
 
             // 5. Layer 1 — context steering synthesis
             Vec3 navTarget = self.Position;
-            if (autonomy == AutonomyMode.GrindAutopilot && Blackboard.Hostiles.Count == 0 && waypointOrLootPos.HasValue)
+            if (cruiseActive && waypointOrLootPos.HasValue)
             {
                 navTarget = waypointOrLootPos.Value;
             }
@@ -804,19 +871,24 @@ namespace Automa.Brain
                     h.ThreatWeight * (h.IsWindUp ? 1.8 : 1.0)));
             }
 
-            double prefRange = (autonomy == AutonomyMode.GrindAutopilot && Blackboard.Hostiles.Count == 0)
-                ? 0.5
-                : profile.PreferredRange;
+            double prefRange = cruiseActive ? 0.5 : profile.PreferredRange;
 
             double speedMultiplier;
             Vec3 direction = Steering.ComputeMoveVector(self.Position, navTarget, prefRange, hazards, out speedMultiplier);
+            if (inactive)
+            {
+                // [FLAGS] idle: no steering output
+                direction = new Vec3(0.0, 0.0, 0.0);
+                speedMultiplier = 0.0;
+            }
 
             // 6. Layer 4 — presentation director
             CameraDirective camera = ComputeCameraDirective(presentation, immediateCommand, profile);
 
             return new AutomaDecision
             {
-                AutonomyMode = autonomy,
+                AutonomyMode = AutonomyMode.FullCombat,
+                Behaviors = behaviors,
                 Stance = stance,
                 InterceptHumanInput = interceptHumanInput,
                 SelectedUtilityAction = bestUtility.Id,

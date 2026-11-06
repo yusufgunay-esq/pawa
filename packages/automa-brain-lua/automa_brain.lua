@@ -31,6 +31,22 @@ AutomaBrain.AutonomyMode = {
     COMMANDER = 4,
 }
 
+-- Composable behavior flags (bit mask). The five AutonomyMode names are presets over these.
+-- Conflict rules: DEFENSIVE overrides offense; ASSIST is inert while COMBAT is set AND an enemy exists;
+-- CRUISE runs only while no enemy exists; ASSIST+CRUISE: cruise when clear, human pass-through + reflex
+-- intercept when an enemy exists; no active behavior => human input passes, AUTOMA idle.
+AutomaBrain.Behavior = { COMBAT = 1, ASSIST = 2, CRUISE = 4, DEFENSIVE = 8, COMMAND = 16 }
+
+AutomaBrain.AutonomyPresets = {
+    [0] = 1,      -- FULL_COMBAT     = COMBAT
+    [1] = 2,      -- CO_PILOT        = ASSIST
+    [2] = 4 + 1,  -- GRIND_AUTOPILOT = CRUISE | COMBAT
+    [3] = 8,      -- SHADOW_SURVIVAL = DEFENSIVE
+    [4] = 1 + 16, -- COMMANDER       = COMBAT | COMMAND
+}
+
+local function hasFlag(mask, flag) return math.floor(mask / flag) % 2 == 1 end -- LuaJIT-safe (no bitwise ops)
+
 AutomaBrain.PresentationMode = {
     TACTICAL = 0,
     CINEMATIC_LIVE = 1,
@@ -685,17 +701,34 @@ end
 
 --- Executes one cognitive tick across all four architectural layers.
 function AutomaBrain:tick(selfState, hostiles, profile, presentationMode, autonomyMode, waypointOrLootPos)
+    autonomyMode = autonomyMode or self.autonomyMode
+    local d = self:tickBehaviors(selfState, hostiles, profile, presentationMode,
+        AutomaBrain.AutonomyPresets[autonomyMode], waypointOrLootPos)
+    d.autonomyMode = autonomyMode
+    return d
+end
+
+--- Same tick driven by a raw Behavior mask (legacy names map to presets via tick()).
+function AutomaBrain:tickBehaviors(selfState, hostiles, profile, presentationMode, behaviors, waypointOrLootPos)
     profile = profile or self.profile
     presentationMode = presentationMode or self.presentationMode
-    autonomyMode = autonomyMode or self.autonomyMode
 
     -- 1. Layer 2 — blackboard + influence map
     self.blackboard.presentationMode = presentationMode
     self.blackboard:refresh(selfState, hostiles, profile)
 
+    -- [FLAGS] resolve behaviors (identical block in every port)
+    local B = AutomaBrain.Behavior
+    local hasEnemy = #self.blackboard.hostiles > 0
+    local fCombat = hasFlag(behaviors, B.COMBAT)
+    local fDefensive = hasFlag(behaviors, B.DEFENSIVE)
+    local assistActive = hasFlag(behaviors, B.ASSIST) and not (fCombat and hasEnemy)
+    local cruiseActive = hasFlag(behaviors, B.CRUISE) and not hasEnemy
+    local inactive = not (fCombat or fDefensive or assistActive or cruiseActive)
+
     -- 2. Layer 4 — stance & high-level goal
     local stance
-    if autonomyMode == AutomaBrain.AutonomyMode.SHADOW_SURVIVAL then
+    if fDefensive then
         stance = AutomaBrain.Stance.DEFENSIVE
     else
         stance = self:evaluateStance()
@@ -708,7 +741,7 @@ function AutomaBrain:tick(selfState, hostiles, profile, presentationMode, autono
     local bestScore = -1.0
     self.jitter:reset()
     for _, ua in ipairs(self.utilityActions) do
-        local skip = autonomyMode == AutomaBrain.AutonomyMode.SHADOW_SURVIVAL
+        local skip = fDefensive
             and (ua.id == "STRIKE_COMBO" or ua.id == "EXECUTE_FINISHER")
         if not skip then
             local jittered = ua:score(self.blackboard) + self.jitter:next(profile.discipline)
@@ -737,21 +770,23 @@ function AutomaBrain:tick(selfState, hostiles, profile, presentationMode, autono
     end
     local interceptHumanInput = true
 
-    if autonomyMode == AutomaBrain.AutonomyMode.CO_PILOT then
+    if inactive then
+        -- [FLAGS] no active behavior: human input passes, AUTOMA does nothing
+        interceptHumanInput = false
+        immediateCommand = "HUMAN_PASS_THROUGH"
+    elseif cruiseActive then
+        immediateCommand = waypointOrLootPos and "CRUISE_OR_LOOT" or "IDLE_SCAN"
+    elseif assistActive then
         local isUrgentReflex =
             (bestUtility.id == "DEFLECT_COUNTER" or bestUtility.id == "EVADE_REPOSITION")
             and bestScore >= 0.75
         interceptHumanInput = isUrgentReflex or selfState.healthRatio < 0.25
         if not interceptHumanInput then immediateCommand = "HUMAN_PASS_THROUGH" end
-    elseif autonomyMode == AutomaBrain.AutonomyMode.GRIND_AUTOPILOT
-        and #self.blackboard.hostiles == 0 then
-        immediateCommand = waypointOrLootPos and "CRUISE_OR_LOOT" or "IDLE_SCAN"
     end
 
     -- 5. Layer 1 — context steering synthesis
     local navTarget = selfState.position
-    if autonomyMode == AutomaBrain.AutonomyMode.GRIND_AUTOPILOT
-        and #self.blackboard.hostiles == 0 and waypointOrLootPos then
+    if cruiseActive and waypointOrLootPos then
         navTarget = waypointOrLootPos
     elseif stance == AutomaBrain.Stance.EVASIVE or stance == AutomaBrain.Stance.DEFENSIVE then
         navTarget = self.blackboard.influenceMap:findSafestPocket(selfState.position)
@@ -769,7 +804,7 @@ function AutomaBrain:tick(selfState, hostiles, profile, presentationMode, autono
     end
 
     local prefRange
-    if autonomyMode == AutomaBrain.AutonomyMode.GRIND_AUTOPILOT and #self.blackboard.hostiles == 0 then
+    if cruiseActive then
         prefRange = 0.5
     else
         prefRange = profile.preferredRange
@@ -777,12 +812,18 @@ function AutomaBrain:tick(selfState, hostiles, profile, presentationMode, autono
 
     local moveDir, speedMultiplier =
         self.steering:computeMoveVector(selfState.position, navTarget, prefRange, hazards)
+    if inactive then
+        -- [FLAGS] idle: no steering output
+        moveDir = { x = 0.0, y = 0.0, z = 0.0 }
+        speedMultiplier = 0.0
+    end
 
     -- 6. Layer 4 — presentation director
     local camera = self:computeCameraDirective(presentationMode, immediateCommand)
 
     return {
-        autonomyMode = autonomyMode,
+        autonomyMode = AutomaBrain.AutonomyMode.FULL_COMBAT, -- legacy name echo (set by tick())
+        behaviors = behaviors,
         stance = stance,
         interceptHumanInput = interceptHumanInput,
         selectedUtilityAction = bestUtility.id,

@@ -370,5 +370,221 @@
       "fovMultiplier": 1,
       "focusTargetId": "h1"
     }
+  },
+  {
+    "id": "combo-cruise-combat-ambush",
+    "stance": "DEFENSIVE",
+    "interceptHumanInput": true,
+    "selectedUtilityAction": "DEFLECT_COUNTER",
+    "utilityScore": 0.9701,
+    "goapPlan": [
+      "DEFLECT_COUNTER"
+    ],
+    "immediateCommand": "DEFLECT_COUNTER",
+    "steering": [
+      -0.7071067811865477,
+      -0.7071067811865475
+    ],
+    "speedMultiplier": 1,
+    "camera": {
+      "mode": "PASSIVE",
+      "timeScale": 1,
+      "fovMultiplier": 1,
+      "focusTargetId": "ambusher_1"
+    }
+  },
+  {
+    "id": "combo-cruise-combat-clear",
+    "stance": "STEALTH",
+    "interceptHumanInput": true,
+    "selectedUtilityAction": "STRIKE_COMBO",
+    "utilityScore": 0.8177,
+    "goapPlan": [],
+    "immediateCommand": "CRUISE_OR_LOOT",
+    "steering": [
+      6.123233995736766e-17,
+      1
+    ],
+    "speedMultiplier": 1,
+    "camera": {
+      "mode": "PASSIVE",
+      "timeScale": 1,
+      "fovMultiplier": 1,
+      "focusTargetId": null
+    }
+  },
+  {
+    "id": "combo-assist-cruise-clear",
+    "stance": "STEALTH",
+    "interceptHumanInput": true,
+    "selectedUtilityAction": "STRIKE_COMBO",
+    "utilityScore": 0.8177,
+    "goapPlan": [],
+    "immediateCommand": "CRUISE_OR_LOOT",
+    "steering": [
+      -0.9238795325112867,
+      0.3826834323650899
+    ],
+    "speedMultiplier": 1,
+    "camera": {
+      "mode": "PASSIVE",
+      "timeScale": 1,
+      "fovMultiplier": 1,
+      "focusTargetId": null
+    }
+  },
+  {
+    "id": "combo-assist-cruise-calm",
+    "stance": "AGGRESSIVE",
+    "interceptHumanInput": false,
+    "selectedUtilityAction": "STRIKE_COMBO",
+    "utilityScore": 0.8177,
+    "goapPlan": [
+      "HEAVY_ASSAULT",
+      "EXECUTE_FINISHER"
+    ],
+    "immediateCommand": "HUMAN_PASS_THROUGH",
+    "steering": [
+      6.123233995736766e-17,
+      1
+    ],
+    "speedMultiplier": 1,
+    "camera": {
+      "mode": "PASSIVE",
+      "timeScale": 1,
+      "fovMultiplier": 1,
+      "focusTargetId": "boss_1"
+    }
+  },
+  {
+    "id": "combo-assist-cruise-windup",
+    "stance": "DEFENSIVE",
+    "interceptHumanInput": true,
+    "selectedUtilityAction": "DEFLECT_COUNTER",
+    "utilityScore": 0.9701,
+    "goapPlan": [
+      "DEFLECT_COUNTER"
+    ],
+    "immediateCommand": "DEFLECT_COUNTER",
+    "steering": [
+      -0.7071067811865477,
+      -0.7071067811865475
+    ],
+    "speedMultiplier": 1,
+    "camera": {
+      "mode": "PASSIVE",
+      "timeScale": 1,
+      "fovMultiplier": 1,
+      "focusTargetId": "boss_1"
+    }
+  },
+  {
+    "id": "combo-assist-combat-enemy",
+    "stance": "AGGRESSIVE",
+    "interceptHumanInput": true,
+    "selectedUtilityAction": "STRIKE_COMBO",
+    "utilityScore": 0.8177,
+    "goapPlan": [
+      "HEAVY_ASSAULT",
+      "EXECUTE_FINISHER"
+    ],
+    "immediateCommand": "STRIKE_COMBO",
+    "steering": [
+      6.123233995736766e-17,
+      1
+    ],
+    "speedMultiplier": 1,
+    "camera": {
+      "mode": "PASSIVE",
+      "timeScale": 1,
+      "fovMultiplier": 1,
+      "focusTargetId": "boss_1"
+    }
+  },
+  {
+    "id": "combo-defensive-command",
+    "stance": "DEFENSIVE",
+    "interceptHumanInput": true,
+    "selectedUtilityAction": "DEFLECT_COUNTER",
+    "utilityScore": 0.0019,
+    "goapPlan": [],
+    "immediateCommand": "DEFLECT_COUNTER",
+    "steering": [
+      -0.7071067811865477,
+      -0.7071067811865475
+    ],
+    "speedMultiplier": 1,
+    "camera": {
+      "mode": "PASSIVE",
+      "timeScale": 1,
+      "fovMultiplier": 1,
+      "focusTargetId": "boss_1"
+    }
+  },
+  {
+    "id": "combo-defensive-combat",
+    "stance": "DEFENSIVE",
+    "interceptHumanInput": true,
+    "selectedUtilityAction": "DEFLECT_COUNTER",
+    "utilityScore": 0.0019,
+    "goapPlan": [],
+    "immediateCommand": "DEFLECT_COUNTER",
+    "steering": [
+      -0.7071067811865477,
+      -0.7071067811865475
+    ],
+    "speedMultiplier": 1,
+    "camera": {
+      "mode": "PASSIVE",
+      "timeScale": 1,
+      "fovMultiplier": 1,
+      "focusTargetId": "guard_1"
+    }
+  },
+  {
+    "id": "combo-mask-zero",
+    "stance": "DEFENSIVE",
+    "interceptHumanInput": false,
+    "selectedUtilityAction": "DEFLECT_COUNTER",
+    "utilityScore": 0.9701,
+    "goapPlan": [
+      "DEFLECT_COUNTER"
+    ],
+    "immediateCommand": "HUMAN_PASS_THROUGH",
+    "steering": [
+      0,
+      0
+    ],
+    "speedMultiplier": 0,
+    "camera": {
+      "mode": "PASSIVE",
+      "timeScale": 1,
+      "fovMultiplier": 1,
+      "focusTargetId": "boss_1"
+    }
+  },
+  {
+    "id": "combo-cruise-only-enemy",
+    "stance": "AGGRESSIVE",
+    "interceptHumanInput": false,
+    "selectedUtilityAction": "STRIKE_COMBO",
+    "utilityScore": 0.8177,
+    "goapPlan": [
+      "CLOSE_DISTANCE",
+      "HEAVY_ASSAULT",
+      "EXECUTE_FINISHER"
+    ],
+    "immediateCommand": "HUMAN_PASS_THROUGH",
+    "steering": [
+      0,
+      0
+    ],
+    "speedMultiplier": 0,
+    "camera": {
+      "mode": "PASSIVE",
+      "timeScale": 1,
+      "fovMultiplier": 1,
+      "focusTargetId": "h1"
+    }
   }
 ]

@@ -44,6 +44,28 @@ enum class AutonomyMode : int {
     Commander = 4
 };
 
+/// Composable behavior flags. The five AutonomyMode names are presets over these.
+/// Conflict rules: DEFENSIVE overrides offense; ASSIST is inert while COMBAT is set AND an enemy exists;
+/// CRUISE runs only while no enemy exists; ASSIST+CRUISE: cruise when clear, human pass-through + reflex
+/// intercept when an enemy exists; no active behavior => human input passes, AUTOMA idle.
+namespace behavior {
+inline constexpr int Combat = 1;
+inline constexpr int Assist = 2;
+inline constexpr int Cruise = 4;
+inline constexpr int Defensive = 8;
+inline constexpr int Command = 16;
+} // namespace behavior
+
+[[nodiscard]] constexpr int behaviors_of(AutonomyMode m) noexcept {
+    switch (m) {
+        case AutonomyMode::CoPilot: return behavior::Assist;
+        case AutonomyMode::GrindAutopilot: return behavior::Cruise | behavior::Combat;
+        case AutonomyMode::ShadowSurvival: return behavior::Defensive;
+        case AutonomyMode::Commander: return behavior::Combat | behavior::Command;
+        default: return behavior::Combat;
+    }
+}
+
 enum class PresentationMode : int {
     Tactical = 0,
     CinematicLive = 1,
@@ -108,7 +130,8 @@ struct CameraDirective {
 };
 
 struct Decision {
-    AutonomyMode autonomy_mode{AutonomyMode::FullCombat};
+    AutonomyMode autonomy_mode{AutonomyMode::FullCombat}; // legacy name echo (FullCombat when ticked by mask)
+    int behaviors{behavior::Combat};                      // resolved flag mask actually used
     TacticalStance stance{TacticalStance::Balanced};
     bool intercept_human_input{true};
     std::string_view selected_utility_action{"IDLE_SCAN"};
@@ -730,13 +753,32 @@ public:
                                 AutonomyMode autonomy = AutonomyMode::FullCombat,
                                 const Vec3* waypoint_or_loot = nullptr)
     {
+        Decision d = tick_behaviors(self, hostiles, profile, presentation, behaviors_of(autonomy), waypoint_or_loot);
+        d.autonomy_mode = autonomy;
+        return d;
+    }
+
+    [[nodiscard]] Decision tick_behaviors(const EntitySnapshot& self,
+                                          const std::vector<EntitySnapshot>& hostiles,
+                                          const BehaviorProfile& profile,
+                                          PresentationMode presentation,
+                                          int behaviors,
+                                          const Vec3* waypoint_or_loot = nullptr)
+    {
         // 1. Layer 2 — blackboard + influence map
         blackboard_.presentation_mode = presentation;
         blackboard_.refresh(self, hostiles, profile);
 
+        // [FLAGS] resolve behaviors (identical block in every port)
+        const bool has_enemy = !blackboard_.hostiles.empty();
+        const bool f_combat = (behaviors & behavior::Combat) != 0;
+        const bool f_defensive = (behaviors & behavior::Defensive) != 0;
+        const bool assist_active = (behaviors & behavior::Assist) != 0 && !(f_combat && has_enemy);
+        const bool cruise_active = (behaviors & behavior::Cruise) != 0 && !has_enemy;
+        const bool inactive = !(f_combat || f_defensive || assist_active || cruise_active);
+
         // 2. Layer 4 — stance & high-level goal
-        const TacticalStance stance =
-            autonomy == AutonomyMode::ShadowSurvival ? TacticalStance::Defensive : evaluate_stance();
+        const TacticalStance stance = f_defensive ? TacticalStance::Defensive : evaluate_stance();
         blackboard_.stance = stance;
         const WorldState goal_state = select_goal_for_stance(stance);
 
@@ -747,9 +789,9 @@ public:
         for (std::size_t i = 0; i < utility_actions_.size(); ++i) {
             const UtilityAction& ua = utility_actions_[i];
             const std::string_view id{ua.id()};
-            if (autonomy == AutonomyMode::ShadowSurvival &&
+            if (f_defensive &&
                 (id == "STRIKE_COMBO" || id == "EXECUTE_FINISHER")) {
-                continue; // Shadow Survival never attacks
+                continue; // DEFENSIVE never attacks
             }
             const double jittered = ua.score(blackboard_) + jitter_.next(profile.discipline);
             const double s = detail::clamp01(jittered);
@@ -762,25 +804,29 @@ public:
 
         // 4. Layer 3B — regressive A* plan
         const WorldState world_state = blackboard_.to_world_state();
-        planner_.plan(world_state, goal_state, goap_actions_.data(), goap_actions_.size(), blackboard_, plan_);
+        static_cast<void>(planner_.plan(world_state, goal_state, goap_actions_.data(), goap_actions_.size(), blackboard_, plan_));
 
         // Autonomy-mode command & human-input interception policy
         std::string_view immediate_command =
             best_score > 0.78 ? best_id : (!plan_.empty() ? plan_.front() : best_id);
         bool intercept_human_input = true;
 
-        if (autonomy == AutonomyMode::CoPilot) {
+        if (inactive) {
+            // [FLAGS] no active behavior: human input passes, AUTOMA does nothing
+            intercept_human_input = false;
+            immediate_command = "HUMAN_PASS_THROUGH";
+        } else if (cruise_active) {
+            immediate_command = waypoint_or_loot ? "CRUISE_OR_LOOT" : "IDLE_SCAN";
+        } else if (assist_active) {
             const bool is_urgent_reflex =
                 (best_id == "DEFLECT_COUNTER" || best_id == "EVADE_REPOSITION") && best_score >= 0.75;
             intercept_human_input = is_urgent_reflex || self.health_ratio < 0.25;
             if (!intercept_human_input) immediate_command = "HUMAN_PASS_THROUGH";
-        } else if (autonomy == AutonomyMode::GrindAutopilot && blackboard_.hostiles.empty()) {
-            immediate_command = waypoint_or_loot ? "CRUISE_OR_LOOT" : "IDLE_SCAN";
         }
 
         // 5. Layer 1 — context steering synthesis
         Vec3 nav_target = self.position;
-        if (autonomy == AutonomyMode::GrindAutopilot && blackboard_.hostiles.empty() && waypoint_or_loot) {
+        if (cruise_active && waypoint_or_loot) {
             nav_target = *waypoint_or_loot;
         } else if (stance == TacticalStance::Evasive || stance == TacticalStance::Defensive) {
             nav_target = blackboard_.influence_map.find_safest_pocket(self.position);
@@ -796,14 +842,16 @@ public:
                                       h.threat_weight * (h.is_wind_up ? 1.8 : 1.0)});
         }
 
-        const double pref_range =
-            (autonomy == AutonomyMode::GrindAutopilot && blackboard_.hostiles.empty())
-                ? 0.5
-                : profile.preferred_range;
+        const double pref_range = cruise_active ? 0.5 : profile.preferred_range;
 
         double speed_multiplier = 1.0;
-        const Vec3 direction = steering_.compute_move_vector(
+        Vec3 direction = steering_.compute_move_vector(
             self.position, nav_target, pref_range, hazards_, speed_multiplier);
+        if (inactive) {
+            // [FLAGS] idle: no steering output
+            direction = Vec3{0.0, 0.0, 0.0};
+            speed_multiplier = 0.0;
+        }
 
         // 6. Layer 4 — presentation director
         CameraDirective camera = compute_camera_directive(presentation, immediate_command, profile);
@@ -816,7 +864,8 @@ public:
         }
 
         Decision decision;
-        decision.autonomy_mode = autonomy;
+        decision.autonomy_mode = AutonomyMode::FullCombat;
+        decision.behaviors = behaviors;
         decision.stance = stance;
         decision.intercept_human_input = intercept_human_input;
         decision.selected_utility_action = best_id;

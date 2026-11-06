@@ -20,6 +20,35 @@ export type AutonomyMode =
   | 'SHADOW_SURVIVAL' // Zero-offense evasion & parry showcase to study boss attack patterns safely
   | 'COMMANDER';      // Human issues high-level target/stance orders; AUTOMA executes motor combat
 
+/**
+ * Composable behavior flags (bit mask). The five AutonomyMode names are presets over these.
+ * Conflict rules (fixed, identical in TS / C# / C++ / Lua):
+ *   DEFENSIVE overrides offense; ASSIST is inert while COMBAT is set AND an enemy exists;
+ *   CRUISE runs only while no enemy exists; ASSIST+CRUISE: cruise when clear, human pass-through
+ *   plus reflex intercept when an enemy exists; no active behavior => human input passes, AUTOMA idle.
+ */
+export const Behavior = {
+  COMBAT: 1,
+  ASSIST: 2,
+  CRUISE: 4,
+  DEFENSIVE: 8,
+  COMMAND: 16,
+} as const;
+export type Behaviors = number;
+
+export const AUTONOMY_PRESETS: Record<AutonomyMode, Behaviors> = {
+  FULL_COMBAT: Behavior.COMBAT,
+  CO_PILOT: Behavior.ASSIST,
+  GRIND_AUTOPILOT: Behavior.CRUISE | Behavior.COMBAT,
+  SHADOW_SURVIVAL: Behavior.DEFENSIVE,
+  COMMANDER: Behavior.COMBAT | Behavior.COMMAND,
+};
+
+/** Accepts a legacy AutonomyMode name or a raw flag mask and returns the mask. */
+export function resolveBehaviors(mode: AutonomyMode | Behaviors): Behaviors {
+  return typeof mode === 'number' ? mode & 31 : AUTONOMY_PRESETS[mode];
+}
+
 export type PresentationMode = 'TACTICAL' | 'CINEMATIC_LIVE' | 'CINEMATIC_RESOLVE';
 export type TacticalStance = 'AGGRESSIVE' | 'BALANCED' | 'DEFENSIVE' | 'EVASIVE' | 'STEALTH';
 
@@ -515,7 +544,8 @@ export class GoapPlanner {
 // ============================================================================
 
 export interface AutomaDecision {
-  autonomyMode: AutonomyMode;
+  autonomyMode: AutonomyMode | Behaviors; // echoes the tick argument (legacy name or mask)
+  behaviors: Behaviors;                   // resolved flag mask actually used
   stance: TacticalStance;
   interceptHumanInput: boolean; // True when AUTOMA overrides human controller this tick
   selectedUtilityAction: string;
@@ -548,16 +578,24 @@ export class AutomaBrain {
     hostiles: EntitySnapshot[],
     profile: BehaviorProfile,
     presentationMode: PresentationMode = 'TACTICAL',
-    autonomyMode: AutonomyMode = 'FULL_COMBAT',
+    autonomyMode: AutonomyMode | Behaviors = 'FULL_COMBAT',
     waypointOrLootPos?: Vec3
   ): AutomaDecision {
     // 1. Update Layer 2 (Blackboard + Spatial Influence Map)
     this.blackboard.presentationMode = presentationMode;
     this.blackboard.refresh(self, hostiles, profile);
 
-    // 2. Layer 4: Orchestrator evaluates stance & high-level goal based on AutonomyMode
-    const stance =
-      autonomyMode === 'SHADOW_SURVIVAL' ? 'DEFENSIVE' : this.evaluateStance();
+    // [FLAGS] resolve behaviors (identical block in every port)
+    const behaviors = resolveBehaviors(autonomyMode);
+    const hasEnemy = this.blackboard.hostiles.length > 0;
+    const fCombat = (behaviors & Behavior.COMBAT) !== 0;
+    const fDefensive = (behaviors & Behavior.DEFENSIVE) !== 0;
+    const assistActive = (behaviors & Behavior.ASSIST) !== 0 && !(fCombat && hasEnemy);
+    const cruiseActive = (behaviors & Behavior.CRUISE) !== 0 && !hasEnemy;
+    const inactive = !(fCombat || fDefensive || assistActive || cruiseActive);
+
+    // 2. Layer 4: Orchestrator evaluates stance & high-level goal based on behaviors
+    const stance = fDefensive ? 'DEFENSIVE' : this.evaluateStance();
     this.blackboard.stance = stance;
     const goalState = this.selectGoalForStance(stance);
 
@@ -566,8 +604,8 @@ export class AutomaBrain {
     let bestScore = -1;
     this.jitter.reset();
     for (const ua of this.utilityActions) {
-      if (autonomyMode === 'SHADOW_SURVIVAL' && (ua.id === 'STRIKE_COMBO' || ua.id === 'EXECUTE_FINISHER')) {
-        continue; // Shadow Survival strictly parries and evades without attacking
+      if (fDefensive && (ua.id === 'STRIKE_COMBO' || ua.id === 'EXECUTE_FINISHER')) {
+        continue; // DEFENSIVE strictly parries and evades without attacking
       }
       const jittered = ua.score(this.blackboard) + this.jitter.next(profile.discipline);
       const s = Math.max(0, Math.min(1, jittered));
@@ -587,7 +625,13 @@ export class AutomaBrain {
       bestScore > 0.78 ? bestUtility.id : goapPlanNames[0] ?? bestUtility.id;
     let interceptHumanInput = true;
 
-    if (autonomyMode === 'CO_PILOT') {
+    if (inactive) {
+      // [FLAGS] no active behavior: human input passes, AUTOMA does nothing
+      interceptHumanInput = false;
+      immediateCommand = 'HUMAN_PASS_THROUGH';
+    } else if (cruiseActive) {
+      immediateCommand = waypointOrLootPos ? 'CRUISE_OR_LOOT' : 'IDLE_SCAN';
+    } else if (assistActive) {
       // Only intercept human controls when an urgent defensive reflex (Parry/Evade/Heal) crosses threshold
       const isUrgentReflex =
         (bestUtility.id === 'DEFLECT_COUNTER' || bestUtility.id === 'EVADE_REPOSITION') &&
@@ -596,13 +640,11 @@ export class AutomaBrain {
       if (!interceptHumanInput) {
         immediateCommand = 'HUMAN_PASS_THROUGH';
       }
-    } else if (autonomyMode === 'GRIND_AUTOPILOT' && this.blackboard.hostiles.length === 0) {
-      immediateCommand = waypointOrLootPos ? 'CRUISE_OR_LOOT' : 'IDLE_SCAN';
     }
 
     // 5. Layer 1: Context Steering vector synthesis
     let navTarget = self.position;
-    if (autonomyMode === 'GRIND_AUTOPILOT' && this.blackboard.hostiles.length === 0 && waypointOrLootPos) {
+    if (cruiseActive && waypointOrLootPos) {
       navTarget = waypointOrLootPos;
     } else if (stance === 'EVASIVE' || stance === 'DEFENSIVE') {
       navTarget = this.blackboard.influenceMap.findSafestPocket(self.position);
@@ -616,17 +658,19 @@ export class AutomaBrain {
       weight: h.threatWeight * (h.isWindUp ? 1.8 : 1.0),
     }));
 
-    const prefRange =
-      autonomyMode === 'GRIND_AUTOPILOT' && this.blackboard.hostiles.length === 0
-        ? 0.5
-        : profile.preferredRange;
+    const prefRange = cruiseActive ? 0.5 : profile.preferredRange;
 
-    const { direction, speedMultiplier } = this.steering.computeMoveVector(
+    let { direction, speedMultiplier } = this.steering.computeMoveVector(
       self.position,
       navTarget,
       prefRange,
       hazards
     );
+    if (inactive) {
+      // [FLAGS] idle: no steering output
+      direction = { x: 0, y: 0, z: 0 };
+      speedMultiplier = 0;
+    }
 
     // 6. Layer 4: Optional Presentation & Camera Director
     const cameraDirective = this.computeCameraDirective(
@@ -637,6 +681,7 @@ export class AutomaBrain {
 
     return {
       autonomyMode,
+      behaviors,
       stance,
       interceptHumanInput,
       selectedUtilityAction: bestUtility.id,

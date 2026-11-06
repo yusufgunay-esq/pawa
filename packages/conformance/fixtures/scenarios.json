@@ -52,7 +52,8 @@
       }
     ],
     "presentation": "TACTICAL",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
   },
   {
     "id": "deflect-windup-cinematic",
@@ -107,7 +108,8 @@
       }
     ],
     "presentation": "CINEMATIC_LIVE",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
   },
   {
     "id": "deflect-windup-low-flair",
@@ -162,7 +164,8 @@
       }
     ],
     "presentation": "CINEMATIC_LIVE",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
   },
   {
     "id": "finisher-open",
@@ -217,7 +220,8 @@
       }
     ],
     "presentation": "TACTICAL",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
   },
   {
     "id": "evasive-critical-health",
@@ -291,7 +295,8 @@
       }
     ],
     "presentation": "TACTICAL",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
   },
   {
     "id": "crowded-pressure",
@@ -403,7 +408,8 @@
       }
     ],
     "presentation": "TACTICAL",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
   },
   {
     "id": "co-pilot-pass-through",
@@ -458,7 +464,8 @@
       }
     ],
     "presentation": "TACTICAL",
-    "autonomy": "CO_PILOT"
+    "autonomy": "CO_PILOT",
+    "behaviors": 2
   },
   {
     "id": "co-pilot-interrupt",
@@ -513,7 +520,8 @@
       }
     ],
     "presentation": "TACTICAL",
-    "autonomy": "CO_PILOT"
+    "autonomy": "CO_PILOT",
+    "behaviors": 2
   },
   {
     "id": "shadow-survival",
@@ -568,7 +576,8 @@
       }
     ],
     "presentation": "TACTICAL",
-    "autonomy": "SHADOW_SURVIVAL"
+    "autonomy": "SHADOW_SURVIVAL",
+    "behaviors": 8
   },
   {
     "id": "grind-cruise",
@@ -608,7 +617,8 @@
       "x": 50,
       "y": 0,
       "z": 0
-    }
+    },
+    "behaviors": 5
   },
   {
     "id": "grind-idle-scan",
@@ -643,7 +653,8 @@
     },
     "hostiles": [],
     "presentation": "TACTICAL",
-    "autonomy": "GRIND_AUTOPILOT"
+    "autonomy": "GRIND_AUTOPILOT",
+    "behaviors": 5
   },
   {
     "id": "commander-assault",
@@ -698,7 +709,8 @@
       }
     ],
     "presentation": "TACTICAL",
-    "autonomy": "COMMANDER"
+    "autonomy": "COMMANDER",
+    "behaviors": 17
   },
   {
     "id": "empty-world-stealth",
@@ -733,7 +745,8 @@
     },
     "hostiles": [],
     "presentation": "TACTICAL",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
   },
   {
     "id": "cinematic-resolve",
@@ -788,7 +801,8 @@
       }
     ],
     "presentation": "CINEMATIC_RESOLVE",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
   },
   {
     "id": "obstacle-steering",
@@ -843,7 +857,8 @@
       }
     ],
     "presentation": "TACTICAL",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
   },
   {
     "id": "wide-range-kiter",
@@ -917,7 +932,8 @@
       }
     ],
     "presentation": "CINEMATIC_LIVE",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
   },
   {
     "id": "low-discipline-jitter",
@@ -972,6 +988,557 @@
       }
     ],
     "presentation": "TACTICAL",
-    "autonomy": "FULL_COMBAT"
+    "autonomy": "FULL_COMBAT",
+    "behaviors": 1
+  },
+  {
+    "id": "combo-cruise-combat-ambush",
+    "note": "CRUISE|COMBAT with a waypoint but an enemy winding up nearby: cruise yields to combat.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 1.6,
+        "id": "ambusher_1",
+        "position": {
+          "x": 2.4,
+          "y": 0,
+          "z": 0.5
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 5,
+    "waypoint": {
+      "x": 40,
+      "y": 0,
+      "z": 0
+    },
+    "behaviors": 5
+  },
+  {
+    "id": "combo-cruise-combat-clear",
+    "note": "CRUISE|COMBAT with no enemy and a waypoint: cruise runs.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [],
+    "presentation": "TACTICAL",
+    "autonomy": 5,
+    "waypoint": {
+      "x": 0,
+      "y": 0,
+      "z": 30
+    },
+    "behaviors": 5
+  },
+  {
+    "id": "combo-assist-cruise-clear",
+    "note": "ASSIST|CRUISE with no enemy: cruise drives, AUTOMA keeps the controller.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [],
+    "presentation": "TACTICAL",
+    "autonomy": 6,
+    "waypoint": {
+      "x": -25,
+      "y": 0,
+      "z": 10
+    },
+    "behaviors": 6
+  },
+  {
+    "id": "combo-assist-cruise-calm",
+    "note": "ASSIST|CRUISE with a calm enemy: cruise stops, human input passes through.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.8,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 2,
+        "id": "boss_1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 6,
+    "waypoint": {
+      "x": 40,
+      "y": 0,
+      "z": 0
+    },
+    "behaviors": 6
+  },
+  {
+    "id": "combo-assist-cruise-windup",
+    "note": "ASSIST|CRUISE with an enemy telegraphing: reflex intercept fires.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.8,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 2,
+        "id": "boss_1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 6,
+    "waypoint": {
+      "x": 40,
+      "y": 0,
+      "z": 0
+    },
+    "behaviors": 6
+  },
+  {
+    "id": "combo-assist-combat-enemy",
+    "note": "ASSIST|COMBAT with an enemy present: ASSIST is inert, AUTOMA fights.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.8,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 2,
+        "id": "boss_1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 3,
+    "behaviors": 3
+  },
+  {
+    "id": "combo-defensive-command",
+    "note": "DEFENSIVE|COMMAND: COMMAND adds no motor change, no offense is ever selected.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.1,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 2,
+        "id": "boss_1",
+        "position": {
+          "x": 1.5,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 24,
+    "behaviors": 24
+  },
+  {
+    "id": "combo-defensive-combat",
+    "note": "DEFENSIVE|COMBAT: DEFENSIVE overrides offense even with COMBAT set.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.18,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "guard_1",
+        "position": {
+          "x": 2.4,
+          "y": 0,
+          "z": 0.2
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 9,
+    "behaviors": 9
+  },
+  {
+    "id": "combo-mask-zero",
+    "note": "Mask 0: human input passes, no command, no steering.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.8,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 2,
+        "id": "boss_1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 0,
+    "behaviors": 0
+  },
+  {
+    "id": "combo-cruise-only-enemy",
+    "note": "CRUISE alone with an enemy present: nothing is active, human input passes.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "h1",
+        "position": {
+          "x": 3,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 4,
+    "waypoint": {
+      "x": 40,
+      "y": 0,
+      "z": 0
+    },
+    "behaviors": 4
   }
 ]

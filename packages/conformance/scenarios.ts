@@ -10,7 +10,8 @@
  * Add a scenario here rather than editing generated fixtures: fixtures are outputs.
  */
 
-import type { AutonomyMode, EntitySnapshot, BehaviorProfile, PresentationMode, Vec3 } from '../../automa-brain-ts/src/index.ts';
+import { Behavior } from '../automa-brain-ts/src/index.ts';
+import type { AutonomyMode, Behaviors, EntitySnapshot, BehaviorProfile, PresentationMode, Vec3 } from '../../automa-brain-ts/src/index.ts';
 
 export interface Scenario {
   id: string;
@@ -19,7 +20,7 @@ export interface Scenario {
   self: EntitySnapshot;
   hostiles: EntitySnapshot[];
   presentation: PresentationMode;
-  autonomy: AutonomyMode;
+  autonomy: AutonomyMode | Behaviors; // legacy preset name or raw Behavior mask
   waypoint?: Vec3;
 }
 
@@ -231,5 +232,103 @@ export const SCENARIOS: Scenario[] = [
     hostiles: [hostile({ id: 'h1', position: { x: 2.6, y: 0, z: 0.6 }, healthRatio: 0.4, threatWeight: 1.3 })],
     presentation: 'TACTICAL',
     autonomy: 'FULL_COMBAT',
+  },
+
+  // ---- Combined behavior-flag scenarios (raw masks; no legacy name) ----
+  {
+    id: 'combo-cruise-combat-ambush',
+    note: 'CRUISE|COMBAT with a waypoint but an enemy winding up nearby: cruise yields to combat.',
+    profile: BASE_PERSONA,
+    self: IDLE_SELF,
+    hostiles: [hostile({ id: 'ambusher_1', position: { x: 2.4, y: 0, z: 0.5 }, isWindUp: true, threatWeight: 1.6 })],
+    presentation: 'TACTICAL',
+    autonomy: Behavior.CRUISE | Behavior.COMBAT,
+    waypoint: { x: 40, y: 0, z: 0 },
+  },
+  {
+    id: 'combo-cruise-combat-clear',
+    note: 'CRUISE|COMBAT with no enemy and a waypoint: cruise runs.',
+    profile: BASE_PERSONA,
+    self: IDLE_SELF,
+    hostiles: [],
+    presentation: 'TACTICAL',
+    autonomy: Behavior.CRUISE | Behavior.COMBAT,
+    waypoint: { x: 0, y: 0, z: 30 },
+  },
+  {
+    id: 'combo-assist-cruise-clear',
+    note: 'ASSIST|CRUISE with no enemy: cruise drives, AUTOMA keeps the controller.',
+    profile: BASE_PERSONA,
+    self: IDLE_SELF,
+    hostiles: [],
+    presentation: 'TACTICAL',
+    autonomy: Behavior.ASSIST | Behavior.CRUISE,
+    waypoint: { x: -25, y: 0, z: 10 },
+  },
+  {
+    id: 'combo-assist-cruise-calm',
+    note: 'ASSIST|CRUISE with a calm enemy: cruise stops, human input passes through.',
+    profile: BASE_PERSONA,
+    self: IDLE_SELF,
+    hostiles: [hostile({ id: 'boss_1', position: { x: 2.0, y: 0, z: 0 }, healthRatio: 0.8, threatWeight: 2.0 })],
+    presentation: 'TACTICAL',
+    autonomy: Behavior.ASSIST | Behavior.CRUISE,
+    waypoint: { x: 40, y: 0, z: 0 },
+  },
+  {
+    id: 'combo-assist-cruise-windup',
+    note: 'ASSIST|CRUISE with an enemy telegraphing: reflex intercept fires.',
+    profile: BASE_PERSONA,
+    self: IDLE_SELF,
+    hostiles: [hostile({ id: 'boss_1', position: { x: 2.0, y: 0, z: 0 }, healthRatio: 0.8, isWindUp: true, threatWeight: 2.0 })],
+    presentation: 'TACTICAL',
+    autonomy: Behavior.ASSIST | Behavior.CRUISE,
+    waypoint: { x: 40, y: 0, z: 0 },
+  },
+  {
+    id: 'combo-assist-combat-enemy',
+    note: 'ASSIST|COMBAT with an enemy present: ASSIST is inert, AUTOMA fights.',
+    profile: BASE_PERSONA,
+    self: IDLE_SELF,
+    hostiles: [hostile({ id: 'boss_1', position: { x: 2.0, y: 0, z: 0 }, healthRatio: 0.8, threatWeight: 2.0 })],
+    presentation: 'TACTICAL',
+    autonomy: Behavior.ASSIST | Behavior.COMBAT,
+  },
+  {
+    id: 'combo-defensive-command',
+    note: 'DEFENSIVE|COMMAND: COMMAND adds no motor change, no offense is ever selected.',
+    profile: BASE_PERSONA,
+    self: IDLE_SELF,
+    hostiles: [hostile({ id: 'boss_1', position: { x: 1.5, y: 0, z: 0 }, healthRatio: 0.1, threatWeight: 2.0 })],
+    presentation: 'TACTICAL',
+    autonomy: Behavior.DEFENSIVE | Behavior.COMMAND,
+  },
+  {
+    id: 'combo-defensive-combat',
+    note: 'DEFENSIVE|COMBAT: DEFENSIVE overrides offense even with COMBAT set.',
+    profile: BASE_PERSONA,
+    self: IDLE_SELF,
+    hostiles: [hostile({ id: 'guard_1', position: { x: 2.4, y: 0, z: 0.2 }, healthRatio: 0.18, threatWeight: 1.0 })],
+    presentation: 'TACTICAL',
+    autonomy: Behavior.DEFENSIVE | Behavior.COMBAT,
+  },
+  {
+    id: 'combo-mask-zero',
+    note: 'Mask 0: human input passes, no command, no steering.',
+    profile: BASE_PERSONA,
+    self: IDLE_SELF,
+    hostiles: [hostile({ id: 'boss_1', position: { x: 2.0, y: 0, z: 0 }, healthRatio: 0.8, isWindUp: true, threatWeight: 2.0 })],
+    presentation: 'TACTICAL',
+    autonomy: 0,
+  },
+  {
+    id: 'combo-cruise-only-enemy',
+    note: 'CRUISE alone with an enemy present: nothing is active, human input passes.',
+    profile: BASE_PERSONA,
+    self: IDLE_SELF,
+    hostiles: [hostile({ id: 'h1', position: { x: 3.0, y: 0, z: 0 } })],
+    presentation: 'TACTICAL',
+    autonomy: Behavior.CRUISE,
+    waypoint: { x: 40, y: 0, z: 0 },
   },
 ];

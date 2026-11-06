@@ -1,0 +1,19 @@
+{
+  "name": "automa",
+  "private": true,
+  "description": "AUTOMA monorepo: reference TS kernel + C# / C++ / Lua ports kept in lockstep by the conformance suite.",
+  "license": "MPL-2.0",
+  "type": "module",
+  "engines": { "node": ">=22.6" },
+  "scripts": {
+    "test:ts": "node --experimental-strip-types --test packages/automa-brain-ts/tests/brain.test.ts",
+    "validate": "node scripts/validate-profiles.mjs",
+    "fixtures:gen": "node --experimental-strip-types packages/conformance/emit-reference.mjs && node --experimental-strip-types packages/conformance/gen-fixtures.mjs",
+    "fixtures:check": "node scripts/check-fixtures-fresh.mjs",
+    "conformance:cs": "node scripts/run-conformance.mjs cs",
+    "conformance:cpp": "node scripts/run-conformance.mjs cpp",
+    "conformance:lua": "node scripts/run-conformance.mjs lua",
+    "conformance:all": "npm run fixtures:check && node scripts/run-conformance.mjs all",
+    "test": "npm run test:ts && npm run validate && npm run fixtures:check && node scripts/run-conformance.mjs cs --optional"
+  }
+}

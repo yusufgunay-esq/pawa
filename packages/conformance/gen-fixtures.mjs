@@ -29,6 +29,9 @@ const num = (v) => {
   return Number.isInteger(n) ? `${n}.0` : String(n);
 };
 
+const hasAuto = (s) => typeof s.autonomy === 'string';
+const autoIdx = (s) => (hasAuto(s) ? AUTONOMY[s.autonomy] : 0);
+
 const csBool = (b) => (b ? 'true' : 'false');
 const csStr = (s) => (s === null || s === undefined ? 'null' : `"${String(s).replace(/"/g, '\\"')}"`);
 
@@ -36,11 +39,11 @@ function csEntity(e, indent) {
   const p = e.position;
   const v = e.velocity ?? { x: 0, y: 0, z: 0 };
   return (
-    `${indent}new EntitySnapshot { Id = ${csStr(e.id)}, Position = new Vec3(${num(p.x)}f, ${num(p.y)}f, ${num(p.z)}f), ` +
-    `Velocity = new Vec3(${num(v.x)}f, ${num(v.y)}f, ${num(v.z)}f), ` +
-    `HealthRatio = ${num(e.healthRatio)}f, StaminaRatio = ${num(e.staminaRatio)}f, ` +
+    `${indent}new EntitySnapshot { Id = ${csStr(e.id)}, Position = new Vec3(${num(p.x)}, ${num(p.y)}, ${num(p.z)}), ` +
+    `Velocity = new Vec3(${num(v.x)}, ${num(v.y)}, ${num(v.z)}), ` +
+    `HealthRatio = ${num(e.healthRatio)}, StaminaRatio = ${num(e.staminaRatio)}, ` +
     `IsAttacking = ${csBool(!!e.isAttacking)}, IsWindUp = ${csBool(!!e.isWindUp)}, ` +
-    `IsRanged = ${csBool(!!e.isRanged)}, ThreatWeight = ${num(e.threatWeight)}f }`
+    `IsRanged = ${csBool(!!e.isRanged)}, ThreatWeight = ${num(e.threatWeight)} }`
   );
 }
 
@@ -58,21 +61,23 @@ function emitCs() {
                 {
                     Id = ${csStr(p.id)},
                     Name = ${csStr(p.name ?? 'Protagonist')},
-                    Aggression = ${num(p.aggression)}f,
-                    Discipline = ${num(p.discipline)}f,
-                    CinematicFlair = ${num(p.cinematicFlair)}f,
+                    Aggression = ${num(p.aggression)},
+                    Discipline = ${num(p.discipline)},
+                    CinematicFlair = ${num(p.cinematicFlair)},
                     ReactionDelayMs = ${p.reactionDelayMs},
-                    PreferredRange = ${num(p.preferredRange)}f
+                    PreferredRange = ${num(p.preferredRange)}
                 },
                 Self = ${csEntity(s.self, '').replace(/^/, '')},
-                Hostiles = new[]
+                Hostiles = new EntitySnapshot[]
                 {
 ${hostiles}
                 },
                 Presentation = (PresentationMode)${PRESENTATION[s.presentation]},
-                Autonomy = (AutonomyMode)${AUTONOMY[s.autonomy]},
+                Autonomy = (AutonomyMode)${autoIdx(s)},
+                HasAutonomy = ${csBool(hasAuto(s))},
+                Behaviors = ${s.behaviors},
                 HasWaypoint = ${csBool(!!s.waypoint)},
-                Waypoint = new Vec3(${num(s.waypoint?.x ?? 0)}f, ${num(s.waypoint?.y ?? 0)}f, ${num(s.waypoint?.z ?? 0)}f)
+                Waypoint = new Vec3(${num(s.waypoint?.x ?? 0)}, ${num(s.waypoint?.y ?? 0)}, ${num(s.waypoint?.z ?? 0)})
             }`;
     })
     .join(',\n');
@@ -90,7 +95,9 @@ namespace Automa.Conformance
         public EntitySnapshot Self;
         public EntitySnapshot[] Hostiles;
         public PresentationMode Presentation;
-        public AutonomyMode Autonomy;
+        public AutonomyMode Autonomy;   // legacy preset (valid when HasAutonomy)
+        public bool HasAutonomy;
+        public int Behaviors;           // resolved flag mask
         public bool HasWaypoint;
         public Vec3 Waypoint;
     }
@@ -110,9 +117,9 @@ function cppEntity(e, indent) {
   const p = e.position;
   const v = e.velocity ?? { x: 0, y: 0, z: 0 };
   return (
-    `${indent}automa::EntitySnapshot{${JSON.stringify(e.id)}, automa::Vec3{${num(p.x)}f, ${num(p.y)}f, ${num(p.z)}f}, ` +
-    `automa::Vec3{${num(v.x)}f, ${num(v.y)}f, ${num(v.z)}f}, ${num(e.healthRatio)}f, ${num(e.staminaRatio)}f, ` +
-    `${e.isAttacking ? 'true' : 'false'}, ${e.isWindUp ? 'true' : 'false'}, ${e.isRanged ? 'true' : 'false'}, ${num(e.threatWeight)}f}`
+    `${indent}automa::EntitySnapshot{${JSON.stringify(e.id)}, automa::Vec3{${num(p.x)}, ${num(p.y)}, ${num(p.z)}}, ` +
+    `automa::Vec3{${num(v.x)}, ${num(v.y)}, ${num(v.z)}}, ${num(e.healthRatio)}, ${num(e.staminaRatio)}, ` +
+    `${e.isAttacking ? 'true' : 'false'}, ${e.isWindUp ? 'true' : 'false'}, ${e.isRanged ? 'true' : 'false'}, ${num(e.threatWeight)}}`
   );
 }
 
@@ -125,14 +132,15 @@ function emitCpp() {
         : '';
       return `    automa::conformance::ScenarioFixture{
         ${JSON.stringify(s.id)},
-        automa::BehaviorProfile{${num(p.aggression)}f, ${num(p.discipline)}f, ${num(p.cinematicFlair)}f, ${p.reactionDelayMs}, ${num(p.preferredRange)}f},
+        automa::BehaviorProfile{${num(p.aggression)}, ${num(p.discipline)}, ${num(p.cinematicFlair)}, ${p.reactionDelayMs}, ${num(p.preferredRange)}},
         ${cppEntity(s.self, '')},
         std::vector<automa::EntitySnapshot>{
 ${hostiles}
         },
         static_cast<automa::PresentationMode>(${PRESENTATION[s.presentation]}),
-        static_cast<automa::AutonomyMode>(${AUTONOMY[s.autonomy]}),
-        ${s.waypoint ? 'true' : 'false'}, automa::Vec3{${num(s.waypoint?.x ?? 0)}f, ${num(s.waypoint?.y ?? 0)}f, ${num(s.waypoint?.z ?? 0)}f}
+        static_cast<automa::AutonomyMode>(${autoIdx(s)}),
+        ${hasAuto(s) ? 'true' : 'false'}, ${s.behaviors},
+        ${s.waypoint ? 'true' : 'false'}, automa::Vec3{${num(s.waypoint?.x ?? 0)}, ${num(s.waypoint?.y ?? 0)}, ${num(s.waypoint?.z ?? 0)}}
     }`;
     })
     .join(',\n');
@@ -152,7 +160,9 @@ struct ScenarioFixture {
     EntitySnapshot self;
     std::vector<EntitySnapshot> hostiles;
     PresentationMode presentation;
-    AutonomyMode autonomy;
+    AutonomyMode autonomy;   // legacy preset (valid when has_autonomy)
+    bool has_autonomy;
+    int behaviors;           // resolved flag mask
     bool has_waypoint{false};
     Vec3 waypoint{};
 };
@@ -190,7 +200,8 @@ function emitLua() {
     self = ${luaEntity(s.self)},
     hostiles = {${hostiles}},
     presentation = ${PRESENTATION[s.presentation]},
-    autonomy = ${AUTONOMY[s.autonomy]},
+    autonomy = ${hasAuto(s) ? autoIdx(s) : 'nil'},
+    behaviors = ${s.behaviors},
     hasWaypoint = ${s.waypoint ? 'true' : 'false'},
     waypoint = { x = ${num(s.waypoint?.x ?? 0)}, y = ${num(s.waypoint?.y ?? 0)}, z = ${num(s.waypoint?.z ?? 0)} }
   }`;
@@ -205,8 +216,123 @@ ${blocks}
 `;
 }
 
+// ---------------------------------------------------------------------------
+// Expected decisions (from expected.json) as native literals, so runners need no JSON parser.
+// ---------------------------------------------------------------------------
+const expected = JSON.parse(readFileSync(join(FIXTURES, 'expected.json'), 'utf8'));
+const lit = (v) => (v === null || v === undefined ? null : JSON.stringify(v));
+const HEADER = 'AUTOMA conformance expected decisions — regenerate with: node packages/conformance/gen-fixtures.mjs';
+
+function emitExpectedCs() {
+  const rows = expected
+    .map(
+      (e) => `            new ExpectedDecision
+            {
+                Id = ${lit(e.id)}, Stance = ${lit(e.stance)}, Intercept = ${csBool(e.interceptHumanInput)},
+                Utility = ${lit(e.selectedUtilityAction)}, Score = ${num(e.utilityScore)},
+                Plan = new string[] { ${e.goapPlan.map(lit).join(', ')} },
+                Command = ${lit(e.immediateCommand)}, Sx = ${num(e.steering[0])}, Sz = ${num(e.steering[1])},
+                Speed = ${num(e.speedMultiplier)}, CamMode = ${lit(e.camera.mode)}, TimeScale = ${num(e.camera.timeScale)},
+                Fov = ${num(e.camera.fovMultiplier)}, Focus = ${e.camera.focusTargetId === null ? 'null' : lit(e.camera.focusTargetId)}
+            }`
+    )
+    .join(',\n');
+  return `// <auto-generated>${HEADER}</auto-generated>
+// Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
+namespace Automa.Conformance
+{
+    public sealed class ExpectedDecision
+    {
+        public string Id, Stance, Utility, Command, CamMode, Focus;
+        public bool Intercept;
+        public double Score, Sx, Sz, Speed, TimeScale, Fov;
+        public string[] Plan;
+    }
+
+    public static class Expected
+    {
+        public static readonly ExpectedDecision[] All =
+        {
+${rows}
+        };
+    }
+}
+`;
+}
+
+function emitExpectedCpp() {
+  const rows = expected
+    .map(
+      (e) => `    automa::conformance::ExpectedDecision{
+        ${lit(e.id)}, ${lit(e.stance)}, ${e.interceptHumanInput ? 'true' : 'false'},
+        ${lit(e.selectedUtilityAction)}, ${num(e.utilityScore)},
+        std::vector<std::string>{ ${e.goapPlan.map(lit).join(', ')} },
+        ${lit(e.immediateCommand)}, ${num(e.steering[0])}, ${num(e.steering[1])},
+        ${num(e.speedMultiplier)}, ${lit(e.camera.mode)}, ${num(e.camera.timeScale)},
+        ${num(e.camera.fovMultiplier)}, ${e.camera.focusTargetId === null ? 'false' : 'true'}, ${e.camera.focusTargetId === null ? '""' : lit(e.camera.focusTargetId)}
+    }`
+    )
+    .join(',\n');
+  return `// <auto-generated>${HEADER}</auto-generated>
+// Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
+#pragma once
+#include <string>
+#include <vector>
+
+namespace automa::conformance {
+
+struct ExpectedDecision {
+    std::string id, stance;
+    bool intercept;
+    std::string utility;
+    double score;
+    std::vector<std::string> plan;
+    std::string command;
+    double sx, sz, speed;
+    std::string cam_mode;
+    double time_scale, fov;
+    bool has_focus;
+    std::string focus;
+};
+
+inline const std::vector<ExpectedDecision>& expected() {
+    static const std::vector<ExpectedDecision> all = {
+${rows}
+    };
+    return all;
+}
+
+} // namespace automa::conformance
+`;
+}
+
+function emitExpectedLua() {
+  const rows = expected
+    .map(
+      (e) => `  {
+    id = ${lit(e.id)}, stance = ${lit(e.stance)}, intercept = ${e.interceptHumanInput ? 'true' : 'false'},
+    utility = ${lit(e.selectedUtilityAction)}, score = ${num(e.utilityScore)},
+    plan = { ${e.goapPlan.map(lit).join(', ')} },
+    command = ${lit(e.immediateCommand)}, sx = ${num(e.steering[0])}, sz = ${num(e.steering[1])},
+    speed = ${num(e.speedMultiplier)}, camMode = ${lit(e.camera.mode)}, timeScale = ${num(e.camera.timeScale)},
+    fov = ${num(e.camera.fovMultiplier)}, focus = ${e.camera.focusTargetId === null ? 'nil' : lit(e.camera.focusTargetId)}
+  }`
+    )
+    .join(',\n');
+  return `-- <auto-generated>${HEADER}</auto-generated>
+-- Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
+return {
+${rows}
+}
+`;
+}
+
 writeFileSync(join(FIXTURES, 'fixtures.cs'), emitCs(), 'utf8');
 writeFileSync(join(FIXTURES, 'fixtures.hpp'), emitCpp(), 'utf8');
 writeFileSync(join(FIXTURES, 'fixtures.lua'), emitLua(), 'utf8');
+
+writeFileSync(join(FIXTURES, 'expected.cs'), emitExpectedCs(), 'utf8');
+writeFileSync(join(FIXTURES, 'expected.hpp'), emitExpectedCpp(), 'utf8');
+writeFileSync(join(FIXTURES, 'expected.lua'), emitExpectedLua(), 'utf8');
 
 console.log(`[conformance] generated ${scenarios.length} native fixtures (cs / hpp / lua)`);
