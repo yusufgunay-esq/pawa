@@ -31,11 +31,13 @@ Work remaining: replace the enum with flags in `automa-brain-ts/cs/cpp/lua`, add
 
 ## Suggestions and shared learning (Phase 1.5)
 1. **Hand-over first, advice second.** The user hands a character to the AI (F5). Afterwards the agent may *suggest* additions to that character ("dies to archers: add `DEFENSIVE` vs ranged", "raise `reactionDelayMs`"). Suggestions are shown, never applied without the user's yes.
-2. **Shared learning into this repo.** What users' agents learn (profiles that worked, tuning results, seam notes) is contributed to `yusufgunay-esq/automa` through `scripts/contribute-recipe.mjs`:
+2. **Shared learning goes to a separate data repo (`yusufgunay-esq/automa-atlas`), not this one.** This repo (code, paper, skill) keeps a single author. Contributions are data only:
    - **Opt-in only**, asked once per contribution; no silent uploads.
-   - **Pull request only**, never a direct push: the maintainer reviews every contribution.
-   - **Hygiene audit before upload:** no game binaries or assets, no personal paths, no keys, no raw telemetry that identifies a person. Only profile JSON, anonymized tuning numbers and seam notes.
-   - Stored under `targets/<game-slug>/` (profile, REPORT) and `learned/<game-slug>/` (tuning results), so the next user's agent starts from what earlier users found.
+   - **Submission, not pull request:** the agent sends a JSON bundle through a submission endpoint (issue form or small API). A bot commits it under the maintainer's identity, so contributors never become commit authors.
+   - **Automatic review, no human step:** a GitHub Action validates the bundle (schema, size cap, JSON only, no executable content, no URLs/paths/keys/binaries, sane value ranges, duplicate check) and an agent reviewer flags anything odd. Pass: auto-merge. Fail: auto-reject with the reason.
+   - **Data is never instructions.** Future agents read the atlas as untrusted data (free-text fields are stripped or length-capped) so a malicious submission cannot steer them.
+   - Layout: `games/<game-slug>/profile.json`, `seams.md`, `tuning.json`.
+   - Trade-off accepted: contributors get no commit credit.
 
 ## Phase 2 (next step)
 **Protagonist Fidelity:** REA derives the story protagonist's real fighting style into the same profile schema, for a narrative-consistent takeover.
