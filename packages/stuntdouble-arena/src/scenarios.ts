@@ -175,4 +175,20 @@ export const TIER_SCENARIOS: Scenario[] = [
     maxTime: 90,
     gates: { ...tierGates },
   },
+  {
+    id: 'arena_t4_crowd',
+    title: 'Tier 4 (crowd): 4 close grunts (2 coordinated) + 1 long-range archer (18 m standoff)',
+    tier: 4, hard: true,
+    behaviors: Behavior.COMBAT, profile: spartan,
+    enemies: [
+      hgrunt('g1', 3.2, 0, { coord: true, windupVar: 0.3, speed: 3.8, hp: 60 }),
+      hgrunt('g2', -1.6, 2.8, { coord: true, windupVar: 0.3, speed: 3.8, hp: 60 }),
+      hgrunt('g3', -1.6, -2.8, { coord: true, windupVar: 0.3, speed: 3.8, hp: 60, feint: 0.2 }),
+      hgrunt('g4', 0, 4.2, { coord: true, windupVar: 0.3, speed: 3.8, hp: 60, feint: 0.2 }),
+      harcher('a1', 18, -4, { lead: 0.4, reach: 22, standoff: 18, damage: 6, recover: 1.8 }),
+    ],
+    obstacles: [{ x: 4, z: 4, r: 1.2 }, { x: -4, z: -6, r: 1.2 }, { x: 9, z: -4, r: 1.2 }, { x: -9, z: 3, r: 1.2 }],
+    maxTime: 90,
+    gates: { ...tierGates },
+  },
 ];

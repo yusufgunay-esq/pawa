@@ -45,7 +45,7 @@ return {
     id = "crowded-pressure", stance = "DEFENSIVE", intercept = true,
     utility = "STRIKE_COMBO", score = 0.8177,
     plan = {  },
-    command = "STRIKE_COMBO", sx = -0.7071067811865477, sz = -0.7071067811865475,
+    command = "STRIKE_COMBO", sx = 0.7071067811865476, sz = 0.7071067811865475,
     speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
     fov = 1.0, focus = "h1"
   },
@@ -117,7 +117,7 @@ return {
     id = "obstacle-steering", stance = "DEFENSIVE", intercept = true,
     utility = "DEFLECT_COUNTER", score = 0.9701,
     plan = { "DEFLECT_COUNTER" },
-    command = "DEFLECT_COUNTER", sx = -0.7071067811865477, sz = -0.7071067811865475,
+    command = "DEFLECT_COUNTER", sx = -1.0, sz = 1.2246467991473532e-16,
     speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
     fov = 1.0, focus = "wall_1"
   },
@@ -304,5 +304,53 @@ return {
     command = "TACTICAL_HEAL", sx = -0.7071067811865477, sz = -0.7071067811865475,
     speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
     fov = 1.0, focus = "h1"
+  },
+  {
+    id = "crowd-counter-strike", stance = "DEFENSIVE", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.8177,
+    plan = {  },
+    command = "STRIKE_COMBO", sx = 0.7071067811865474, sz = -0.7071067811865477,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "g1"
+  },
+  {
+    id = "crowd-windup-parries", stance = "DEFENSIVE", intercept = true,
+    utility = "DEFLECT_COUNTER", score = 0.9701,
+    plan = { "DEFLECT_COUNTER" },
+    command = "DEFLECT_COUNTER", sx = -1.8369701987210297e-16, sz = -1.0,
+    speed = 0.999, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "g1"
+  },
+  {
+    id = "crowd-low-health-flees", stance = "EVASIVE", intercept = true,
+    utility = "EVADE_REPOSITION", score = 0.8631,
+    plan = { "TACTICAL_HEAL" },
+    command = "TACTICAL_HEAL", sx = 0.7071067811865474, sz = -0.7071067811865477,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "g1"
+  },
+  {
+    id = "crowd-defensive-flag-no-offense", stance = "DEFENSIVE", intercept = true,
+    utility = "DEFLECT_COUNTER", score = 0.0019,
+    plan = {  },
+    command = "DEFLECT_COUNTER", sx = 0.7071067811865474, sz = -0.7071067811865477,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "g1"
+  },
+  {
+    id = "ranged-windup-beyond-16m-range", stance = "AGGRESSIVE", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.8177,
+    plan = { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "STRIKE_COMBO", sx = 0.7226659775398219, sz = 0.6911974283129341,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "archer_1"
+  },
+  {
+    id = "ranged-windup-beyond-default-range", stance = "AGGRESSIVE", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.8177,
+    plan = { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "STRIKE_COMBO", sx = 1.0, sz = 0.0,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "archer_1"
   }
 }

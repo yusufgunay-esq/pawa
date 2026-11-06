@@ -121,6 +121,7 @@ struct EntitySnapshot {
     bool is_ranged{false};
     double threat_weight{1.0};
     double projectile_eta{0.0}; // seconds until a projectile this entity fired lands; <= 0 = none in flight
+    double attack_range{0.0};   // [CORE-005] ranged: real firing range in meters; <= 0 = 16 m default
 };
 
 struct CameraDirective {
@@ -307,6 +308,38 @@ public:
         }
     }
 
+    /// [CORE-005] Crowd positioning: best of 8 ring points (least threat, pulled towards the target).
+    [[nodiscard]] Vec3 find_local_pocket(const Vec3& center, const std::vector<EntitySnapshot>& hostiles,
+                                         const Vec3* target, double ring_radius) const noexcept {
+        const double S = 0.7071067811865476;
+        const double dxs[8] = {1.0, S, 0.0, -S, -1.0, -S, 0.0, S};
+        const double dzs[8] = {0.0, S, 1.0, S, 0.0, -S, -1.0, -S};
+        Vec3 best = center;
+        double best_val = -1e308;
+        for (int k = 0; k < 8; ++k) {
+            const double px = center.x + dxs[k] * ring_radius;
+            const double pz = center.z + dzs[k] * ring_radius;
+            double score = 0.0;
+            for (const auto& h : hostiles) {
+                const double dx = px - h.position.x;
+                const double dz = pz - h.position.z;
+                const double d = std::sqrt(dx * dx + dz * dz);
+                score -= (h.threat_weight * (h.is_wind_up ? 1.75 : 1.0)) / (1.0 + d * 0.45);
+            }
+            if (target != nullptr) {
+                const double tx = px - target->x;
+                const double tz = pz - target->z;
+                const double td = std::sqrt(tx * tx + tz * tz);
+                score -= 0.25 * std::max(0.0, td - 2.0);
+            }
+            if (score > best_val) {
+                best_val = score;
+                best = Vec3{px, center.y, pz};
+            }
+        }
+        return best;
+    }
+
     /// Highest scoring (safest) cell within the local grid.
     [[nodiscard]] Vec3 find_safest_pocket(const Vec3& center) const noexcept {
         const double half_span = (static_cast<double>(grid_size_) * cell_size_) / 2.0;
@@ -348,6 +381,7 @@ public:
     const EntitySnapshot* imminent_threat{nullptr};
     const EntitySnapshot* ranged_threat{nullptr}; // nearest ranged hostile winding up (<= 16 m) or with a projectile in flight
     double pressure_index{0.0};
+    bool pressure_high{false}; // [CORE-005] crowd pressure with hysteresis (in above 0.72, out below 0.6)
     InfluenceMap2D influence_map{12, 2.5};
 
     void refresh(const EntitySnapshot& self_state,
@@ -377,7 +411,7 @@ public:
             raw_pressure += h.threat_weight / std::max(1.0, d * 0.35);
 
             if (h.is_wind_up && d < 4.5 && !h.is_ranged) wind_up_threat = &h;
-            if (h.is_ranged && ((h.is_wind_up && d <= 16.0) || h.projectile_eta > 0.0) && d < ranged_dist) {
+            if (h.is_ranged && ((h.is_wind_up && d <= (h.attack_range > 0.0 ? h.attack_range : 16.0)) || h.projectile_eta > 0.0) && d < ranged_dist) {
                 ranged_dist = d;
                 ranged_threat_pick = &h;
             }
@@ -392,6 +426,11 @@ public:
         imminent_threat = wind_up_threat;
         ranged_threat = ranged_threat_pick;
         pressure_index = std::min(1.0, raw_pressure / 3.5);
+        if (pressure_high) {
+            if (pressure_index < 0.6) pressure_high = false;
+        } else if (pressure_index > 0.72) {
+            pressure_high = true;
+        }
         influence_map.update(self.position, hostiles);
     }
 
@@ -834,11 +873,39 @@ public:
             if (!intercept_human_input) immediate_command = "HUMAN_PASS_THROUGH";
         }
 
+        // [CORE-005] crowd: fight from the least-covered side, punish in the gaps
+        const bool crowd = !inactive && !cruise_active && !assist_active && !f_defensive &&
+                           stance == TacticalStance::Defensive && blackboard_.pressure_high;
+        const EntitySnapshot* counter_target = nullptr;
+        if (crowd && blackboard_.imminent_threat == nullptr && self.health_ratio >= 0.4 &&
+            immediate_command != "TACTICAL_HEAL") {
+            double cd = 1e308;
+            for (const auto& h : blackboard_.hostiles) {
+                if (h.is_ranged) continue;
+                const double hx = h.position.x - self.position.x;
+                const double hz = h.position.z - self.position.z;
+                const double d = std::sqrt(hx * hx + hz * hz);
+                if (d <= 2.6 && d < cd) { cd = d; counter_target = &h; }
+            }
+            if (counter_target != nullptr && immediate_command != "STRIKE_COMBO" &&
+                immediate_command != "HEAVY_ASSAULT" && immediate_command != "EXECUTE_FINISHER") {
+                immediate_command = "STRIKE_COMBO";
+            }
+        }
+
         // [CORE-003] continuous aggression: stamina reserve = (1 - aggression) * 0.6
         if (!inactive && !cruise_active && !assist_active && blackboard_.imminent_threat == nullptr &&
             (immediate_command == "STRIKE_COMBO" || immediate_command == "HEAVY_ASSAULT") &&
             self.stamina_ratio < (1.0 - profile.aggression) * 0.9) {
             immediate_command = "CLOSE_DISTANCE";
+        }
+
+        // [CORE-005] aggression pacing: a share `aggression` of strike requests goes out (credit accumulator)
+        if (!inactive && !cruise_active && !assist_active && blackboard_.imminent_threat == nullptr &&
+            (immediate_command == "STRIKE_COMBO" || immediate_command == "HEAVY_ASSAULT")) {
+            attack_budget_ += profile.aggression;
+            if (attack_budget_ >= 1.0) attack_budget_ -= 1.0;
+            else immediate_command = "CLOSE_DISTANCE";
         }
 
         // [CORE-003] critical health and nothing about to land in melee: heal beats fleeing
@@ -862,6 +929,12 @@ public:
         Vec3 nav_target = self.position;
         if (cruise_active && waypoint_or_loot) {
             nav_target = *waypoint_or_loot;
+        } else if (crowd) {
+            const EntitySnapshot* focus = counter_target != nullptr ? counter_target : blackboard_.primary_target;
+            Vec3 focus_pos{};
+            if (focus != nullptr) focus_pos = focus->position;
+            nav_target = blackboard_.influence_map.find_local_pocket(self.position, blackboard_.hostiles,
+                                                                     focus != nullptr ? &focus_pos : nullptr, 2.5);
         } else if (stance == TacticalStance::Evasive || stance == TacticalStance::Defensive) {
             nav_target = blackboard_.influence_map.find_safest_pocket(self.position);
         } else if (blackboard_.primary_target) {
@@ -876,7 +949,7 @@ public:
                                       h.threat_weight * (h.is_wind_up ? 1.8 : 1.0)});
         }
 
-        const double pref_range = cruise_active ? 0.5 : profile.preferred_range;
+        const double pref_range = (cruise_active || crowd) ? 0.5 : profile.preferred_range;
 
         double speed_multiplier = 1.0;
         Vec3 direction = steering_.compute_move_vector(
@@ -931,7 +1004,7 @@ private:
         const auto& bb = blackboard_;
         if (bb.hostiles.empty()) return TacticalStance::Stealth;
         if (bb.self.health_ratio < 0.28) return TacticalStance::Evasive;
-        if (bb.imminent_threat || bb.pressure_index > 0.72) return TacticalStance::Defensive;
+        if (bb.imminent_threat || bb.pressure_high) return TacticalStance::Defensive;
         if (bb.profile.aggression >= 0.65 && bb.self.stamina_ratio > 0.35) return TacticalStance::Aggressive;
         return TacticalStance::Balanced;
     }
@@ -975,6 +1048,7 @@ private:
     ContextSteering steering_{};
     GoapPlanner planner_{};
     DisciplineJitter jitter_{};
+    double attack_budget_{1.0}; // [CORE-005] aggression pacing credit (first strike always goes out)
 
     std::vector<UtilityAction> utility_actions_{defaults::utility_actions()};
     std::vector<GoapAction> goap_actions_{defaults::goap_actions()};

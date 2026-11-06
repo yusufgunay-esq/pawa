@@ -238,3 +238,56 @@ test('Behaviors: conflict rules', () => {
   assert.equal(d.stance, 'DEFENSIVE');
   assert.notEqual(d.selectedUtilityAction, 'EXECUTE_FINISHER');
 });
+
+// ---- 005: crowd counter-attack, pressure hysteresis, ranged range, aggression pacing ----
+const CSELF: EntitySnapshot = { id: 'p', position: { x: 0, y: 0, z: 0 }, velocity: { x: 0, y: 0, z: 0 }, healthRatio: 0.9, staminaRatio: 0.9, isAttacking: false, isWindUp: false, isRanged: false, threatWeight: 1 };
+const grunt = (id: string, x: number, z: number, over: Partial<EntitySnapshot> = {}): EntitySnapshot => ({ ...CSELF, id, position: { x, y: 0, z }, healthRatio: 0.7, ...over });
+const RING = [grunt('a', 2, 0), grunt('b', -1, 1.8), grunt('c', -1, -1.8), grunt('d', 0, 2.6)];
+
+test('005 crowd: no wind-up inside reach -> counter strike; a wind-up flips back to parry; DEFENSIVE flag never attacks', () => {
+  assert.equal(new StuntBrain().tick(CSELF, RING, PROTAGONIST_OPERATIVE, 'TACTICAL', Behavior.COMBAT).immediateCommand, 'STRIKE_COMBO');
+  const wind = [{ ...RING[0], isWindUp: true }, ...RING.slice(1)];
+  assert.equal(new StuntBrain().tick(CSELF, wind, PROTAGONIST_OPERATIVE, 'TACTICAL', Behavior.COMBAT).immediateCommand, 'DEFLECT_COUNTER');
+  assert.notEqual(new StuntBrain().tick(CSELF, RING, PROTAGONIST_OPERATIVE, 'TACTICAL', Behavior.DEFENSIVE).immediateCommand, 'STRIKE_COMBO');
+  assert.equal(new StuntBrain().tick({ ...CSELF, healthRatio: 0.25 }, RING, PROTAGONIST_OPERATIVE, 'TACTICAL', Behavior.COMBAT).stance, 'EVASIVE');
+});
+
+test('005 crowd positioning stays local (no flight to the far grid edge)', () => {
+  const d = new StuntBrain().tick(CSELF, RING, PROTAGONIST_OPERATIVE, 'TACTICAL', Behavior.COMBAT);
+  assert.ok(Math.hypot(d.steeringMove.x, d.steeringMove.z) > 0.99);
+  const bb = new TacticalBlackboard();
+  bb.refresh(CSELF, RING, PROTAGONIST_OPERATIVE);
+  const p = bb.influenceMap.findLocalPocket(CSELF.position, bb.hostiles, RING[0].position, 2.5);
+  assert.ok(Math.hypot(p.x, p.z) <= 2.5 + 1e-9);
+});
+
+test('005 pressure hysteresis: in above 0.72, stays until below 0.6', () => {
+  const bb = new TacticalBlackboard();
+  const at = (d: number) => bb.refresh(CSELF, [grunt('a', d, 0), grunt('b', -d, 0), grunt('c', 0, d), grunt('d', 0, -d)], PROTAGONIST_OPERATIVE);
+  at(2.5); assert.equal(bb.pressureHigh, true);
+  at(4.5); // raw 4 / (4.5*.35)=2.54 -> 0.73
+  assert.equal(bb.pressureHigh, true);
+  at(5.5); // 4 / 1.925 = 2.08 -> 0.59 -> released
+  assert.equal(bb.pressureHigh, false);
+  at(4.6); // 0.71: below the 0.72 entry threshold, so it stays released
+  assert.equal(bb.pressureHigh, false);
+});
+
+test('005 ranged threat range follows attackRange (default 16 m)', () => {
+  const archer = (r?: number) => grunt('arc', 18, 3, { isRanged: true, isWindUp: true, attackRange: r });
+  const bb = new TacticalBlackboard();
+  bb.refresh(CSELF, [archer()], PROTAGONIST_OPERATIVE);
+  assert.equal(bb.rangedThreat, null);
+  bb.refresh(CSELF, [archer(22)], PROTAGONIST_OPERATIVE);
+  assert.equal(bb.rangedThreat?.id, 'arc');
+});
+
+test('005 aggression pacing: strike requests go out in proportion to aggression', () => {
+  const share = (a: number) => {
+    const b = new StuntBrain();
+    let n = 0;
+    for (let i = 0; i < 100; i++) if (b.tick(CSELF, [grunt('a', 2, 0)], { ...PROTAGONIST_OPERATIVE, aggression: a, discipline: 1 }, 'TACTICAL', Behavior.COMBAT).immediateCommand === 'STRIKE_COMBO' || false) n++;
+    return n;
+  };
+  assert.ok(share(0.9) >= share(0.6) && share(0.6) >= share(0.3), `${share(0.3)} ${share(0.6)} ${share(0.9)}`);
+});

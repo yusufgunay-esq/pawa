@@ -2,7 +2,7 @@
 /**
  * Stuntdouble arena runner.
  *   node packages/stuntdouble-arena/run.mjs [--scenario id] [--seed n] [--json] [--html out.html]
- *   node packages/stuntdouble-arena/run.mjs --compare [--scenario arena_t3]   (4 agents x seeds 1-8 per hard tier; exit 1 if the fixed hard-tier gate fails)
+ *   node packages/stuntdouble-arena/run.mjs --compare [--scenario arena_t4_crowd]   (4 agents x seeds 1-8 per tier; t3 + t4 carry fixed gates; exit 1 if the fixed hard-tier gate fails)
  * Exit code 1 if any gate fails. Copyright (c) 2026 Yusuf Günay. MPL-2.0.
  */
 import { spawnSync } from 'node:child_process';
@@ -15,7 +15,7 @@ if (!process.features.typescript) {
 
 const { writeFileSync } = await import('node:fs');
 const { SCENARIOS, TIER_SCENARIOS } = await import('./src/scenarios.ts');
-const { compare, compareGate, COMPARE_SEEDS } = await import('./src/compare.ts');
+const { compare, compareGate, crowdGate, COMPARE_SEEDS } = await import('./src/compare.ts');
 const { runScenario } = await import('./src/sim.ts');
 const { evaluateGates } = await import('./src/gates.ts');
 const { renderHtml } = await import('./src/html.ts');
@@ -36,10 +36,10 @@ if (argv.includes('--compare')) {
     const st = compare(sc, COMPARE_SEEDS);
     console.log('');
     console.log(`${sc.id}  ${sc.title}`);
-    console.log('  agent                 survived  hp end  damage  hits  kills');
-    for (const r of st) console.log(`  ${r.label.padEnd(21)} ${(r.survived + '/' + r.runs).padStart(8)}  ${r.hpEnd.toFixed(0).padStart(6)}  ${r.damage.toFixed(0).padStart(6)}  ${r.hits.toFixed(1).padStart(4)}  ${r.kills.toFixed(1).padStart(5)}`);
-    if (sc.tier === 3) {
-      const g = compareGate(st);
+    console.log('  agent                 survived  hp end  damage  hits  kills  atk%');
+    for (const r of st) console.log(`  ${r.label.padEnd(21)} ${(r.survived + '/' + r.runs).padStart(8)}  ${r.hpEnd.toFixed(0).padStart(6)}  ${r.damage.toFixed(0).padStart(6)}  ${r.hits.toFixed(1).padStart(4)}  ${r.kills.toFixed(1).padStart(5)}  ${(r.attackRatio * 100).toFixed(0).padStart(4)}`);
+    if (sc.tier === 3 || sc.tier === 4) {
+      const g = sc.tier === 4 ? crowdGate(st) : compareGate(st);
       ok &&= g.pass;
       for (const d of g.detail) console.log('  ' + d);
     }

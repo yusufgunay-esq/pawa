@@ -978,6 +978,168 @@ namespace Stuntdouble.Conformance
                 Behaviors = 1,
                 HasWaypoint = false,
                 Waypoint = new Vec3(0.0, 0.0, 0.0)
+            },
+            new ScenarioFixture
+            {
+                Id = "crowd-counter-strike",
+                Profile = new BehaviorProfile
+                {
+                    Id = "conformance_reference",
+                    Name = "Conformance Reference Protagonist",
+                    Aggression = 0.78,
+                    Discipline = 0.92,
+                    CinematicFlair = 0.88,
+                    ReactionDelayMs = 95,
+                    PreferredRange = 2.2
+                },
+                Self = new EntitySnapshot { Id = "player_0", Position = new Vec3(0.0, 0.0, 0.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.9, StaminaRatio = 0.9, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                Hostiles = new EntitySnapshot[]
+                {
+                    new EntitySnapshot { Id = "g1", Position = new Vec3(2.0, 0.0, 0.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g2", Position = new Vec3(-1.0, 0.0, 1.8), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g3", Position = new Vec3(-1.0, 0.0, -1.8), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g4", Position = new Vec3(0.0, 0.0, 2.6), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 }
+                },
+                Presentation = (PresentationMode)0,
+                Autonomy = (AutonomyMode)0,
+                HasAutonomy = false,
+                Behaviors = 1,
+                HasWaypoint = false,
+                Waypoint = new Vec3(0.0, 0.0, 0.0)
+            },
+            new ScenarioFixture
+            {
+                Id = "crowd-windup-parries",
+                Profile = new BehaviorProfile
+                {
+                    Id = "conformance_reference",
+                    Name = "Conformance Reference Protagonist",
+                    Aggression = 0.78,
+                    Discipline = 0.92,
+                    CinematicFlair = 0.88,
+                    ReactionDelayMs = 95,
+                    PreferredRange = 2.2
+                },
+                Self = new EntitySnapshot { Id = "player_0", Position = new Vec3(0.0, 0.0, 0.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.9, StaminaRatio = 0.9, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                Hostiles = new EntitySnapshot[]
+                {
+                    new EntitySnapshot { Id = "g1", Position = new Vec3(2.0, 0.0, 0.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = true, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g2", Position = new Vec3(-1.0, 0.0, 1.8), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g3", Position = new Vec3(-1.0, 0.0, -1.8), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g4", Position = new Vec3(0.0, 0.0, 2.6), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 }
+                },
+                Presentation = (PresentationMode)0,
+                Autonomy = (AutonomyMode)0,
+                HasAutonomy = false,
+                Behaviors = 1,
+                HasWaypoint = false,
+                Waypoint = new Vec3(0.0, 0.0, 0.0)
+            },
+            new ScenarioFixture
+            {
+                Id = "crowd-low-health-flees",
+                Profile = new BehaviorProfile
+                {
+                    Id = "conformance_reference",
+                    Name = "Conformance Reference Protagonist",
+                    Aggression = 0.78,
+                    Discipline = 0.92,
+                    CinematicFlair = 0.88,
+                    ReactionDelayMs = 95,
+                    PreferredRange = 2.2
+                },
+                Self = new EntitySnapshot { Id = "player_0", Position = new Vec3(0.0, 0.0, 0.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.25, StaminaRatio = 0.9, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                Hostiles = new EntitySnapshot[]
+                {
+                    new EntitySnapshot { Id = "g1", Position = new Vec3(2.0, 0.0, 0.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g2", Position = new Vec3(-1.0, 0.0, 1.8), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g3", Position = new Vec3(-1.0, 0.0, -1.8), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g4", Position = new Vec3(0.0, 0.0, 2.6), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 }
+                },
+                Presentation = (PresentationMode)0,
+                Autonomy = (AutonomyMode)0,
+                HasAutonomy = false,
+                Behaviors = 1,
+                HasWaypoint = false,
+                Waypoint = new Vec3(0.0, 0.0, 0.0)
+            },
+            new ScenarioFixture
+            {
+                Id = "crowd-defensive-flag-no-offense",
+                Profile = new BehaviorProfile
+                {
+                    Id = "conformance_reference",
+                    Name = "Conformance Reference Protagonist",
+                    Aggression = 0.78,
+                    Discipline = 0.92,
+                    CinematicFlair = 0.88,
+                    ReactionDelayMs = 95,
+                    PreferredRange = 2.2
+                },
+                Self = new EntitySnapshot { Id = "player_0", Position = new Vec3(0.0, 0.0, 0.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.9, StaminaRatio = 0.9, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                Hostiles = new EntitySnapshot[]
+                {
+                    new EntitySnapshot { Id = "g1", Position = new Vec3(2.0, 0.0, 0.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g2", Position = new Vec3(-1.0, 0.0, 1.8), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g3", Position = new Vec3(-1.0, 0.0, -1.8), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                    new EntitySnapshot { Id = "g4", Position = new Vec3(0.0, 0.0, 2.6), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 }
+                },
+                Presentation = (PresentationMode)0,
+                Autonomy = (AutonomyMode)0,
+                HasAutonomy = false,
+                Behaviors = 8,
+                HasWaypoint = false,
+                Waypoint = new Vec3(0.0, 0.0, 0.0)
+            },
+            new ScenarioFixture
+            {
+                Id = "ranged-windup-beyond-16m-range",
+                Profile = new BehaviorProfile
+                {
+                    Id = "conformance_reference",
+                    Name = "Conformance Reference Protagonist",
+                    Aggression = 0.78,
+                    Discipline = 0.92,
+                    CinematicFlair = 0.88,
+                    ReactionDelayMs = 95,
+                    PreferredRange = 2.2
+                },
+                Self = new EntitySnapshot { Id = "player_0", Position = new Vec3(0.0, 0.0, 0.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.9, StaminaRatio = 0.9, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                Hostiles = new EntitySnapshot[]
+                {
+                    new EntitySnapshot { Id = "archer_1", Position = new Vec3(18.0, 0.0, 3.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = true, IsRanged = true, AttackRange = 22.0, ThreatWeight = 1.2 }
+                },
+                Presentation = (PresentationMode)0,
+                Autonomy = (AutonomyMode)0,
+                HasAutonomy = false,
+                Behaviors = 1,
+                HasWaypoint = false,
+                Waypoint = new Vec3(0.0, 0.0, 0.0)
+            },
+            new ScenarioFixture
+            {
+                Id = "ranged-windup-beyond-default-range",
+                Profile = new BehaviorProfile
+                {
+                    Id = "conformance_reference",
+                    Name = "Conformance Reference Protagonist",
+                    Aggression = 0.78,
+                    Discipline = 0.92,
+                    CinematicFlair = 0.88,
+                    ReactionDelayMs = 95,
+                    PreferredRange = 2.2
+                },
+                Self = new EntitySnapshot { Id = "player_0", Position = new Vec3(0.0, 0.0, 0.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.9, StaminaRatio = 0.9, IsAttacking = false, IsWindUp = false, IsRanged = false, ThreatWeight = 1.0 },
+                Hostiles = new EntitySnapshot[]
+                {
+                    new EntitySnapshot { Id = "archer_1", Position = new Vec3(18.0, 0.0, 3.0), Velocity = new Vec3(0.0, 0.0, 0.0), HealthRatio = 0.7, StaminaRatio = 0.7, IsAttacking = false, IsWindUp = true, IsRanged = true, ThreatWeight = 1.2 }
+                },
+                Presentation = (PresentationMode)0,
+                Autonomy = (AutonomyMode)0,
+                HasAutonomy = false,
+                Behaviors = 1,
+                HasWaypoint = false,
+                Waypoint = new Vec3(0.0, 0.0, 0.0)
             }
         };
     }

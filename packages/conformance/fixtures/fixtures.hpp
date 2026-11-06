@@ -484,6 +484,90 @@ inline const std::vector<ScenarioFixture>& fixtures() {
         static_cast<stuntdouble::AutonomyMode>(0),
         false, 1,
         false, stuntdouble::Vec3{0.0, 0.0, 0.0}
+    },
+    stuntdouble::conformance::ScenarioFixture{
+        "crowd-counter-strike",
+        stuntdouble::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        stuntdouble::EntitySnapshot{"player_0", stuntdouble::Vec3{0.0, 0.0, 0.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<stuntdouble::EntitySnapshot>{
+                stuntdouble::EntitySnapshot{"g1", stuntdouble::Vec3{2.0, 0.0, 0.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g2", stuntdouble::Vec3{-1.0, 0.0, 1.8}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g3", stuntdouble::Vec3{-1.0, 0.0, -1.8}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g4", stuntdouble::Vec3{0.0, 0.0, 2.6}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0}
+        },
+        static_cast<stuntdouble::PresentationMode>(0),
+        static_cast<stuntdouble::AutonomyMode>(0),
+        false, 1,
+        false, stuntdouble::Vec3{0.0, 0.0, 0.0}
+    },
+    stuntdouble::conformance::ScenarioFixture{
+        "crowd-windup-parries",
+        stuntdouble::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        stuntdouble::EntitySnapshot{"player_0", stuntdouble::Vec3{0.0, 0.0, 0.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<stuntdouble::EntitySnapshot>{
+                stuntdouble::EntitySnapshot{"g1", stuntdouble::Vec3{2.0, 0.0, 0.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, true, false, 1.0},
+                stuntdouble::EntitySnapshot{"g2", stuntdouble::Vec3{-1.0, 0.0, 1.8}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g3", stuntdouble::Vec3{-1.0, 0.0, -1.8}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g4", stuntdouble::Vec3{0.0, 0.0, 2.6}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0}
+        },
+        static_cast<stuntdouble::PresentationMode>(0),
+        static_cast<stuntdouble::AutonomyMode>(0),
+        false, 1,
+        false, stuntdouble::Vec3{0.0, 0.0, 0.0}
+    },
+    stuntdouble::conformance::ScenarioFixture{
+        "crowd-low-health-flees",
+        stuntdouble::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        stuntdouble::EntitySnapshot{"player_0", stuntdouble::Vec3{0.0, 0.0, 0.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.25, 0.9, false, false, false, 1.0},
+        std::vector<stuntdouble::EntitySnapshot>{
+                stuntdouble::EntitySnapshot{"g1", stuntdouble::Vec3{2.0, 0.0, 0.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g2", stuntdouble::Vec3{-1.0, 0.0, 1.8}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g3", stuntdouble::Vec3{-1.0, 0.0, -1.8}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g4", stuntdouble::Vec3{0.0, 0.0, 2.6}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0}
+        },
+        static_cast<stuntdouble::PresentationMode>(0),
+        static_cast<stuntdouble::AutonomyMode>(0),
+        false, 1,
+        false, stuntdouble::Vec3{0.0, 0.0, 0.0}
+    },
+    stuntdouble::conformance::ScenarioFixture{
+        "crowd-defensive-flag-no-offense",
+        stuntdouble::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        stuntdouble::EntitySnapshot{"player_0", stuntdouble::Vec3{0.0, 0.0, 0.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<stuntdouble::EntitySnapshot>{
+                stuntdouble::EntitySnapshot{"g1", stuntdouble::Vec3{2.0, 0.0, 0.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g2", stuntdouble::Vec3{-1.0, 0.0, 1.8}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g3", stuntdouble::Vec3{-1.0, 0.0, -1.8}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                stuntdouble::EntitySnapshot{"g4", stuntdouble::Vec3{0.0, 0.0, 2.6}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0}
+        },
+        static_cast<stuntdouble::PresentationMode>(0),
+        static_cast<stuntdouble::AutonomyMode>(0),
+        false, 8,
+        false, stuntdouble::Vec3{0.0, 0.0, 0.0}
+    },
+    stuntdouble::conformance::ScenarioFixture{
+        "ranged-windup-beyond-16m-range",
+        stuntdouble::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        stuntdouble::EntitySnapshot{"player_0", stuntdouble::Vec3{0.0, 0.0, 0.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<stuntdouble::EntitySnapshot>{
+                stuntdouble::EntitySnapshot{"archer_1", stuntdouble::Vec3{18.0, 0.0, 3.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, true, true, 1.2, 0.0, 22.0}
+        },
+        static_cast<stuntdouble::PresentationMode>(0),
+        static_cast<stuntdouble::AutonomyMode>(0),
+        false, 1,
+        false, stuntdouble::Vec3{0.0, 0.0, 0.0}
+    },
+    stuntdouble::conformance::ScenarioFixture{
+        "ranged-windup-beyond-default-range",
+        stuntdouble::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        stuntdouble::EntitySnapshot{"player_0", stuntdouble::Vec3{0.0, 0.0, 0.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<stuntdouble::EntitySnapshot>{
+                stuntdouble::EntitySnapshot{"archer_1", stuntdouble::Vec3{18.0, 0.0, 3.0}, stuntdouble::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, true, true, 1.2}
+        },
+        static_cast<stuntdouble::PresentationMode>(0),
+        static_cast<stuntdouble::AutonomyMode>(0),
+        false, 1,
+        false, stuntdouble::Vec3{0.0, 0.0, 0.0}
     }
     };
     return all;

@@ -43,7 +43,7 @@ function csEntity(e, indent) {
     `Velocity = new Vec3(${num(v.x)}, ${num(v.y)}, ${num(v.z)}), ` +
     `HealthRatio = ${num(e.healthRatio)}, StaminaRatio = ${num(e.staminaRatio)}, ` +
     `IsAttacking = ${csBool(!!e.isAttacking)}, IsWindUp = ${csBool(!!e.isWindUp)}, ` +
-    `IsRanged = ${csBool(!!e.isRanged)}, ${e.projectileEta ? `ProjectileEta = ${num(e.projectileEta)}, ` : ''}ThreatWeight = ${num(e.threatWeight)} }`
+    `IsRanged = ${csBool(!!e.isRanged)}, ${e.projectileEta ? `ProjectileEta = ${num(e.projectileEta)}, ` : ''}${e.attackRange ? `AttackRange = ${num(e.attackRange)}, ` : ''}ThreatWeight = ${num(e.threatWeight)} }`
   );
 }
 
@@ -119,7 +119,7 @@ function cppEntity(e, indent) {
   return (
     `${indent}stuntdouble::EntitySnapshot{${JSON.stringify(e.id)}, stuntdouble::Vec3{${num(p.x)}, ${num(p.y)}, ${num(p.z)}}, ` +
     `stuntdouble::Vec3{${num(v.x)}, ${num(v.y)}, ${num(v.z)}}, ${num(e.healthRatio)}, ${num(e.staminaRatio)}, ` +
-    `${e.isAttacking ? 'true' : 'false'}, ${e.isWindUp ? 'true' : 'false'}, ${e.isRanged ? 'true' : 'false'}, ${num(e.threatWeight)}${e.projectileEta ? `, ${num(e.projectileEta)}` : ''}}`
+    `${e.isAttacking ? 'true' : 'false'}, ${e.isWindUp ? 'true' : 'false'}, ${e.isRanged ? 'true' : 'false'}, ${num(e.threatWeight)}${e.projectileEta || e.attackRange ? `, ${num(e.projectileEta ?? 0)}` : ''}${e.attackRange ? `, ${num(e.attackRange)}` : ''}}`
   );
 }
 
@@ -185,7 +185,7 @@ function luaEntity(e) {
     `{ id = ${JSON.stringify(e.id)}, position = { x = ${num(p.x)}, y = ${num(p.y)}, z = ${num(p.z)} }, ` +
     `velocity = { x = ${num(v.x)}, y = ${num(v.y)}, z = ${num(v.z)} }, healthRatio = ${num(e.healthRatio)}, ` +
     `staminaRatio = ${num(e.staminaRatio)}, isAttacking = ${e.isAttacking ? 'true' : 'false'}, ` +
-    `isWindUp = ${e.isWindUp ? 'true' : 'false'}, isRanged = ${e.isRanged ? 'true' : 'false'}, ${e.projectileEta ? `projectileEta = ${num(e.projectileEta)}, ` : ''}threatWeight = ${num(e.threatWeight)} }`
+    `isWindUp = ${e.isWindUp ? 'true' : 'false'}, isRanged = ${e.isRanged ? 'true' : 'false'}, ${e.projectileEta ? `projectileEta = ${num(e.projectileEta)}, ` : ''}${e.attackRange ? `attackRange = ${num(e.attackRange)}, ` : ''}threatWeight = ${num(e.threatWeight)} }`
   );
 }
 

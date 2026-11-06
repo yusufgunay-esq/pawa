@@ -306,6 +306,37 @@ function InfluenceMap2D:update(centerPos, hostiles, allies)
     end
 end
 
+--- [CORE-005] Crowd positioning: best of 8 ring points (least threat, pulled towards the target).
+function InfluenceMap2D:findLocalPocket(centerPos, hostiles, target, ringRadius)
+    local S = 0.7071067811865476
+    local dxs = { 1.0, S, 0.0, -S, -1.0, -S, 0.0, S }
+    local dzs = { 0.0, S, 1.0, S, 0.0, -S, -1.0, -S }
+    local best = centerPos
+    local bestVal = -1e308
+    for k = 1, 8 do
+        local px = centerPos.x + dxs[k] * ringRadius
+        local pz = centerPos.z + dzs[k] * ringRadius
+        local score = 0.0
+        for _, h in ipairs(hostiles) do
+            local dx = px - h.position.x
+            local dz = pz - h.position.z
+            local d = math.sqrt(dx * dx + dz * dz)
+            score = score - (h.threatWeight * (h.isWindUp and 1.75 or 1.0)) / (1.0 + d * 0.45)
+        end
+        if target then
+            local tx = px - target.x
+            local tz = pz - target.z
+            local td = math.sqrt(tx * tx + tz * tz)
+            score = score - 0.25 * math.max(0.0, td - 2.0)
+        end
+        if score > bestVal then
+            bestVal = score
+            best = { x = px, y = centerPos.y, z = pz }
+        end
+    end
+    return best
+end
+
 --- Highest scoring (safest) cell within the local grid.
 function InfluenceMap2D:findSafestPocket(centerPos)
     local n = self.gridSize
@@ -351,6 +382,7 @@ function TacticalBlackboard.new()
         imminentThreat = nil,
         rangedThreat = nil, -- nearest ranged hostile winding up (<= 16 m) or with a projectile in flight
         pressureIndex = 0.0,
+        pressureHigh = false, -- [CORE-005] crowd pressure with hysteresis (in above 0.72, out below 0.6)
         influenceMap = InfluenceMap2D.new(12, 2.5),
     }, TacticalBlackboard)
 end
@@ -374,7 +406,7 @@ function TacticalBlackboard:refresh(selfState, hostiles, profile)
         local d = distXZ(selfState.position, h.position)
         rawPressure = rawPressure + h.threatWeight / math.max(1.0, d * 0.35)
         if h.isWindUp and d < 4.5 and not h.isRanged then windUpThreat = h end
-        if h.isRanged and ((h.isWindUp and d <= 16.0) or (h.projectileEta or 0.0) > 0.0) and d < rangedDist then
+        if h.isRanged and ((h.isWindUp and d <= ((h.attackRange or 0.0) > 0.0 and h.attackRange or 16.0)) or (h.projectileEta or 0.0) > 0.0) and d < rangedDist then
             rangedDist = d
             rangedThreatPick = h
         end
@@ -389,6 +421,11 @@ function TacticalBlackboard:refresh(selfState, hostiles, profile)
     self.imminentThreat = windUpThreat
     self.rangedThreat = rangedThreatPick
     self.pressureIndex = math.min(1.0, rawPressure / 3.5)
+    if self.pressureHigh then
+        if self.pressureIndex < 0.6 then self.pressureHigh = false end
+    elseif self.pressureIndex > 0.72 then
+        self.pressureHigh = true
+    end
     self.influenceMap:update(selfState.position, self.hostiles)
 end
 
@@ -650,6 +687,7 @@ function StuntBrain.new(profile, options)
     self.steering = ContextSteering.new(16)
     self.planner = GoapPlanner.new()
     self.jitter = DisciplineJitter.new()
+    self.attackBudget = 1.0 -- [CORE-005] aggression pacing credit (first strike always goes out)
 
     self.utilityActions = options.utilityActions or StuntBrain.defaultUtilityActions()
     self.goapActions = options.goapActions or StuntBrain.defaultGoapActions()
@@ -671,7 +709,7 @@ function StuntBrain:evaluateStance()
     local bb = self.blackboard
     if #bb.hostiles == 0 then return StuntBrain.Stance.STEALTH end
     if bb.self.healthRatio < 0.28 then return StuntBrain.Stance.EVASIVE end
-    if bb.imminentThreat ~= nil or bb.pressureIndex > 0.72 then return StuntBrain.Stance.DEFENSIVE end
+    if bb.imminentThreat ~= nil or bb.pressureHigh then return StuntBrain.Stance.DEFENSIVE end
     if bb.profile.aggression >= 0.65 and bb.self.staminaRatio > 0.35 then return StuntBrain.Stance.AGGRESSIVE end
     return StuntBrain.Stance.BALANCED
 end
@@ -793,11 +831,46 @@ function StuntBrain:tickBehaviors(selfState, hostiles, profile, presentationMode
         if not interceptHumanInput then immediateCommand = "HUMAN_PASS_THROUGH" end
     end
 
+    -- [CORE-005] crowd: fight from the least-covered side, punish in the gaps
+    local crowd = (not inactive) and (not cruiseActive) and (not assistActive) and (not fDefensive)
+        and stance == StuntBrain.Stance.DEFENSIVE and self.blackboard.pressureHigh
+    local counterTarget = nil
+    if crowd and self.blackboard.imminentThreat == nil and selfState.healthRatio >= 0.4
+        and immediateCommand ~= "TACTICAL_HEAL" then
+        local cd = 1e308
+        for _, h in ipairs(self.blackboard.hostiles) do
+            if not h.isRanged then
+                local hx = h.position.x - selfState.position.x
+                local hz = h.position.z - selfState.position.z
+                local d = math.sqrt(hx * hx + hz * hz)
+                if d <= 2.6 and d < cd then
+                    cd = d
+                    counterTarget = h
+                end
+            end
+        end
+        if counterTarget ~= nil and immediateCommand ~= "STRIKE_COMBO" and immediateCommand ~= "HEAVY_ASSAULT"
+            and immediateCommand ~= "EXECUTE_FINISHER" then
+            immediateCommand = "STRIKE_COMBO"
+        end
+    end
+
     -- [CORE-003] continuous aggression: stamina reserve = (1 - aggression) * 0.6
     if not inactive and not cruiseActive and not assistActive and self.blackboard.imminentThreat == nil
         and (immediateCommand == "STRIKE_COMBO" or immediateCommand == "HEAVY_ASSAULT")
         and selfState.staminaRatio < (1.0 - profile.aggression) * 0.9 then
         immediateCommand = "CLOSE_DISTANCE"
+    end
+
+    -- [CORE-005] aggression pacing: a share `aggression` of strike requests goes out (credit accumulator)
+    if not inactive and not cruiseActive and not assistActive and self.blackboard.imminentThreat == nil
+        and (immediateCommand == "STRIKE_COMBO" or immediateCommand == "HEAVY_ASSAULT") then
+        self.attackBudget = self.attackBudget + profile.aggression
+        if self.attackBudget >= 1.0 then
+            self.attackBudget = self.attackBudget - 1.0
+        else
+            immediateCommand = "CLOSE_DISTANCE"
+        end
     end
 
     -- [CORE-003] critical health and nothing about to land in melee: heal beats fleeing
@@ -821,6 +894,10 @@ function StuntBrain:tickBehaviors(selfState, hostiles, profile, presentationMode
     local navTarget = selfState.position
     if cruiseActive and waypointOrLootPos then
         navTarget = waypointOrLootPos
+    elseif crowd then
+        local focus = counterTarget or self.blackboard.primaryTarget
+        navTarget = self.blackboard.influenceMap:findLocalPocket(
+            selfState.position, self.blackboard.hostiles, focus and focus.position or nil, 2.5)
     elseif stance == StuntBrain.Stance.EVASIVE or stance == StuntBrain.Stance.DEFENSIVE then
         navTarget = self.blackboard.influenceMap:findSafestPocket(selfState.position)
     elseif self.blackboard.primaryTarget then
@@ -837,7 +914,7 @@ function StuntBrain:tickBehaviors(selfState, hostiles, profile, presentationMode
     end
 
     local prefRange
-    if cruiseActive then
+    if cruiseActive or crowd then
         prefRange = 0.5
     else
         prefRange = profile.preferredRange

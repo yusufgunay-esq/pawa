@@ -119,6 +119,7 @@ namespace Stuntdouble.Brain
         public bool IsRanged;
         public double ThreatWeight;
         public double ProjectileEta; // seconds until a projectile this entity fired lands; <= 0 = none in flight
+        public double AttackRange;   // [CORE-005] ranged: real firing range in meters; <= 0 = 16 m default
     }
 
     public struct CameraDirective
@@ -359,6 +360,43 @@ namespace Stuntdouble.Brain
             }
         }
 
+        /// <summary>[CORE-005] Crowd positioning: best of 8 ring points (least threat, pulled towards the target).</summary>
+        public Vec3 FindLocalPocket(Vec3 centerPos, IList<EntitySnapshot> hostiles, Vec3? target, double ringRadius)
+        {
+            const double S = 0.7071067811865476;
+            double[] dxs = { 1.0, S, 0.0, -S, -1.0, -S, 0.0, S };
+            double[] dzs = { 0.0, S, 1.0, S, 0.0, -S, -1.0, -S };
+            Vec3 best = centerPos;
+            double bestVal = double.NegativeInfinity;
+            for (int k = 0; k < 8; k++)
+            {
+                double px = centerPos.X + dxs[k] * ringRadius;
+                double pz = centerPos.Z + dzs[k] * ringRadius;
+                double score = 0.0;
+                for (int i = 0; i < hostiles.Count; i++)
+                {
+                    EntitySnapshot h = hostiles[i];
+                    double dx = px - h.Position.X;
+                    double dz = pz - h.Position.Z;
+                    double d = Math.Sqrt(dx * dx + dz * dz);
+                    score -= (h.ThreatWeight * (h.IsWindUp ? 1.75 : 1.0)) / (1.0 + d * 0.45);
+                }
+                if (target.HasValue)
+                {
+                    double tx = px - target.Value.X;
+                    double tz = pz - target.Value.Z;
+                    double td = Math.Sqrt(tx * tx + tz * tz);
+                    score -= 0.25 * Math.Max(0.0, td - 2.0);
+                }
+                if (score > bestVal)
+                {
+                    bestVal = score;
+                    best = new Vec3(px, centerPos.Y, pz);
+                }
+            }
+            return best;
+        }
+
         /// <summary>Highest scoring (safest) cell within the local grid.</summary>
         public Vec3 FindSafestPocket(Vec3 centerPos)
         {
@@ -395,6 +433,7 @@ namespace Stuntdouble.Brain
         public EntitySnapshot? ImminentThreat;
         public EntitySnapshot? RangedThreat; // nearest ranged hostile winding up (<= 16 m) or with a projectile in flight
         public double PressureIndex;
+        public bool PressureHigh; // [CORE-005] crowd pressure with hysteresis (in above 0.72, out below 0.6)
         public readonly InfluenceMap2D InfluenceMap = new InfluenceMap2D(12, 2.5);
 
         public void Refresh(EntitySnapshot self, IList<EntitySnapshot> hostiles, BehaviorProfile profile)
@@ -427,7 +466,7 @@ namespace Stuntdouble.Brain
                 rawPressure += h.ThreatWeight / Math.Max(1.0, d * 0.35);
 
                 if (h.IsWindUp && d < 4.5 && !h.IsRanged) windUpThreat = h;
-                if (h.IsRanged && ((h.IsWindUp && d <= 16.0) || h.ProjectileEta > 0.0) && d < rangedDist)
+                if (h.IsRanged && ((h.IsWindUp && d <= (h.AttackRange > 0.0 ? h.AttackRange : 16.0)) || h.ProjectileEta > 0.0) && d < rangedDist)
                 {
                     rangedDist = d;
                     rangedThreat = h;
@@ -444,6 +483,8 @@ namespace Stuntdouble.Brain
             ImminentThreat = windUpThreat;
             RangedThreat = rangedThreat;
             PressureIndex = Math.Min(1.0, rawPressure / 3.5);
+            if (PressureHigh) { if (PressureIndex < 0.6) PressureHigh = false; }
+            else if (PressureIndex > 0.72) PressureHigh = true;
             InfluenceMap.Update(self.Position, Hostiles);
         }
 
@@ -746,6 +787,7 @@ namespace Stuntdouble.Brain
         public AutonomyMode ActiveAutonomy { get; set; }
 
         private readonly DisciplineJitter _jitter = new DisciplineJitter();
+        private double _attackBudget = 1.0; // [CORE-005] aggression pacing credit (first strike always goes out)
         private readonly UtilityAction[] _utilityActions;
         private readonly GoapAction[] _goapActions;
 
@@ -857,12 +899,43 @@ namespace Stuntdouble.Brain
                 if (!interceptHumanInput) immediateCommand = "HUMAN_PASS_THROUGH";
             }
 
+            // [CORE-005] crowd: fight from the least-covered side, punish in the gaps
+            bool crowd = !inactive && !cruiseActive && !assistActive && !fDefensive &&
+                         stance == TacticalStance.Defensive && Blackboard.PressureHigh;
+            EntitySnapshot? counterTarget = null;
+            if (crowd && Blackboard.ImminentThreat == null && self.HealthRatio >= 0.4 && immediateCommand != "TACTICAL_HEAL")
+            {
+                double cd = double.PositiveInfinity;
+                for (int i = 0; i < Blackboard.Hostiles.Count; i++)
+                {
+                    EntitySnapshot h = Blackboard.Hostiles[i];
+                    if (h.IsRanged) continue;
+                    double hx = h.Position.X - self.Position.X;
+                    double hz = h.Position.Z - self.Position.Z;
+                    double d = Math.Sqrt(hx * hx + hz * hz);
+                    if (d <= 2.6 && d < cd) { cd = d; counterTarget = h; }
+                }
+                if (counterTarget != null && immediateCommand != "STRIKE_COMBO" && immediateCommand != "HEAVY_ASSAULT" && immediateCommand != "EXECUTE_FINISHER")
+                {
+                    immediateCommand = "STRIKE_COMBO";
+                }
+            }
+
             // [CORE-003] continuous aggression: stamina reserve = (1 - aggression) * 0.6
             if (!inactive && !cruiseActive && !assistActive && Blackboard.ImminentThreat == null &&
                 (immediateCommand == "STRIKE_COMBO" || immediateCommand == "HEAVY_ASSAULT") &&
                 self.StaminaRatio < (1.0 - profile.Aggression) * 0.9)
             {
                 immediateCommand = "CLOSE_DISTANCE";
+            }
+
+            // [CORE-005] aggression pacing: a share `aggression` of strike requests goes out (credit accumulator)
+            if (!inactive && !cruiseActive && !assistActive && Blackboard.ImminentThreat == null &&
+                (immediateCommand == "STRIKE_COMBO" || immediateCommand == "HEAVY_ASSAULT"))
+            {
+                _attackBudget += profile.Aggression;
+                if (_attackBudget >= 1.0) _attackBudget -= 1.0;
+                else immediateCommand = "CLOSE_DISTANCE";
             }
 
             // [CORE-003] critical health and nothing about to land in melee: heal beats fleeing
@@ -889,6 +962,12 @@ namespace Stuntdouble.Brain
             {
                 navTarget = waypointOrLootPos.Value;
             }
+            else if (crowd)
+            {
+                EntitySnapshot? focus = counterTarget ?? Blackboard.PrimaryTarget;
+                Vec3? focusPos = focus.HasValue ? focus.Value.Position : (Vec3?)null;
+                navTarget = Blackboard.InfluenceMap.FindLocalPocket(self.Position, Blackboard.Hostiles, focusPos, 2.5);
+            }
             else if (stance == TacticalStance.Evasive || stance == TacticalStance.Defensive)
             {
                 navTarget = Blackboard.InfluenceMap.FindSafestPocket(self.Position);
@@ -908,7 +987,7 @@ namespace Stuntdouble.Brain
                     h.ThreatWeight * (h.IsWindUp ? 1.8 : 1.0)));
             }
 
-            double prefRange = cruiseActive ? 0.5 : profile.PreferredRange;
+            double prefRange = (cruiseActive || crowd) ? 0.5 : profile.PreferredRange;
 
             double speedMultiplier;
             Vec3 direction = Steering.ComputeMoveVector(self.Position, navTarget, prefRange, hazards, out speedMultiplier);
@@ -959,7 +1038,7 @@ namespace Stuntdouble.Brain
             TacticalBlackboard bb = Blackboard;
             if (bb.Hostiles.Count == 0) return TacticalStance.Stealth;
             if (bb.Self.HealthRatio < 0.28) return TacticalStance.Evasive;
-            if (bb.ImminentThreat != null || bb.PressureIndex > 0.72) return TacticalStance.Defensive;
+            if (bb.ImminentThreat != null || bb.PressureHigh) return TacticalStance.Defensive;
             if (bb.Profile.Aggression >= 0.65 && bb.Self.StaminaRatio > 0.35) return TacticalStance.Aggressive;
             return TacticalStance.Balanced;
         }

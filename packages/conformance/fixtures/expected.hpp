@@ -66,7 +66,7 @@ inline const std::vector<ExpectedDecision>& expected() {
         "crowded-pressure", "DEFENSIVE", true,
         "STRIKE_COMBO", 0.8177,
         std::vector<std::string>{  },
-        "STRIKE_COMBO", -0.7071067811865477, -0.7071067811865475,
+        "STRIKE_COMBO", 0.7071067811865476, 0.7071067811865475,
         1.0, "PASSIVE", 1.0,
         1.0, true, "h1"
     },
@@ -138,7 +138,7 @@ inline const std::vector<ExpectedDecision>& expected() {
         "obstacle-steering", "DEFENSIVE", true,
         "DEFLECT_COUNTER", 0.9701,
         std::vector<std::string>{ "DEFLECT_COUNTER" },
-        "DEFLECT_COUNTER", -0.7071067811865477, -0.7071067811865475,
+        "DEFLECT_COUNTER", -1.0, 1.2246467991473532e-16,
         1.0, "PASSIVE", 1.0,
         1.0, true, "wall_1"
     },
@@ -325,6 +325,54 @@ inline const std::vector<ExpectedDecision>& expected() {
         "TACTICAL_HEAL", -0.7071067811865477, -0.7071067811865475,
         1.0, "PASSIVE", 1.0,
         1.0, true, "h1"
+    },
+    stuntdouble::conformance::ExpectedDecision{
+        "crowd-counter-strike", "DEFENSIVE", true,
+        "STRIKE_COMBO", 0.8177,
+        std::vector<std::string>{  },
+        "STRIKE_COMBO", 0.7071067811865474, -0.7071067811865477,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "g1"
+    },
+    stuntdouble::conformance::ExpectedDecision{
+        "crowd-windup-parries", "DEFENSIVE", true,
+        "DEFLECT_COUNTER", 0.9701,
+        std::vector<std::string>{ "DEFLECT_COUNTER" },
+        "DEFLECT_COUNTER", -1.8369701987210297e-16, -1.0,
+        0.999, "PASSIVE", 1.0,
+        1.0, true, "g1"
+    },
+    stuntdouble::conformance::ExpectedDecision{
+        "crowd-low-health-flees", "EVASIVE", true,
+        "EVADE_REPOSITION", 0.8631,
+        std::vector<std::string>{ "TACTICAL_HEAL" },
+        "TACTICAL_HEAL", 0.7071067811865474, -0.7071067811865477,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "g1"
+    },
+    stuntdouble::conformance::ExpectedDecision{
+        "crowd-defensive-flag-no-offense", "DEFENSIVE", true,
+        "DEFLECT_COUNTER", 0.0019,
+        std::vector<std::string>{  },
+        "DEFLECT_COUNTER", 0.7071067811865474, -0.7071067811865477,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "g1"
+    },
+    stuntdouble::conformance::ExpectedDecision{
+        "ranged-windup-beyond-16m-range", "AGGRESSIVE", true,
+        "STRIKE_COMBO", 0.8177,
+        std::vector<std::string>{ "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "STRIKE_COMBO", 0.7226659775398219, 0.6911974283129341,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "archer_1"
+    },
+    stuntdouble::conformance::ExpectedDecision{
+        "ranged-windup-beyond-default-range", "AGGRESSIVE", true,
+        "STRIKE_COMBO", 0.8177,
+        std::vector<std::string>{ "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "STRIKE_COMBO", 1.0, 0.0,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "archer_1"
     }
     };
     return all;

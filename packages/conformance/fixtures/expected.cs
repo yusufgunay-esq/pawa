@@ -64,7 +64,7 @@ namespace Stuntdouble.Conformance
                 Id = "crowded-pressure", Stance = "DEFENSIVE", Intercept = true,
                 Utility = "STRIKE_COMBO", Score = 0.8177,
                 Plan = new string[] {  },
-                Command = "STRIKE_COMBO", Sx = -0.7071067811865477, Sz = -0.7071067811865475,
+                Command = "STRIKE_COMBO", Sx = 0.7071067811865476, Sz = 0.7071067811865475,
                 Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
                 Fov = 1.0, Focus = "h1"
             },
@@ -145,7 +145,7 @@ namespace Stuntdouble.Conformance
                 Id = "obstacle-steering", Stance = "DEFENSIVE", Intercept = true,
                 Utility = "DEFLECT_COUNTER", Score = 0.9701,
                 Plan = new string[] { "DEFLECT_COUNTER" },
-                Command = "DEFLECT_COUNTER", Sx = -0.7071067811865477, Sz = -0.7071067811865475,
+                Command = "DEFLECT_COUNTER", Sx = -1.0, Sz = 1.2246467991473532e-16,
                 Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
                 Fov = 1.0, Focus = "wall_1"
             },
@@ -355,6 +355,60 @@ namespace Stuntdouble.Conformance
                 Command = "TACTICAL_HEAL", Sx = -0.7071067811865477, Sz = -0.7071067811865475,
                 Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
                 Fov = 1.0, Focus = "h1"
+            },
+            new ExpectedDecision
+            {
+                Id = "crowd-counter-strike", Stance = "DEFENSIVE", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.8177,
+                Plan = new string[] {  },
+                Command = "STRIKE_COMBO", Sx = 0.7071067811865474, Sz = -0.7071067811865477,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "g1"
+            },
+            new ExpectedDecision
+            {
+                Id = "crowd-windup-parries", Stance = "DEFENSIVE", Intercept = true,
+                Utility = "DEFLECT_COUNTER", Score = 0.9701,
+                Plan = new string[] { "DEFLECT_COUNTER" },
+                Command = "DEFLECT_COUNTER", Sx = -1.8369701987210297e-16, Sz = -1.0,
+                Speed = 0.999, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "g1"
+            },
+            new ExpectedDecision
+            {
+                Id = "crowd-low-health-flees", Stance = "EVASIVE", Intercept = true,
+                Utility = "EVADE_REPOSITION", Score = 0.8631,
+                Plan = new string[] { "TACTICAL_HEAL" },
+                Command = "TACTICAL_HEAL", Sx = 0.7071067811865474, Sz = -0.7071067811865477,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "g1"
+            },
+            new ExpectedDecision
+            {
+                Id = "crowd-defensive-flag-no-offense", Stance = "DEFENSIVE", Intercept = true,
+                Utility = "DEFLECT_COUNTER", Score = 0.0019,
+                Plan = new string[] {  },
+                Command = "DEFLECT_COUNTER", Sx = 0.7071067811865474, Sz = -0.7071067811865477,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "g1"
+            },
+            new ExpectedDecision
+            {
+                Id = "ranged-windup-beyond-16m-range", Stance = "AGGRESSIVE", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.8177,
+                Plan = new string[] { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "STRIKE_COMBO", Sx = 0.7226659775398219, Sz = 0.6911974283129341,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "archer_1"
+            },
+            new ExpectedDecision
+            {
+                Id = "ranged-windup-beyond-default-range", Stance = "AGGRESSIVE", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.8177,
+                Plan = new string[] { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "STRIKE_COMBO", Sx = 1.0, Sz = 0.0,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "archer_1"
             }
         };
     }

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SCENARIOS, TIER_SCENARIOS } from '../src/scenarios.ts';
-import { compare, compareGate, COMPARE_SEEDS } from '../src/compare.ts';
+import { compare, compareGate, crowdGate, COMPARE_SEEDS } from '../src/compare.ts';
 import { avoidRatio } from '../src/gates.ts';
 import { runScenario } from '../src/sim.ts';
 import { evaluateGates } from '../src/gates.ts';
@@ -63,6 +63,24 @@ test('hard tier: Stuntdouble and native+Stuntdouble beat naive bot and weak nati
   assert.ok(g.pass, g.detail.join(' | '));
 });
 
+test('crowd tier (t4): Stuntdouble and native+Stuntdouble survive AND counter-attack (fixed thresholds)', () => {
+  const t4 = TIER_SCENARIOS.find((s) => s.tier === 4)!;
+  const st = compare(t4, COMPARE_SEEDS);
+  const g = crowdGate(st);
+  assert.ok(g.pass, g.detail.join(' | '));
+  for (const a of ['stuntdouble', 'layered']) assert.ok(st.find((x) => x.agent === a)!.minKills >= 1, a);
+});
+
+test('crowd tier (t4): fights back instead of fleeing (kills, attack share, no wall hugging, long-range archer answered)', () => {
+  const t4 = TIER_SCENARIOS.find((s) => s.tier === 4)!;
+  for (const seed of SEEDS) {
+    const r = runScenario(t4, seed);
+    assert.ok(r.survived && r.enemiesKilled >= 1 && r.attacksLanded >= 1, `seed ${seed}`);
+    assert.ok(r.attackCommands / Math.max(1, r.stateTicks.ACTIVE ?? 1) > 0.2, `seed ${seed}`);
+    assert.ok(r.wallRatio <= 0.15 && r.unreactableHit === 0 && r.projectilesFired > 0, `seed ${seed}`);
+  }
+});
+
 test('tier runs are deterministic', () => {
   const t3 = TIER_SCENARIOS[2];
   assert.deepEqual(runScenario(t3, 3), runScenario(t3, 3));
@@ -89,6 +107,7 @@ test('monotone: aggression up -> attack share up (whole range, incl. 0.15-0.5)',
     assert.ok(nonDecreasing(xs, 0.02), xs.join(' '));
     assert.ok(xs[5] > xs[0] * 1.5, xs.join(' '));
     assert.ok(xs[2] > xs[0] + 0.05, 'low band must not be dead: ' + xs.join(' '));
+    assert.ok(xs[3] > xs[1] + 0.05, '0.3 -> 0.6 band must slope (005): ' + xs.join(' '));
   }
 });
 

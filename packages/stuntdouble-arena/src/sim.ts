@@ -30,6 +30,7 @@ export interface EnemySpec {
   projSpeed?: number;   // m/s of the fired projectile (ranged, hard mode)
   lead?: number;        // 0..1 how much the archer leads a moving target
   flank?: number;       // radians: approach path is bent by this angle (circling / rear approach)
+  standoff?: number;    // ranged: firing distance (default 13); the snapshot advertises reach as attackRange
   coord?: boolean;      // coordinated group: when one starts a wind-up, nearby coord mates strike on the same tick
 }
 
@@ -66,7 +67,7 @@ export interface Scenario {
   native?: 'weak' | 'basic';
   /** Hard enemy rules: one-hit parry with lock, projectiles instead of instant ranged hits. */
   hard?: boolean;
-  tier?: 1 | 2 | 3;
+  tier?: 1 | 2 | 3 | 4;
   gates: GateSpec;
 }
 
@@ -213,6 +214,7 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
     isWindUp: e.phase === 'windup',
     isRanged: !!e.spec.ranged,
     projectileEta: e.projEta,
+    attackRange: e.spec.ranged ? e.spec.reach : undefined,
     threatWeight: e.spec.threat,
   });
 
@@ -360,7 +362,7 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
   };
 
   const reactableAt = (e: Enemy, d: number): boolean =>
-    d < BRAIN_IMMINENT_RANGE || (!!sc.hard && !!e.spec.ranged && d <= BRAIN_RANGED_RANGE);
+    d < BRAIN_IMMINENT_RANGE || (!!sc.hard && !!e.spec.ranged && d <= (e.spec.reach || BRAIN_RANGED_RANGE));
 
   const windupLen = (e: Enemy, followUp: boolean): number => {
     const v = followUp ? (e.spec.comboVar ?? 0) : (e.spec.windupVar ?? 0.1);
@@ -519,7 +521,8 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
         e.timer -= DT;
         let dir = 0;
         if (e.spec.ranged) {
-          if (d > 11) dir = 1; else if (d < 7) dir = -1;
+          const so = e.spec.standoff ?? 13;
+          if (d > so - 2) dir = 1; else if (d < 7) dir = -1;
         } else if (d > e.spec.reach * 0.9) dir = 1;
         let mx = ux;
         let mz = uz;
@@ -534,7 +537,7 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
         e.x += e.vx * DT;
         e.z += e.vz * DT;
         pushOut(e, 0.5);
-        const inRange = e.spec.ranged ? d <= 13 : d <= e.spec.reach;
+        const inRange = e.spec.ranged ? d <= (e.spec.standoff ?? 13) : d <= e.spec.reach;
         if (inRange && e.timer <= 0) { e.comboLeft = e.spec.combo ?? 1; startWindup(e, d); }
       } else if (e.phase === 'windup') {
         e.timer -= DT;

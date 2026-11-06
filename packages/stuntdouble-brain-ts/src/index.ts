@@ -100,6 +100,8 @@ export interface EntitySnapshot {
   isRanged: boolean;
   /** Optional: seconds until a projectile this entity already fired reaches the target (<= 0 or absent = none in flight). */
   projectileEta?: number;
+  /** [CORE-005] ranged: real firing range in meters; <= 0 / absent = 16 m default. */
+  attackRange?: number;
   threatWeight: number;    // Base danger level (e.g., 1.0 grunt, 3.0 elite/boss)
 }
 
@@ -245,6 +247,36 @@ export class InfluenceMap2D {
   }
 
   /**
+   * [CORE-005] Crowd positioning: best of 8 points on a ring around the player. Score = least
+   * simultaneous threat (same field as the grid) minus a pull back towards the target so the
+   * player stays in strike reach instead of fleeing to the far grid edge.
+   */
+  public findLocalPocket(centerPos: Vec3, hostiles: EntitySnapshot[], target: Vec3 | null, ringRadius: number): Vec3 {
+    const S = 0.7071067811865476;
+    const dirs = [[1, 0], [S, S], [0, 1], [-S, S], [-1, 0], [-S, -S], [0, -1], [S, -S]];
+    let best = centerPos;
+    let bestVal = -Infinity;
+    for (let k = 0; k < 8; k++) {
+      const px = centerPos.x + dirs[k][0] * ringRadius;
+      const pz = centerPos.z + dirs[k][1] * ringRadius;
+      let score = 0;
+      for (const h of hostiles) {
+        const d = distXZ(px, pz, h.position.x, h.position.z);
+        score -= (h.threatWeight * (h.isWindUp ? 1.75 : 1.0)) / (1.0 + d * 0.45);
+      }
+      if (target) {
+        const td = distXZ(px, pz, target.x, target.z);
+        score -= 0.25 * Math.max(0, td - 2.0);
+      }
+      if (score > bestVal) {
+        bestVal = score;
+        best = { x: px, y: centerPos.y, z: pz };
+      }
+    }
+    return best;
+  }
+
+  /**
    * Returns the safest tactical coordinate (highest influence value) within local grid.
    */
   public findSafestPocket(centerPos: Vec3): Vec3 {
@@ -280,6 +312,8 @@ export class TacticalBlackboard {
   /** Nearest ranged hostile that is winding up (<= 16 m) or has a projectile in flight; null if none. */
   public rangedThreat: EntitySnapshot | null = null;
   public pressureIndex = 0;
+  /** [CORE-005] crowd pressure with hysteresis: enters above 0.72, leaves below 0.6 (no flicker, no permanent lock). */
+  public pressureHigh = false;
   public influenceMap = new InfluenceMap2D(12, 2.5);
   public customData: Record<string, unknown> = {};
 
@@ -303,7 +337,7 @@ export class TacticalBlackboard {
       if (h.isWindUp && d < 4.5 && !h.isRanged) {
         windUpThreat = h;
       }
-      if (h.isRanged && ((h.isWindUp && d <= 16.0) || (h.projectileEta ?? 0) > 0) && d < rangedDist) {
+      if (h.isRanged && ((h.isWindUp && d <= ((h.attackRange ?? 0) > 0 ? h.attackRange! : 16.0)) || (h.projectileEta ?? 0) > 0) && d < rangedDist) {
         rangedDist = d;
         rangedThreat = h;
       }
@@ -319,6 +353,9 @@ export class TacticalBlackboard {
     this.imminentThreat = windUpThreat;
     this.rangedThreat = rangedThreat;
     this.pressureIndex = Math.min(1.0, rawPressure / 3.5);
+    if (this.pressureHigh) {
+      if (this.pressureIndex < 0.6) this.pressureHigh = false;
+    } else if (this.pressureIndex > 0.72) this.pressureHigh = true;
     this.influenceMap.update(self.position, this.hostiles);
   }
 
@@ -575,6 +612,8 @@ export class StuntBrain {
   public readonly steering = new ContextSteering(16);
   public readonly planner = new GoapPlanner();
   private readonly jitter = new DisciplineJitter();
+  /** [CORE-005] aggression pacing credit (starts full: the first requested strike always goes out). */
+  private attackBudget = 1.0;
   private readonly utilityActions: UtilityAction[];
   private readonly goapActions: GoapAction[];
 
@@ -655,6 +694,23 @@ export class StuntBrain {
       }
     }
 
+    // [CORE-005] crowd (latched pressure, not the DEFENSIVE flag): fight from the least-covered side and
+    // punish in the gaps. With no melee wind-up imminent and a melee enemy inside strike reach, hit it
+    // once; the next wind-up flips back to parry/evade by itself, so this never turns into a charge.
+    const crowd = !inactive && !cruiseActive && !assistActive && !fDefensive && stance === 'DEFENSIVE' && this.blackboard.pressureHigh;
+    let counterTarget: EntitySnapshot | null = null;
+    if (crowd && this.blackboard.imminentThreat === null && self.healthRatio >= 0.4 && immediateCommand !== 'TACTICAL_HEAL') {
+      let cd = Infinity;
+      for (const h of this.blackboard.hostiles) {
+        if (h.isRanged) continue;
+        const d = distXZ(h.position.x, h.position.z, self.position.x, self.position.z);
+        if (d <= 2.6 && d < cd) { cd = d; counterTarget = h; }
+      }
+      if (counterTarget !== null && immediateCommand !== 'STRIKE_COMBO' && immediateCommand !== 'HEAVY_ASSAULT' && immediateCommand !== 'EXECUTE_FINISHER') {
+        immediateCommand = 'STRIKE_COMBO';
+      }
+    }
+
     // [CORE-003] continuous aggression: low-aggression profiles keep a stamina reserve and skip
     // non-finisher attacks below it (reserve = (1 - aggression) * 0.6; monotone over the whole range).
     if (
@@ -663,6 +719,15 @@ export class StuntBrain {
       self.staminaRatio < (1.0 - profile.aggression) * 0.9
     ) {
       immediateCommand = 'CLOSE_DISTANCE';
+    }
+
+    // [CORE-005] aggression pacing: of the decisions that ask for a non-finisher strike, exactly a share
+    // `aggression` goes out (credit accumulator, deterministic). Linear over the whole range, rate-free.
+    if (!inactive && !cruiseActive && !assistActive && this.blackboard.imminentThreat === null &&
+        (immediateCommand === 'STRIKE_COMBO' || immediateCommand === 'HEAVY_ASSAULT')) {
+      this.attackBudget += profile.aggression;
+      if (this.attackBudget >= 1.0) this.attackBudget -= 1.0;
+      else immediateCommand = 'CLOSE_DISTANCE';
     }
 
     // [CORE-003] critical health and nothing about to land in melee: heal beats fleeing.
@@ -688,6 +753,9 @@ export class StuntBrain {
     let navTarget = self.position;
     if (cruiseActive && waypointOrLootPos) {
       navTarget = waypointOrLootPos;
+    } else if (crowd) {
+      const focus = counterTarget ?? this.blackboard.primaryTarget;
+      navTarget = this.blackboard.influenceMap.findLocalPocket(self.position, this.blackboard.hostiles, focus ? focus.position : null, 2.5);
     } else if (stance === 'EVASIVE' || stance === 'DEFENSIVE') {
       navTarget = this.blackboard.influenceMap.findSafestPocket(self.position);
     } else if (this.blackboard.primaryTarget) {
@@ -700,7 +768,7 @@ export class StuntBrain {
       weight: h.threatWeight * (h.isWindUp ? 1.8 : 1.0),
     }));
 
-    const prefRange = cruiseActive ? 0.5 : profile.preferredRange;
+    const prefRange = cruiseActive || crowd ? 0.5 : profile.preferredRange;
 
     let { direction, speedMultiplier } = this.steering.computeMoveVector(
       self.position,
@@ -755,7 +823,7 @@ export class StuntBrain {
     const bb = this.blackboard;
     if (bb.hostiles.length === 0) return 'STEALTH';
     if (bb.self.healthRatio < 0.28) return 'EVASIVE';
-    if (bb.imminentThreat !== null || bb.pressureIndex > 0.72) return 'DEFENSIVE'; // [CORE-003] continuous (was a fixed 0.72)
+    if (bb.imminentThreat !== null || bb.pressureHigh) return 'DEFENSIVE'; // [CORE-005] hysteresis (0.72 in / 0.6 out)
     if (bb.profile.aggression >= 0.65 && bb.self.staminaRatio > 0.35) return 'AGGRESSIVE';
     return 'BALANCED';
   }

@@ -2197,5 +2197,570 @@
     "presentation": "TACTICAL",
     "autonomy": 1,
     "behaviors": 1
+  },
+  {
+    "id": "crowd-counter-strike",
+    "note": "Four melee enemies around, none winding up: crowd pressure + gap -> one counter strike, steering to the least-covered ring point.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g2",
+        "position": {
+          "x": -1,
+          "y": 0,
+          "z": 1.8
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g3",
+        "position": {
+          "x": -1,
+          "y": 0,
+          "z": -1.8
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g4",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 2.6
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "crowd-windup-parries",
+    "note": "Same crowd but one enemy winds up inside 4.5 m: parry wins, no counter strike.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g2",
+        "position": {
+          "x": -1,
+          "y": 0,
+          "z": 1.8
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g3",
+        "position": {
+          "x": -1,
+          "y": 0,
+          "z": -1.8
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g4",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 2.6
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "crowd-low-health-flees",
+    "note": "Same crowd at health 0.25: EVASIVE keeps the old far-pocket retreat, no counter strike.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.25,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g2",
+        "position": {
+          "x": -1,
+          "y": 0,
+          "z": 1.8
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g3",
+        "position": {
+          "x": -1,
+          "y": 0,
+          "z": -1.8
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g4",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 2.6
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "crowd-defensive-flag-no-offense",
+    "note": "Same crowd under the DEFENSIVE flag: never attacks, old pocket logic.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g2",
+        "position": {
+          "x": -1,
+          "y": 0,
+          "z": 1.8
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g3",
+        "position": {
+          "x": -1,
+          "y": 0,
+          "z": -1.8
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "g4",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 2.6
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 8,
+    "behaviors": 8
+  },
+  {
+    "id": "ranged-windup-beyond-16m-range",
+    "note": "Archer with attackRange 22 winding up at 18 m: ranged reflex (lateral sidestep) now reacts.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": true,
+        "threatWeight": 1.2,
+        "id": "archer_1",
+        "position": {
+          "x": 18,
+          "y": 0,
+          "z": 3
+        },
+        "attackRange": 22
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "ranged-windup-beyond-default-range",
+    "note": "Same archer without attackRange (default 16 m): still ignored at 18 m (old behavior kept).",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": true,
+        "threatWeight": 1.2,
+        "id": "archer_1",
+        "position": {
+          "x": 18,
+          "y": 0,
+          "z": 3
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
   }
 ]
