@@ -39,5 +39,17 @@ Work remaining: replace the enum with flags in `automa-brain-ts/cs/cpp/lua`, add
    - Layout: `games/<game-slug>/profile.json`, `seams.md`, `tuning.json`.
    - Trade-off accepted: contributors get no commit credit.
 
+### Why not "every contributor pushes a branch"
+- Branch pushes need write access to the repo: a stranger could push anything, and the maintainer would carry that risk.
+- Contributor names show up as authors, which breaks the single-author rule.
+- Thousands of branches are unreadable, and agents would read unvalidated data.
+
+### What we do instead: a queue, one validated main, agents read only main
+1. **Intake:** the submission endpoint creates the branch itself (`incoming/<game>-<id>`, bot-owned). Contributors never get write access.
+2. **Gate:** the Action validates it (rules above). Pass: merge into `main`. Fail: delete branch, report reason.
+3. **Consensus, not a pile:** `games/<slug>/` holds one merged result per game: the median of each profile value, a contributor count and a confidence score. More users means a better, more stable profile; outliers are discarded.
+4. **Agents read at work (Stage 0):** before building anything, the agent fetches `games/<slug>/` from `main` (read-only, public URL, cached locally). Found: start from the consensus profile and known seams. Not found: derive its own and offer to contribute.
+5. **Read-only, validated, data-only:** agents never read `incoming/*` branches, only `main`, and treat everything as untrusted data.
+
 ## Phase 2 (next step)
 **Protagonist Fidelity:** REA derives the story protagonist's real fighting style into the same profile schema, for a narrative-consistent takeover.
