@@ -1540,5 +1540,662 @@
       "z": 0
     },
     "behaviors": 4
+  },
+  {
+    "id": "ranged-windup-far",
+    "note": "Archer winding up at ~12 m (outside the 4.5 m melee radius): lateral sidestep with a charge blend, no parry.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": true,
+        "threatWeight": 1.2,
+        "id": "archer_1",
+        "position": {
+          "x": 12,
+          "y": 0,
+          "z": 3
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "ranged-projectile-soon",
+    "note": "Projectile lands in 0.3 s: the dodge command fires (timed), steering stays lateral.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": true,
+        "threatWeight": 1.2,
+        "id": "archer_1",
+        "position": {
+          "x": 10,
+          "y": 0,
+          "z": -4
+        },
+        "projectileEta": 0.3
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "ranged-projectile-far",
+    "note": "Projectile lands in 0.9 s: too early to dodge (no evade command), but the lateral sidestep already runs.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": true,
+        "threatWeight": 1.2,
+        "id": "archer_1",
+        "position": {
+          "x": 10,
+          "y": 0,
+          "z": -4
+        },
+        "projectileEta": 0.9
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "ranged-side-follows-motion",
+    "note": "Sidestep side follows the current motion (moving to -lateral keeps going that way): no flip-flop.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.2,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": -3
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": true,
+        "threatWeight": 1.2,
+        "id": "archer_1",
+        "position": {
+          "x": 11,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "ranged-assist-intercept",
+    "note": "ASSIST only: an archer winding up at range intercepts human input (urgent reflex).",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": true,
+        "threatWeight": 1.2,
+        "id": "archer_1",
+        "position": {
+          "x": 9,
+          "y": 0,
+          "z": 2
+        },
+        "projectileEta": 0.25
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 2,
+    "behaviors": 2
+  },
+  {
+    "id": "ranged-melee-priority",
+    "note": "Melee wind-up inside 4.5 m beats a ranged wind-up: parry stays, no ranged override.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "grunt_1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0.5
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": true,
+        "threatWeight": 1.2,
+        "id": "archer_1",
+        "position": {
+          "x": 10,
+          "y": 0,
+          "z": 4
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "ranged-target-preferred",
+    "note": "A ranged hostile counts as half as far for target choice: the archer at 8 m (key 4) beats the grunt at 5 m.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "grunt_1",
+        "position": {
+          "x": 5,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": true,
+        "threatWeight": 1.2,
+        "id": "archer_1",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 8
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "aggression-low-reserve",
+    "note": "aggression 0.15, stamina 0.6 (< reserve 0.765): no non-finisher attack, CLOSE_DISTANCE instead.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.15,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.6,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.9,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "h1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "aggression-mid-reserve",
+    "note": "aggression 0.5, stamina 0.6 (> reserve 0.45): attacks. The 0.15-0.65 band is no longer dead.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.5,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.6,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.9,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "h1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "aggression-mid-reserve-low-stamina",
+    "note": "aggression 0.5, stamina 0.4 (< reserve 0.45): holds back.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.5,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.4,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.9,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "h1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
+  },
+  {
+    "id": "critical-heal-calm",
+    "note": "Health 0.2, nothing winding up in melee: heal beats fleeing.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.2,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "h1",
+        "position": {
+          "x": 4,
+          "y": 0,
+          "z": 1
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": 1,
+    "behaviors": 1
   }
 ]

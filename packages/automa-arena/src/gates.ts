@@ -19,6 +19,9 @@ export function evaluateGates(sc: Scenario, r: RunResult, baseline?: RunResult):
   }
   if (g.maxAttackCommands !== undefined) add('noOffense', r.attackCommands <= g.maxAttackCommands, `${r.attackCommands} attack commands`);
   add('steerStable', r.reversalRatio <= g.maxReversal, `reversal ${(r.reversalRatio * 100).toFixed(1)}% (max ${(g.maxReversal * 100).toFixed(0)}%)`);
+  if (g.maxWall !== undefined) add('noWallHug', r.wallRatio <= g.maxWall, `${(r.wallRatio * 100).toFixed(1)}% of ticks at the edge (max ${(g.maxWall * 100).toFixed(0)}%)`);
+  if (g.maxCmdShare !== undefined) add('noSpam', r.cmdTopShare <= g.maxCmdShare, `top command ${(r.cmdTopShare * 100).toFixed(0)}% of all commands (max ${(g.maxCmdShare * 100).toFixed(0)}%)`);
+  if (g.noUnreactable) add('reactsToAll', r.unreactableHit === 0, `${r.unreactableHit} hits from telegraphs the brain could not see`);
   if (g.waypointsAll) add('waypoints', r.waypointsReached === r.waypointsTotal, `${r.waypointsReached}/${r.waypointsTotal}`);
   if (g.autoEngage) {
     const ok = r.standbyInputs === 0 && r.engageDelay >= 0 && r.engageDelay <= 0.2 && r.handbackDelay >= 1.9 && r.handbackDelay <= 2.3;

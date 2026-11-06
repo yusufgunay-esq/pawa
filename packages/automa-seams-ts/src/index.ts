@@ -228,7 +228,10 @@ export class AutomaRuntime {
         this.overrides.push(override);
       } else {
         command = proposal.command;
-        if (proposal.steer) steer = proposal.steer;
+        // Danger context (DEFENSIVE / EVASIVE stance): the native command stands, but positioning stays
+        // with AUTOMA; the native AI is not allowed to walk the player back into the fight.
+        const danger = decision.stance === 'DEFENSIVE' || decision.stance === 'EVASIVE';
+        if (proposal.steer && !(this.overrideNative && danger)) steer = proposal.steer;
       }
     }
     this.input.command(command);

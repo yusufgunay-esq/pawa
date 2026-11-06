@@ -144,11 +144,22 @@ When an AI agent is instructed to **AUTOMA a target game**, it follows [skills/a
 ```bash
 node packages/automa-arena/run.mjs                    # table of gates, exit 1 on failure
 node packages/automa-arena/run.mjs --scenario duel --seed 3 --json
-node packages/automa-arena/run.mjs --html replay.html # single-file replay (works on a phone)
+node packages/automa-arena/run.mjs --html replay.html # single-file replay (works on a phone; shows projectiles)
+node packages/automa-arena/run.mjs --compare           # 4 agents x 3 difficulty tiers, fixed hard-tier gate
 ```
 
-What this does **not** prove: real-game behavior. It proves the brain and runtime contract in a simplified world; every real adapter still needs its own live check. Known limit: a ranged wind-up beyond the brain's 4.5 m imminence radius is not reacted to (reported as `unreactableHit`, not hidden).
+**Difficulty tiers and agent comparison.** Three extra scenarios (`arena_t1..t3`) use a harder enemy model: variable wind-ups, feints (fake wind-up, then a quick real one), coordinated simultaneous strikes, flanking, archers with real projectiles that lead a moving target, a multi-hit boss combo, and a one-hit parry. `--compare` runs four agents on the same seeds (1-8): (a) naive bot (nearest enemy, swing), (b) weak native AI (heals, guards only late and sometimes, blind to ranged/feints), (c) AUTOMA alone, (d) weak native AI + AUTOMA layer. Measured result:
 
+| Hard tier (arena_t3) | survived | hp end | damage taken | hits |
+|---|---|---|---|---|
+| (a) naive bot | 0/8 | 0 | 112 | 9.9 |
+| (b) weak native AI | 5/8 | 40 | 142 | 11.1 |
+| (c) AUTOMA | 8/8 | 81 | 19 | 3.0 |
+| (d) native + AUTOMA | 8/8 | 79 | 30 | 4.9 |
+
+Tier gates also bound human-plausibility: steering reversals, wall hugging (<= 15% of ticks at the edge), single-command spam (<= 85%), and zero hits from telegraphs the brain could not see. The brain reacts to ranged wind-ups up to 16 m and to projectiles in flight (optional `projectileEta`): lateral sidestep, dodge timed to the impact.
+
+What this does **not** prove: real-game behavior. It proves the brain and runtime contract in a simplified world; every real adapter still needs its own live check. Known limits: the original 8 scenarios keep the simpler enemy model; the hard tier's boss and enemy numbers are tuned for this simulator, not for any real game.
 ---
 
 ## 5. Collective Game Autonomy Atlas (Local Verification, Consent, Bundle)

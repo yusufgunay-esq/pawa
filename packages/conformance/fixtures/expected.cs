@@ -256,6 +256,105 @@ namespace Automa.Conformance
                 Command = "HUMAN_PASS_THROUGH", Sx = 0.0, Sz = 0.0,
                 Speed = 0.0, CamMode = "PASSIVE", TimeScale = 1.0,
                 Fov = 1.0, Focus = "h1"
+            },
+            new ExpectedDecision
+            {
+                Id = "ranged-windup-far", Stance = "AGGRESSIVE", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.8177,
+                Plan = new string[] { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "STRIKE_COMBO", Sx = 0.6652447951277616, Sz = 0.7466253160424058,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "archer_1"
+            },
+            new ExpectedDecision
+            {
+                Id = "ranged-projectile-soon", Stance = "AGGRESSIVE", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.8177,
+                Plan = new string[] { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "EVADE_REPOSITION", Sx = 0.9764422070150982, Sz = 0.21577909157164488,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "archer_1"
+            },
+            new ExpectedDecision
+            {
+                Id = "ranged-projectile-far", Stance = "AGGRESSIVE", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.8177,
+                Plan = new string[] { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "STRIKE_COMBO", Sx = 0.9764422070150982, Sz = 0.21577909157164488,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "archer_1"
+            },
+            new ExpectedDecision
+            {
+                Id = "ranged-side-follows-motion", Stance = "BALANCED", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.2642,
+                Plan = new string[] { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "CLOSE_DISTANCE", Sx = 0.7459376616259147, Sz = -0.6660157693088523,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "archer_1"
+            },
+            new ExpectedDecision
+            {
+                Id = "ranged-assist-intercept", Stance = "AGGRESSIVE", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.8177,
+                Plan = new string[] { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "EVADE_REPOSITION", Sx = 0.6846558016067028, Sz = 0.7288665401335715,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "archer_1"
+            },
+            new ExpectedDecision
+            {
+                Id = "ranged-melee-priority", Stance = "DEFENSIVE", Intercept = true,
+                Utility = "DEFLECT_COUNTER", Score = 0.9701,
+                Plan = new string[] { "DEFLECT_COUNTER" },
+                Command = "DEFLECT_COUNTER", Sx = -0.7071067811865477, Sz = -0.7071067811865475,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "grunt_1"
+            },
+            new ExpectedDecision
+            {
+                Id = "ranged-target-preferred", Stance = "AGGRESSIVE", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.8177,
+                Plan = new string[] { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "STRIKE_COMBO", Sx = 6.123233995736766e-17, Sz = 1.0,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "archer_1"
+            },
+            new ExpectedDecision
+            {
+                Id = "aggression-low-reserve", Stance = "BALANCED", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.1535,
+                Plan = new string[] { "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "CLOSE_DISTANCE", Sx = 6.123233995736766e-17, Sz = 1.0,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "h1"
+            },
+            new ExpectedDecision
+            {
+                Id = "aggression-mid-reserve", Stance = "BALANCED", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.4496,
+                Plan = new string[] { "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "HEAVY_ASSAULT", Sx = 6.123233995736766e-17, Sz = 1.0,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "h1"
+            },
+            new ExpectedDecision
+            {
+                Id = "aggression-mid-reserve-low-stamina", Stance = "BALANCED", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.3246,
+                Plan = new string[] { "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+                Command = "CLOSE_DISTANCE", Sx = 6.123233995736766e-17, Sz = 1.0,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "h1"
+            },
+            new ExpectedDecision
+            {
+                Id = "critical-heal-calm", Stance = "EVASIVE", Intercept = true,
+                Utility = "STRIKE_COMBO", Score = 0.8177,
+                Plan = new string[] { "TACTICAL_HEAL" },
+                Command = "TACTICAL_HEAL", Sx = -0.7071067811865477, Sz = -0.7071067811865475,
+                Speed = 1.0, CamMode = "PASSIVE", TimeScale = 1.0,
+                Fov = 1.0, Focus = "h1"
             }
         };
     }

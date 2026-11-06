@@ -120,6 +120,7 @@ struct EntitySnapshot {
     bool is_wind_up{false};   // telegraphing an incoming strike
     bool is_ranged{false};
     double threat_weight{1.0};
+    double projectile_eta{0.0}; // seconds until a projectile this entity fired lands; <= 0 = none in flight
 };
 
 struct CameraDirective {
@@ -345,6 +346,7 @@ public:
     TacticalStance stance{TacticalStance::Balanced};
     const EntitySnapshot* primary_target{nullptr};
     const EntitySnapshot* imminent_threat{nullptr};
+    const EntitySnapshot* ranged_threat{nullptr}; // nearest ranged hostile winding up (<= 16 m) or with a projectile in flight
     double pressure_index{0.0};
     InfluenceMap2D influence_map{12, 2.5};
 
@@ -363,6 +365,8 @@ public:
         double nearest_dist = 1e308;
         const EntitySnapshot* best_target = nullptr;
         const EntitySnapshot* wind_up_threat = nullptr;
+        const EntitySnapshot* ranged_threat_pick = nullptr;
+        double ranged_dist = 1e308;
         double raw_pressure = 0.0;
 
         for (const auto& h : hostiles) {
@@ -372,15 +376,21 @@ public:
 
             raw_pressure += h.threat_weight / std::max(1.0, d * 0.35);
 
-            if (h.is_wind_up && d < 4.5) wind_up_threat = &h;
-            if (d < nearest_dist) {
-                nearest_dist = d;
+            if (h.is_wind_up && d < 4.5 && !h.is_ranged) wind_up_threat = &h;
+            if (h.is_ranged && ((h.is_wind_up && d <= 16.0) || h.projectile_eta > 0.0) && d < ranged_dist) {
+                ranged_dist = d;
+                ranged_threat_pick = &h;
+            }
+            const double key = h.is_ranged ? d * 0.5 : d;
+            if (key < nearest_dist) {
+                nearest_dist = key;
                 best_target = &h;
             }
         }
 
         primary_target = best_target;
         imminent_threat = wind_up_threat;
+        ranged_threat = ranged_threat_pick;
         pressure_index = std::min(1.0, raw_pressure / 3.5);
         influence_map.update(self.position, hostiles);
     }
@@ -808,7 +818,7 @@ public:
 
         // Autonomy-mode command & human-input interception policy
         std::string_view immediate_command =
-            best_score > 0.78 ? best_id : (!plan_.empty() ? plan_.front() : best_id);
+            best_score > 0.78 + 0.4 * (0.78 - profile.aggression) ? best_id : (!plan_.empty() ? plan_.front() : best_id);
         bool intercept_human_input = true;
 
         if (inactive) {
@@ -822,6 +832,30 @@ public:
                 (best_id == "DEFLECT_COUNTER" || best_id == "EVADE_REPOSITION") && best_score >= 0.75;
             intercept_human_input = is_urgent_reflex || self.health_ratio < 0.25;
             if (!intercept_human_input) immediate_command = "HUMAN_PASS_THROUGH";
+        }
+
+        // [CORE-003] continuous aggression: stamina reserve = (1 - aggression) * 0.6
+        if (!inactive && !cruise_active && !assist_active && blackboard_.imminent_threat == nullptr &&
+            (immediate_command == "STRIKE_COMBO" || immediate_command == "HEAVY_ASSAULT") &&
+            self.stamina_ratio < (1.0 - profile.aggression) * 0.9) {
+            immediate_command = "CLOSE_DISTANCE";
+        }
+
+        // [CORE-003] critical health and nothing about to land in melee: heal beats fleeing
+        if (!inactive && !cruise_active && !assist_active && blackboard_.imminent_threat == nullptr &&
+            self.health_ratio < 0.3 && !plan_.empty() && plan_.front() == "TACTICAL_HEAL") {
+            immediate_command = "TACTICAL_HEAL";
+        }
+
+        // [CORE-003] ranged threat: lateral sidestep, dodge timed to the projectile (impact within 0.4 s)
+        const EntitySnapshot* rt = blackboard_.ranged_threat;
+        const bool ranged_reflex = !inactive && rt != nullptr && blackboard_.imminent_threat == nullptr &&
+                                   immediate_command != "TACTICAL_HEAL";
+        if (ranged_reflex) {
+            const double eta = rt->projectile_eta;
+            const bool dodge_now = eta > 0.0 && eta <= 0.4;
+            if (dodge_now) immediate_command = "EVADE_REPOSITION";
+            if (dodge_now || !assist_active) intercept_human_input = true;
         }
 
         // 5. Layer 1 — context steering synthesis
@@ -851,6 +885,20 @@ public:
             // [FLAGS] idle: no steering output
             direction = Vec3{0.0, 0.0, 0.0};
             speed_multiplier = 0.0;
+        } else if (ranged_reflex) {
+            double ux = rt->position.x - self.position.x;
+            double uz = rt->position.z - self.position.z;
+            const double ul = std::sqrt(ux * ux + uz * uz);
+            if (ul > 1e-6) { ux /= ul; uz /= ul; } else { ux = 0.0; uz = 0.0; }
+            const double lx = -uz;
+            const double lz = ux;
+            const double side = (self.velocity.x * lx + self.velocity.z * lz >= 0.0) ? 1.0 : -1.0;
+            double mx = side * lx + (1.0 + profile.aggression * 0.6) * ux;
+            double mz = side * lz + (1.0 + profile.aggression * 0.6) * uz;
+            const double ml = std::sqrt(mx * mx + mz * mz);
+            if (ml > 1e-9) { mx /= ml; mz /= ml; } else { mx = 0.0; mz = 0.0; }
+            direction = Vec3{mx, 0.0, mz};
+            speed_multiplier = 1.0;
         }
 
         // 6. Layer 4 — presentation director

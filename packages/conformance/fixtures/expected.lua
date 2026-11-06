@@ -216,5 +216,93 @@ return {
     command = "HUMAN_PASS_THROUGH", sx = 0.0, sz = 0.0,
     speed = 0.0, camMode = "PASSIVE", timeScale = 1.0,
     fov = 1.0, focus = "h1"
+  },
+  {
+    id = "ranged-windup-far", stance = "AGGRESSIVE", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.8177,
+    plan = { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "STRIKE_COMBO", sx = 0.6652447951277616, sz = 0.7466253160424058,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "archer_1"
+  },
+  {
+    id = "ranged-projectile-soon", stance = "AGGRESSIVE", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.8177,
+    plan = { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "EVADE_REPOSITION", sx = 0.9764422070150982, sz = 0.21577909157164488,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "archer_1"
+  },
+  {
+    id = "ranged-projectile-far", stance = "AGGRESSIVE", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.8177,
+    plan = { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "STRIKE_COMBO", sx = 0.9764422070150982, sz = 0.21577909157164488,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "archer_1"
+  },
+  {
+    id = "ranged-side-follows-motion", stance = "BALANCED", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.2642,
+    plan = { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "CLOSE_DISTANCE", sx = 0.7459376616259147, sz = -0.6660157693088523,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "archer_1"
+  },
+  {
+    id = "ranged-assist-intercept", stance = "AGGRESSIVE", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.8177,
+    plan = { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "EVADE_REPOSITION", sx = 0.6846558016067028, sz = 0.7288665401335715,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "archer_1"
+  },
+  {
+    id = "ranged-melee-priority", stance = "DEFENSIVE", intercept = true,
+    utility = "DEFLECT_COUNTER", score = 0.9701,
+    plan = { "DEFLECT_COUNTER" },
+    command = "DEFLECT_COUNTER", sx = -0.7071067811865477, sz = -0.7071067811865475,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "grunt_1"
+  },
+  {
+    id = "ranged-target-preferred", stance = "AGGRESSIVE", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.8177,
+    plan = { "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "STRIKE_COMBO", sx = 6.123233995736766e-17, sz = 1.0,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "archer_1"
+  },
+  {
+    id = "aggression-low-reserve", stance = "BALANCED", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.1535,
+    plan = { "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "CLOSE_DISTANCE", sx = 6.123233995736766e-17, sz = 1.0,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "h1"
+  },
+  {
+    id = "aggression-mid-reserve", stance = "BALANCED", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.4496,
+    plan = { "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "HEAVY_ASSAULT", sx = 6.123233995736766e-17, sz = 1.0,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "h1"
+  },
+  {
+    id = "aggression-mid-reserve-low-stamina", stance = "BALANCED", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.3246,
+    plan = { "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+    command = "CLOSE_DISTANCE", sx = 6.123233995736766e-17, sz = 1.0,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "h1"
+  },
+  {
+    id = "critical-heal-calm", stance = "EVASIVE", intercept = true,
+    utility = "STRIKE_COMBO", score = 0.8177,
+    plan = { "TACTICAL_HEAL" },
+    command = "TACTICAL_HEAL", sx = -0.7071067811865477, sz = -0.7071067811865475,
+    speed = 1.0, camMode = "PASSIVE", timeScale = 1.0,
+    fov = 1.0, focus = "h1"
   }
 }

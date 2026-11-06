@@ -45,6 +45,7 @@ function draw(){const v=V[cur],s=v.result.steps||[];if(!s.length)return;const st
  v.waypoints.forEach(w=>{cx.strokeStyle=w.loot?'#f2c94c':'#56ccf2';cx.beginPath();cx.arc(px(w.x),pz(w.z),1*X,0,7);cx.stroke()});
  st.e.forEach(e=>{if(e[4]==='dead')return;cx.fillStyle=e[4]==='windup'?'#eb5757':'#bb6bd9';cx.beginPath();cx.arc(px(e[1]),pz(e[2]),0.6*X,0,7);cx.fill();
   cx.fillStyle='#fff';cx.fillRect(px(e[1])-10,pz(e[2])-0.9*X,20*e[3],3)});
+ (st.pr||[]).forEach(q=>{cx.fillStyle='#f2c94c';cx.beginPath();cx.arc(px(q[0]),pz(q[1]),0.3*X,0,7);cx.fill()});
  cx.fillStyle=st.p[3]==='ACTIVE'?'#6fcf97':'#f2994a';cx.beginPath();cx.arc(px(st.p[0]),pz(st.p[1]),0.5*X,0,7);cx.fill();
  cx.fillStyle='#fff';cx.fillRect(px(st.p[0])-10,pz(st.p[1])-0.9*X,20*st.p[2],3);
  cx.font='14px sans-serif';cx.fillText(st.p[3]+(st.ev?' '+st.ev.join(','):''),8,18);

@@ -22,6 +22,15 @@ export interface EnemySpec {
   ranged?: boolean;
   combo?: number;   // strikes per attack chain (default 1)
   threat: number;
+  // ---- hard-mode behaviours (003); all optional, all seeded ----
+  feint?: number;       // probability that a wind-up is fake (no strike, then a quick real one)
+  windupVar?: number;   // +- fraction of random wind-up length (default 0.1)
+  comboVar?: number;    // +- fraction of random wind-up length for combo follow-ups (default 0)
+  finisher?: number;    // damage multiplier of the last combo strike (default 1)
+  projSpeed?: number;   // m/s of the fired projectile (ranged, hard mode)
+  lead?: number;        // 0..1 how much the archer leads a moving target
+  flank?: number;       // radians: approach path is bent by this angle (circling / rear approach)
+  coord?: boolean;      // coordinated group: when one starts a wind-up, nearby coord mates strike on the same tick
 }
 
 export interface LockWindow { from: number; to: number; kind: 'cutscene' | 'menu' | 'loading' | 'manual' }
@@ -35,6 +44,9 @@ export interface GateSpec {
   autoEngage?: boolean;      // onCombat: 0 inputs in standby, takeover <= 0.2 s after first hostile, hand-back ~2 s after last kill
   beatsNative?: number;      // avoid ratio must exceed native-only baseline by this margin       // reversing steering ticks / moving ticks
   waypointsAll?: boolean;
+  maxWall?: number;          // max share of ticks within 1.5 m of the arena edge (no wall hugging)
+  maxCmdShare?: number;      // max share of the most frequent command (no single-move spam)
+  noUnreactable?: boolean;   // unreactableHit must be 0: every telegraph the world shows is answered
   zeroLockedInput: boolean;
 }
 
@@ -49,8 +61,12 @@ export interface Scenario {
   locks?: LockWindow[];
   maxTime: number;
   engage?: 'onCombat' | 'manual';
-  /** 'weak' = deliberately bad native AI (ignores wind-ups, runs straight at the nearest enemy). */
-  native?: 'weak';
+  /** 'weak' = deliberately bad native AI (ignores wind-ups, runs straight at the nearest enemy).
+   *  'basic' = mediocre native AI (heals when low, guards when a melee wind-up is already close; blind to ranged, feints and groups). */
+  native?: 'weak' | 'basic';
+  /** Hard enemy rules: one-hit parry with lock, projectiles instead of instant ranged hits. */
+  hard?: boolean;
+  tier?: 1 | 2 | 3;
   gates: GateSpec;
 }
 
@@ -81,12 +97,22 @@ export interface RunResult {
   stateTicks: Record<string, number>;
   waypointsReached: number;
   waypointsTotal: number;
+  damageTaken: number;
+  meanEnemyDist: number;
+  wallRatio: number;      // share of ticks within 1.5 m of the arena edge
+  cmdTopShare: number;    // share of the most frequent command among all issued (spam metric)
+  projectilesFired: number;
+  feints: number;
+  hitBy: Record<string, number>;
   steps?: Step[];
 }
+
+export type NativeKind = 'weak' | 'basic' | 'none';
 
 export interface Step {
   t: number;
   p: [number, number, number, string]; // x, z, hp ratio, runtime state
+  pr?: [number, number][];             // projectiles in flight
   e: [string, number, number, number, string][]; // id, x, z, hp ratio, phase
   ev?: string[];
 }
@@ -96,6 +122,7 @@ const PLAYER_SPEED = 4;
 const PLAYER_RADIUS = 0.5;
 const ARENA = 40;
 const BRAIN_IMMINENT_RANGE = 4.5; // TacticalBlackboard.refresh: wind-up counts as imminent inside 4.5 m
+const BRAIN_RANGED_RANGE = 16;    // ... and a ranged wind-up inside 16 m (003)
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -120,18 +147,30 @@ interface Enemy {
   reactable: boolean;
   vx: number;
   vz: number;
+  fake: boolean;
+  projEta: number;
+  seen?: boolean; // 'basic' native: did it notice this wind-up (55%)
 }
+
+interface Projectile { x: number; z: number; vx: number; vz: number; dmg: number; left: number; reactable: boolean; done: boolean; owner: Enemy }
 
 const ATTACK_CMDS = new Set(['STRIKE_COMBO', 'HEAVY_ASSAULT', 'EXECUTE_FINISHER']);
 
-export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean; profile?: BehaviorProfile; nativeOnly?: boolean } = {}): RunResult {
+export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean; profile?: BehaviorProfile; nativeOnly?: boolean; nativeKind?: NativeKind } = {}): RunResult {
   const rng = mulberry32(seed);
   const profile = opts.profile ?? sc.profile;
   const latencyTicks = Math.max(0, Math.round(profile.reactionDelayMs / 1000 / DT));
 
   // ---- world state ----
   let time = 0;
-  const player = { x: 0, z: 0, hp: 100, stamina: 100, atkCd: 0, parryUntil: -1, dodgeUntil: -1, dodgeCd: 0, heals: 2, lastAtk: -9, vx: 0, vz: 0 };
+  const player = { x: 0, z: 0, hp: 100, stamina: 100, atkCd: 0, parryUntil: -1, parryLock: -1, dodgeUntil: -1, dodgeCd: 0, heals: 2, lastAtk: -9, vx: 0, vz: 0 };
+  const projectiles: Projectile[] = [];
+  const cmdCounts = new Map<string, number>();
+  let cmdTotal = 0;
+  let wallTicks = 0;
+  let distSum = 0;
+  let distTicks = 0;
+  const nativeKind: NativeKind = opts.nativeKind ?? sc.native ?? 'none';
   const enemies: Enemy[] = [];
   const pending = sc.enemies.slice().sort((a, b) => (a.spawnAt ?? 0) - (b.spawnAt ?? 0));
   let wpIdx = 0;
@@ -141,6 +180,7 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
     telegraphs: 0, reactable: 0, parried: 0, dodged: 0, hit: 0, whiff: 0, unreactableHit: 0,
     attackCommands: 0, attacksLanded: 0, reversalRatio: 0, lockedInputs: 0, manualHandbackOk: true, standbyInputs: 0, engageDelay: -1, handbackDelay: -1, overrides: 0, stateTicks: {},
     waypointsReached: 0, waypointsTotal: sc.waypoints?.length ?? 0,
+    damageTaken: 0, meanEnemyDist: 0, wallRatio: 0, cmdTopShare: 0, projectilesFired: 0, feints: 0, hitBy: {},
   };
   const steps: Step[] = [];
   let events: string[] = [];
@@ -172,6 +212,7 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
     isAttacking: e.struckTick,
     isWindUp: e.phase === 'windup',
     isRanged: !!e.spec.ranged,
+    projectileEta: e.projEta,
     threatWeight: e.spec.threat,
   });
 
@@ -199,6 +240,8 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
       inputThisTick++;
       if (lockNow || manualRising) res.lockedInputs++;
       if (ATTACK_CMDS.has(id)) res.attackCommands++;
+      cmdCounts.set(id, (cmdCounts.get(id) ?? 0) + 1);
+      cmdTotal++;
       queue.push({ at: tickNo + latencyTicks, kind: 'cmd', cmd: id });
     },
     steer: (d, s) => {
@@ -221,7 +264,8 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
     manualOverride: () => activeLock('manual'),
   };
 
-  const native: NativeAiSeam | undefined = sc.native
+  const hold = { direction: { x: 0, y: 0, z: 0 }, speed: 0 };
+  const native: NativeAiSeam | undefined = nativeKind !== 'none'
     ? {
         available: () => true,
         proposeCommand: () => {
@@ -230,8 +274,20 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
           const dx = t.x - player.x;
           const dz = t.z - player.z;
           const d = Math.hypot(dx, dz);
-          // Deliberately weak: never reads wind-ups, never retreats, runs straight and swings.
-          if (d <= 2.4) return { command: 'STRIKE_COMBO', steer: { direction: { x: 0, y: 0, z: 0 }, speed: 0 } };
+          if (nativeKind === 'basic') {
+            if (player.hp < 30 && player.heals > 0) return { command: 'TACTICAL_HEAL', steer: hold };
+            // Guards only once a melee wind-up is already close; blind to ranged and to what comes next.
+            const watch = enemies.some((e) => {
+              if (e.hp <= 0 || e.phase !== 'windup' || e.spec.ranged || Math.hypot(e.x - player.x, e.z - player.z) >= 2.6) return false;
+              if (e.seen === undefined) e.seen = rng() < 0.55;
+              return e.seen;
+            });
+            if (watch) {
+              return { command: 'DEFLECT_COUNTER', steer: { direction: { x: -dx / d, y: 0, z: -dz / d }, speed: 0.8 } };
+            }
+          }
+          // 'weak': never reads wind-ups, never retreats, runs straight and swings.
+          if (d <= 2.4) return { command: 'STRIKE_COMBO', steer: hold };
           return { command: 'CLOSE_DISTANCE', steer: { direction: { x: dx / d, y: 0, z: dz / d }, speed: 1 } };
         },
       }
@@ -260,6 +316,7 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
       events.push('hit:' + tgt.spec.id);
       if (tgt.hp <= 0) { killed++; events.push('kill:' + tgt.spec.id); }
     } else if (cmd === 'DEFLECT_COUNTER') {
+      if (sc.hard && time < player.parryLock) return; // after absorbing one hit the guard is down for 0.4 s
       if (player.parryUntil < time) {
         if (player.stamina < 6) return;
         player.stamina -= 6;
@@ -302,30 +359,75 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
     o.z = Math.max(-ARENA, Math.min(ARENA, o.z));
   };
 
+  const reactableAt = (e: Enemy, d: number): boolean =>
+    d < BRAIN_IMMINENT_RANGE || (!!sc.hard && !!e.spec.ranged && d <= BRAIN_RANGED_RANGE);
+
+  const windupLen = (e: Enemy, followUp: boolean): number => {
+    const v = followUp ? (e.spec.comboVar ?? 0) : (e.spec.windupVar ?? 0.1);
+    const base = followUp ? e.spec.windup * 0.8 : e.spec.windup;
+    return base * (1 + v * (rng() * 2 - 1));
+  };
+
   const startWindup = (e: Enemy, d: number): void => {
     e.phase = 'windup';
-    e.timer = e.spec.windup * (0.9 + 0.2 * rng());
-    e.reactable = d < BRAIN_IMMINENT_RANGE;
-    res.telegraphs++;
-    if (e.reactable) res.reactable++;
+    e.timer = windupLen(e, false);
+    e.fake = !!sc.hard && (e.spec.feint ?? 0) > 0 && !e.spec.ranged && rng() < (e.spec.feint ?? 0);
+    e.reactable = reactableAt(e, d);
+    if (!e.fake) {
+      res.telegraphs++;
+      if (e.reactable) res.reactable++;
+    } else res.feints++;
+    // Coordinated group: nearby mates wind up to strike on the same tick.
+    if (sc.hard && e.spec.coord && !e.fake) {
+      for (const o of enemies) {
+        if (o === e || o.hp <= 0 || !o.spec.coord || o.phase !== 'approach') continue;
+        const od = Math.hypot(o.x - player.x, o.z - player.z);
+        if (od > o.spec.reach + 2.5) continue;
+        o.phase = 'windup';
+        o.timer = Math.max(DT, e.timer);
+        o.fake = false;
+        o.comboLeft = o.spec.combo ?? 1;
+        o.reactable = reactableAt(o, od);
+        res.telegraphs++;
+        if (o.reactable) res.reactable++;
+      }
+    }
+  };
+
+  const fire = (e: Enemy): void => {
+    const sp = e.spec.projSpeed ?? 14;
+    const lead = e.spec.lead ?? 0;
+    const d0 = Math.hypot(player.x - e.x, player.z - e.z);
+    const tFlight = d0 / sp;
+    const ax = player.x + player.vx * tFlight * lead;
+    const az = player.z + player.vz * tFlight * lead;
+    const dist = Math.hypot(ax - e.x, az - e.z) || 1;
+    projectiles.push({ x: e.x, z: e.z, vx: ((ax - e.x) / dist) * sp, vz: ((az - e.z) / dist) * sp, dmg: e.spec.damage, left: dist + 8, reactable: e.reactable, done: false, owner: e });
+    res.projectilesFired++;
+    events.push('shot');
   };
 
   const resolveStrike = (e: Enemy): void => {
     const d = Math.hypot(e.x - player.x, e.z - player.z);
     e.struckTick = true;
+    if (sc.hard && e.spec.ranged) { fire(e); return; }
     if (time < player.parryUntil && d <= e.spec.reach + 1.2) {
       res.parried++;
       e.phase = 'recover';
       e.timer = 1.0;
       e.comboLeft = 0;
+      if (sc.hard) { player.parryUntil = -1; player.parryLock = time + 0.4; }
       events.push('parry');
       return;
     }
     if (time < player.dodgeUntil) { res.dodged++; events.push('dodge'); return; }
     if (d > e.spec.reach + 0.8) { res.whiff++; events.push('whiff'); return; }
     res.hit++;
+    res.hitBy[e.spec.id] = (res.hitBy[e.spec.id] ?? 0) + 1;
     if (!e.reactable) res.unreactableHit++;
-    player.hp -= e.spec.damage;
+    const dmg = e.spec.damage * (e.comboLeft === 0 && (e.spec.combo ?? 1) > 1 ? (e.spec.finisher ?? 1) : 1);
+    player.hp -= dmg;
+    res.damageTaken += dmg;
     events.push('hurt');
   };
 
@@ -347,7 +449,7 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
       if (firstSpawn < 0) firstSpawn = time;
       enemies.push({
         spec: s, x: s.rel ? player.x + s.x : s.x, z: s.rel ? player.z + s.z : s.z, hp: s.hp,
-        phase: 'approach', timer: 0.6 + rng() * 0.6, comboLeft: 0, struckTick: false, reactable: false, vx: 0, vz: 0,
+        phase: 'approach', timer: 0.6 + rng() * 0.6, comboLeft: 0, struckTick: false, reactable: false, vx: 0, vz: 0, fake: false, projEta: 0,
       });
     }
 
@@ -404,6 +506,7 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
     // enemies
     for (const e of enemies) {
       e.struckTick = false;
+      if (e.phase !== 'windup') e.seen = undefined;
       e.vx = 0;
       e.vz = 0;
       if (e.hp <= 0) continue;
@@ -418,8 +521,16 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
         if (e.spec.ranged) {
           if (d > 11) dir = 1; else if (d < 7) dir = -1;
         } else if (d > e.spec.reach * 0.9) dir = 1;
-        e.vx = ux * dir * e.spec.speed;
-        e.vz = uz * dir * e.spec.speed;
+        let mx = ux;
+        let mz = uz;
+        if (e.spec.flank && !e.spec.ranged) {
+          const k = Math.max(0, Math.min(1, (d - e.spec.reach) / 6));
+          const a = e.spec.flank * k;
+          mx = ux * Math.cos(a) - uz * Math.sin(a);
+          mz = ux * Math.sin(a) + uz * Math.cos(a);
+        }
+        e.vx = mx * dir * e.spec.speed;
+        e.vz = mz * dir * e.spec.speed;
         e.x += e.vx * DT;
         e.z += e.vz * DT;
         pushOut(e, 0.5);
@@ -428,10 +539,19 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
       } else if (e.phase === 'windup') {
         e.timer -= DT;
         if (e.timer <= 0) {
+          if (e.fake) {
+            // Feint: nothing lands; a short real wind-up follows almost immediately.
+            e.fake = false;
+            e.timer = e.spec.windup * 0.45;
+            res.telegraphs++;
+            e.reactable = reactableAt(e, d);
+            if (e.reactable) res.reactable++;
+            continue;
+          }
           e.comboLeft--;
           resolveStrike(e);
           if (e.phase === 'windup') {
-            if (e.comboLeft > 0) { e.timer = e.spec.windup * 0.8; res.telegraphs++; e.reactable = d < BRAIN_IMMINENT_RANGE; if (e.reactable) res.reactable++; }
+            if (e.comboLeft > 0) { e.timer = windupLen(e, true); res.telegraphs++; e.reactable = reactableAt(e, d); if (e.reactable) res.reactable++; }
             else { e.phase = 'recover'; e.timer = e.spec.recover; }
           }
         }
@@ -441,10 +561,50 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
       }
     }
 
+    // projectiles
+    for (const e of enemies) e.projEta = 0;
+    for (const pr of projectiles) {
+      if (pr.done) continue;
+      pr.x += pr.vx * DT;
+      pr.z += pr.vz * DT;
+      pr.left -= Math.hypot(pr.vx, pr.vz) * DT;
+      let blocked = false;
+      for (const ob of sc.obstacles) if (Math.hypot(pr.x - ob.x, pr.z - ob.z) < ob.r) blocked = true;
+      if (blocked || pr.left <= 0) { pr.done = true; res.whiff++; continue; }
+      if (Math.hypot(pr.x - player.x, pr.z - player.z) < 0.8) {
+        pr.done = true;
+        if (time < player.dodgeUntil) { res.dodged++; events.push('dodge'); }
+        else {
+          res.hit++;
+          res.hitBy[pr.owner.spec.id] = (res.hitBy[pr.owner.spec.id] ?? 0) + 1;
+          if (!pr.reactable) res.unreactableHit++;
+          player.hp -= pr.dmg;
+          res.damageTaken += pr.dmg;
+          events.push('hurt');
+        }
+      }
+    }
+    for (const pr of projectiles) {
+      if (pr.done) continue;
+      const rx = player.x - pr.x;
+      const rz = player.z - pr.z;
+      const sp = Math.hypot(pr.vx, pr.vz);
+      if (rx * pr.vx + rz * pr.vz > 0) {
+        const eta = Math.hypot(rx, rz) / sp;
+        if (pr.owner.projEta <= 0 || eta < pr.owner.projEta) pr.owner.projEta = eta;
+      }
+    }
+    {
+      const ne = nearestEnemy();
+      if (ne) { distSum += Math.hypot(ne.x - player.x, ne.z - player.z); distTicks++; }
+      if (Math.abs(player.x) > ARENA - 1.5 || Math.abs(player.z) > ARENA - 1.5) wallTicks++;
+    }
+
     if (opts.record && tickNo % 2 === 0) {
       steps.push({
         t: Math.round(time * 100) / 100,
         p: [round(player.x), round(player.z), round(Math.max(0, player.hp) / 100), out.state],
+        pr: projectiles.filter((q) => !q.done).map((q) => [round(q.x), round(q.z)] as [number, number]),
         e: enemies.map((e) => [e.spec.id, round(e.x), round(e.z), round(Math.max(0, e.hp) / e.spec.hp), e.hp <= 0 ? 'dead' : e.phase]),
         ev: events.length ? events : undefined,
       });
@@ -463,6 +623,10 @@ export function runScenario(sc: Scenario, seed: number, opts: { record?: boolean
   res.hpEnd = Math.max(0, Math.round(player.hp));
   res.enemiesKilled = killed;
   res.reversalRatio = moving > 0 ? Math.round((reversals / moving) * 1000) / 1000 : 0;
+  res.damageTaken = Math.round(res.damageTaken);
+  res.meanEnemyDist = distTicks > 0 ? Math.round((distSum / distTicks) * 100) / 100 : 0;
+  res.wallRatio = tickNo > 0 ? Math.round((wallTicks / tickNo) * 1000) / 1000 : 0;
+  res.cmdTopShare = cmdTotal > 0 ? Math.round((Math.max(...cmdCounts.values()) / cmdTotal) * 1000) / 1000 : 0;
   if (opts.record) res.steps = steps;
   void releasedThisTick;
   return res;

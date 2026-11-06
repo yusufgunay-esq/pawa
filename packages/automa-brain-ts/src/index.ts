@@ -98,6 +98,8 @@ export interface EntitySnapshot {
   isAttacking: boolean;
   isWindUp: boolean;       // Enemy telegraphing an incoming strike
   isRanged: boolean;
+  /** Optional: seconds until a projectile this entity already fired reaches the target (<= 0 or absent = none in flight). */
+  projectileEta?: number;
   threatWeight: number;    // Base danger level (e.g., 1.0 grunt, 3.0 elite/boss)
 }
 
@@ -275,6 +277,8 @@ export class TacticalBlackboard {
   public stance: TacticalStance = 'BALANCED';
   public primaryTarget: EntitySnapshot | null = null;
   public imminentThreat: EntitySnapshot | null = null;
+  /** Nearest ranged hostile that is winding up (<= 16 m) or has a projectile in flight; null if none. */
+  public rangedThreat: EntitySnapshot | null = null;
   public pressureIndex = 0;
   public influenceMap = new InfluenceMap2D(12, 2.5);
   public customData: Record<string, unknown> = {};
@@ -288,23 +292,32 @@ export class TacticalBlackboard {
     let nearestDist = Infinity;
     let bestTarget: EntitySnapshot | null = null;
     let windUpThreat: EntitySnapshot | null = null;
+    let rangedThreat: EntitySnapshot | null = null;
+    let rangedDist = Infinity;
     let rawPressure = 0;
 
     for (const h of this.hostiles) {
       const d = distXZ(h.position.x, h.position.z, self.position.x, self.position.z);
       rawPressure += h.threatWeight / Math.max(1.0, d * 0.35);
 
-      if (h.isWindUp && d < 4.5) {
+      if (h.isWindUp && d < 4.5 && !h.isRanged) {
         windUpThreat = h;
       }
-      if (d < nearestDist) {
-        nearestDist = d;
+      if (h.isRanged && ((h.isWindUp && d <= 16.0) || (h.projectileEta ?? 0) > 0) && d < rangedDist) {
+        rangedDist = d;
+        rangedThreat = h;
+      }
+      // [CORE-003] ranged enemies are squishy and drain the fight: they count as half as far for target choice.
+      const key = h.isRanged ? d * 0.5 : d;
+      if (key < nearestDist) {
+        nearestDist = key;
         bestTarget = h;
       }
     }
 
     this.primaryTarget = bestTarget;
     this.imminentThreat = windUpThreat;
+    this.rangedThreat = rangedThreat;
     this.pressureIndex = Math.min(1.0, rawPressure / 3.5);
     this.influenceMap.update(self.position, this.hostiles);
   }
@@ -622,7 +635,7 @@ export class AutomaBrain {
 
     // Determine immediate command and human-input interception policy per AutonomyMode
     let immediateCommand =
-      bestScore > 0.78 ? bestUtility.id : goapPlanNames[0] ?? bestUtility.id;
+      bestScore > 0.78 + 0.4 * (0.78 - profile.aggression) ? bestUtility.id : goapPlanNames[0] ?? bestUtility.id; // [CORE-003] commit threshold is continuous in aggression (0.78 at aggression 0.78)
     let interceptHumanInput = true;
 
     if (inactive) {
@@ -640,6 +653,35 @@ export class AutomaBrain {
       if (!interceptHumanInput) {
         immediateCommand = 'HUMAN_PASS_THROUGH';
       }
+    }
+
+    // [CORE-003] continuous aggression: low-aggression profiles keep a stamina reserve and skip
+    // non-finisher attacks below it (reserve = (1 - aggression) * 0.6; monotone over the whole range).
+    if (
+      !inactive && !cruiseActive && !assistActive && this.blackboard.imminentThreat === null &&
+      (immediateCommand === 'STRIKE_COMBO' || immediateCommand === 'HEAVY_ASSAULT') &&
+      self.staminaRatio < (1.0 - profile.aggression) * 0.9
+    ) {
+      immediateCommand = 'CLOSE_DISTANCE';
+    }
+
+    // [CORE-003] critical health and nothing about to land in melee: heal beats fleeing.
+    if (
+      !inactive && !cruiseActive && !assistActive && this.blackboard.imminentThreat === null &&
+      self.healthRatio < 0.3 && goapPlanNames.length > 0 && goapPlanNames[0] === 'TACTICAL_HEAL'
+    ) {
+      immediateCommand = 'TACTICAL_HEAL';
+    }
+
+    // [CORE-003] ranged threat (wind-up up to 16 m or projectile in flight): sidestep, do not parry.
+    const rt = this.blackboard.rangedThreat;
+    const rangedReflex = !inactive && rt !== null && this.blackboard.imminentThreat === null && immediateCommand !== 'TACTICAL_HEAL';
+    if (rangedReflex) {
+      // Steering is always lateral; the dodge itself is timed to the projectile (impact within 0.4 s).
+      const eta = rt!.projectileEta ?? 0;
+      const dodgeNow = eta > 0 && eta <= 0.4;
+      if (dodgeNow) immediateCommand = 'EVADE_REPOSITION';
+      if (dodgeNow || !assistActive) interceptHumanInput = true;
     }
 
     // 5. Layer 1: Context Steering vector synthesis
@@ -670,6 +712,21 @@ export class AutomaBrain {
       // [FLAGS] idle: no steering output
       direction = { x: 0, y: 0, z: 0 };
       speedMultiplier = 0;
+    } else if (rangedReflex) {
+      // Lateral to the firing line; side follows current motion (stable), aggression blends in a charge.
+      let ux = rt!.position.x - self.position.x;
+      let uz = rt!.position.z - self.position.z;
+      const ul = Math.sqrt(ux * ux + uz * uz);
+      if (ul > 1e-6) { ux /= ul; uz /= ul; } else { ux = 0; uz = 0; }
+      const lx = -uz;
+      const lz = ux;
+      const side = self.velocity.x * lx + self.velocity.z * lz >= 0 ? 1.0 : -1.0;
+      let mx = side * lx + (1.0 + profile.aggression * 0.6) * ux;
+      let mz = side * lz + (1.0 + profile.aggression * 0.6) * uz;
+      const ml = Math.sqrt(mx * mx + mz * mz);
+      if (ml > 1e-9) { mx /= ml; mz /= ml; } else { mx = 0; mz = 0; }
+      direction = { x: mx, y: 0, z: mz };
+      speedMultiplier = 1.0;
     }
 
     // 6. Layer 4: Optional Presentation & Camera Director
@@ -698,7 +755,7 @@ export class AutomaBrain {
     const bb = this.blackboard;
     if (bb.hostiles.length === 0) return 'STEALTH';
     if (bb.self.healthRatio < 0.28) return 'EVASIVE';
-    if (bb.imminentThreat !== null || bb.pressureIndex > 0.72) return 'DEFENSIVE';
+    if (bb.imminentThreat !== null || bb.pressureIndex > 0.72) return 'DEFENSIVE'; // [CORE-003] continuous (was a fixed 0.72)
     if (bb.profile.aggression >= 0.65 && bb.self.staminaRatio > 0.35) return 'AGGRESSIVE';
     return 'BALANCED';
   }

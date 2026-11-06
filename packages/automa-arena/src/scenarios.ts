@@ -115,3 +115,64 @@ export const SCENARIOS: Scenario[] = [
     gates: { survive: true, maxReversal: 0.3, zeroLockedInput: true },
   },
 ];
+
+/**
+ * Difficulty tiers (003). Same player rules ("hard" mode: one-hit parry with lock, real projectiles),
+ * rising enemy model: variable wind-ups, feints, coordinated simultaneous strikes, flanking, leading
+ * archers, multi-hit boss combo. Thresholds live in compare.ts / arena.test.ts and are fixed.
+ */
+const hgrunt = (id: string, x: number, z: number, extra: Partial<EnemySpec> = {}): EnemySpec => ({
+  id, x, z, hp: 50, damage: 14, windup: 0.55, recover: 1.0, reach: 2.4, speed: 3.3, threat: 1, ...extra,
+});
+const harcher = (id: string, x: number, z: number, extra: Partial<EnemySpec> = {}): EnemySpec => ({
+  id, x, z, hp: 35, damage: 9, windup: 0.7, recover: 1.4, reach: 14, speed: 2, ranged: true, threat: 1.2, projSpeed: 16, ...extra,
+});
+// Human-plausibility metrics are gated too: no jitter, no wall hugging, no single-command spam, nothing unreactable.
+const tierGates = { survive: true, maxReversal: 0.35, maxWall: 0.15, maxCmdShare: 0.85, noUnreactable: true, zeroLockedInput: true } as const;
+
+export const TIER_SCENARIOS: Scenario[] = [
+  {
+    id: 'arena_t1',
+    title: 'Tier 1 (easy): 2 grunts, 1 archer, variable wind-ups',
+    tier: 1, hard: true,
+    behaviors: Behavior.COMBAT, profile: spartan,
+    enemies: [
+      hgrunt('g1', 8, 0, { windupVar: 0.25 }), hgrunt('g2', -6, 6, { windupVar: 0.25 }),
+      harcher('a1', 14, -6, { lead: 0, projSpeed: 14 }),
+    ],
+    obstacles: [{ x: 4, z: 4, r: 1.2 }, { x: -4, z: -6, r: 1.2 }],
+    maxTime: 90,
+    gates: { ...tierGates },
+  },
+  {
+    id: 'arena_t2',
+    title: 'Tier 2 (medium): coordinated trio with feints, flanking, 1 leading archer',
+    tier: 2, hard: true,
+    behaviors: Behavior.COMBAT, profile: spartan,
+    enemies: [
+      hgrunt('g1', 8, 0, { coord: true, feint: 0.2, windupVar: 0.3, flank: 0.7, speed: 3.6 }),
+      hgrunt('g2', -5, 7, { coord: true, feint: 0.2, windupVar: 0.3, flank: -0.7, speed: 3.6 }),
+      hgrunt('g3', -5, -7, { coord: true, feint: 0.2, windupVar: 0.3, flank: 0.7, speed: 3.6 }),
+      harcher('a1', 14, -6, { lead: 0.3 }),
+    ],
+    obstacles: [{ x: 4, z: 4, r: 1.2 }, { x: -4, z: -6, r: 1.2 }, { x: 9, z: -4, r: 1.2 }],
+    maxTime: 90,
+    gates: { ...tierGates },
+  },
+  {
+    id: 'arena_t3',
+    title: 'Tier 3 (hard): 2 coordinated flankers, 2 leading archers, boss combo',
+    tier: 3, hard: true,
+    behaviors: Behavior.COMBAT, profile: spartan,
+    enemies: [
+      hgrunt('g1', 8, 0, { coord: true, feint: 0.3, windupVar: 0.35, flank: 0.9, speed: 3.7 }),
+      hgrunt('g2', -5, 7, { coord: true, feint: 0.3, windupVar: 0.35, flank: -0.9, speed: 3.7 }),
+      harcher('a1', 14, -6, { lead: 0.5, damage: 6, recover: 1.8 }),
+      harcher('a2', -14, 4, { lead: 0.5, damage: 6, recover: 1.8 }),
+      { id: 'boss', x: 0, z: -9, rel: true, spawnAt: 15, hp: 150, damage: 16, windup: 0.5, recover: 1.4, reach: 3, speed: 3.4, combo: 3, comboVar: 0.4, finisher: 1.5, threat: 3 },
+    ],
+    obstacles: [{ x: 4, z: 4, r: 1.2 }, { x: -4, z: -6, r: 1.2 }, { x: 9, z: -4, r: 1.2 }, { x: -9, z: 3, r: 1.2 }],
+    maxTime: 90,
+    gates: { ...tierGates },
+  },
+];

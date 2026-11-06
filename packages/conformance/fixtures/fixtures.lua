@@ -346,5 +346,150 @@ return {
     behaviors = 4,
     hasWaypoint = true,
     waypoint = { x = 40.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "ranged-windup-far",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "archer_1", position = { x = 12.0, y = 0.0, z = 3.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = true, isRanged = true, threatWeight = 1.2 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 1,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "ranged-projectile-soon",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "archer_1", position = { x = 10.0, y = 0.0, z = -4.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = true, projectileEta = 0.3, threatWeight = 1.2 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 1,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "ranged-projectile-far",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "archer_1", position = { x = 10.0, y = 0.0, z = -4.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = true, projectileEta = 0.9, threatWeight = 1.2 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 1,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "ranged-side-follows-motion",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.2, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = -3.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "archer_1", position = { x = 11.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = true, isRanged = true, threatWeight = 1.2 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 1,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "ranged-assist-intercept",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "archer_1", position = { x = 9.0, y = 0.0, z = 2.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = true, isRanged = true, projectileEta = 0.25, threatWeight = 1.2 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 2,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "ranged-melee-priority",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "grunt_1", position = { x = 2.0, y = 0.0, z = 0.5 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = true, isRanged = false, threatWeight = 1.0 },
+      { id = "archer_1", position = { x = 10.0, y = 0.0, z = 4.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = true, isRanged = true, threatWeight = 1.2 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 1,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "ranged-target-preferred",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "grunt_1", position = { x = 5.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+      { id = "archer_1", position = { x = 0.0, y = 0.0, z = 8.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = true, threatWeight = 1.2 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 1,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "aggression-low-reserve",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.15, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.6, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "h1", position = { x = 2.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 1,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "aggression-mid-reserve",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.5, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.6, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "h1", position = { x = 2.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 1,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "aggression-mid-reserve-low-stamina",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.5, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.4, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "h1", position = { x = 2.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.9, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 1,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
+  },
+  {
+    id = "critical-heal-calm",
+    profile = { id = "conformance_reference", name = "Conformance Reference Protagonist", aggression = 0.78, discipline = 0.92, cinematicFlair = 0.88, reactionDelayMs = 95, preferredRange = 2.2 },
+    self = { id = "player_0", position = { x = 0.0, y = 0.0, z = 0.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.2, staminaRatio = 0.9, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 },
+    hostiles = {
+      { id = "h1", position = { x = 4.0, y = 0.0, z = 1.0 }, velocity = { x = 0.0, y = 0.0, z = 0.0 }, healthRatio = 0.7, staminaRatio = 0.7, isAttacking = false, isWindUp = false, isRanged = false, threatWeight = 1.0 }
+    },
+    presentation = 0,
+    autonomy = nil,
+    behaviors = 1,
+    hasWaypoint = false,
+    waypoint = { x = 0.0, y = 0.0, z = 0.0 }
   }
 }

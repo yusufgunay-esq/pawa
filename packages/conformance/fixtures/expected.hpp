@@ -237,6 +237,94 @@ inline const std::vector<ExpectedDecision>& expected() {
         "HUMAN_PASS_THROUGH", 0.0, 0.0,
         0.0, "PASSIVE", 1.0,
         1.0, true, "h1"
+    },
+    automa::conformance::ExpectedDecision{
+        "ranged-windup-far", "AGGRESSIVE", true,
+        "STRIKE_COMBO", 0.8177,
+        std::vector<std::string>{ "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "STRIKE_COMBO", 0.6652447951277616, 0.7466253160424058,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "archer_1"
+    },
+    automa::conformance::ExpectedDecision{
+        "ranged-projectile-soon", "AGGRESSIVE", true,
+        "STRIKE_COMBO", 0.8177,
+        std::vector<std::string>{ "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "EVADE_REPOSITION", 0.9764422070150982, 0.21577909157164488,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "archer_1"
+    },
+    automa::conformance::ExpectedDecision{
+        "ranged-projectile-far", "AGGRESSIVE", true,
+        "STRIKE_COMBO", 0.8177,
+        std::vector<std::string>{ "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "STRIKE_COMBO", 0.9764422070150982, 0.21577909157164488,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "archer_1"
+    },
+    automa::conformance::ExpectedDecision{
+        "ranged-side-follows-motion", "BALANCED", true,
+        "STRIKE_COMBO", 0.2642,
+        std::vector<std::string>{ "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "CLOSE_DISTANCE", 0.7459376616259147, -0.6660157693088523,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "archer_1"
+    },
+    automa::conformance::ExpectedDecision{
+        "ranged-assist-intercept", "AGGRESSIVE", true,
+        "STRIKE_COMBO", 0.8177,
+        std::vector<std::string>{ "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "EVADE_REPOSITION", 0.6846558016067028, 0.7288665401335715,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "archer_1"
+    },
+    automa::conformance::ExpectedDecision{
+        "ranged-melee-priority", "DEFENSIVE", true,
+        "DEFLECT_COUNTER", 0.9701,
+        std::vector<std::string>{ "DEFLECT_COUNTER" },
+        "DEFLECT_COUNTER", -0.7071067811865477, -0.7071067811865475,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "grunt_1"
+    },
+    automa::conformance::ExpectedDecision{
+        "ranged-target-preferred", "AGGRESSIVE", true,
+        "STRIKE_COMBO", 0.8177,
+        std::vector<std::string>{ "CLOSE_DISTANCE", "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "STRIKE_COMBO", 6.123233995736766e-17, 1.0,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "archer_1"
+    },
+    automa::conformance::ExpectedDecision{
+        "aggression-low-reserve", "BALANCED", true,
+        "STRIKE_COMBO", 0.1535,
+        std::vector<std::string>{ "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "CLOSE_DISTANCE", 6.123233995736766e-17, 1.0,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "h1"
+    },
+    automa::conformance::ExpectedDecision{
+        "aggression-mid-reserve", "BALANCED", true,
+        "STRIKE_COMBO", 0.4496,
+        std::vector<std::string>{ "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "HEAVY_ASSAULT", 6.123233995736766e-17, 1.0,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "h1"
+    },
+    automa::conformance::ExpectedDecision{
+        "aggression-mid-reserve-low-stamina", "BALANCED", true,
+        "STRIKE_COMBO", 0.3246,
+        std::vector<std::string>{ "HEAVY_ASSAULT", "EXECUTE_FINISHER" },
+        "CLOSE_DISTANCE", 6.123233995736766e-17, 1.0,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "h1"
+    },
+    automa::conformance::ExpectedDecision{
+        "critical-heal-calm", "EVASIVE", true,
+        "STRIKE_COMBO", 0.8177,
+        std::vector<std::string>{ "TACTICAL_HEAL" },
+        "TACTICAL_HEAL", -0.7071067811865477, -0.7071067811865475,
+        1.0, "PASSIVE", 1.0,
+        1.0, true, "h1"
     }
     };
     return all;

@@ -130,3 +130,19 @@ test('native AI is base layer; AUTOMA overrides only on imminent strike and reco
   mkRt(false).tick();
   assert.equal(cmds.at(-1), 'STRIKE_COMBO');
 });
+
+test('danger stance: native command stands but AUTOMA keeps the steering (native cannot walk the player back in)', () => {
+  const steers: { x: number; z: number }[] = [];
+  const mkRt = (overrideNative: boolean) =>
+    new AutomaRuntime({
+      perception: { self: () => mk('p', 0), hostiles: () => [mk('e', 2.5, { isWindUp: true })], waypoint: () => undefined },
+      input: { command: () => {}, steer: (d) => steers.push({ x: d.x, z: d.z }), release: () => {} },
+      interlock: { cutscene: () => false, menu: () => false, loading: () => false, manualOverride: () => false },
+      profile, overrideNative,
+      native: { available: () => true, proposeCommand: () => ({ command: 'DEFLECT_COUNTER', steer: { direction: { x: 1, y: 0, z: 0 }, speed: 1 } }) },
+    });
+  mkRt(true).tick();
+  mkRt(false).tick();
+  assert.ok(steers[0].x < 0.5, 'AUTOMA steering expected, got ' + JSON.stringify(steers[0]));
+  assert.deepEqual(steers[1], { x: 1, z: 0 });
+});

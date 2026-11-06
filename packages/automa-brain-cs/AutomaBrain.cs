@@ -118,6 +118,7 @@ namespace Automa.Brain
         public bool IsWindUp;      // telegraphing an incoming strike
         public bool IsRanged;
         public double ThreatWeight;
+        public double ProjectileEta; // seconds until a projectile this entity fired lands; <= 0 = none in flight
     }
 
     public struct CameraDirective
@@ -392,6 +393,7 @@ namespace Automa.Brain
         public TacticalStance Stance = TacticalStance.Balanced;
         public EntitySnapshot? PrimaryTarget;
         public EntitySnapshot? ImminentThreat;
+        public EntitySnapshot? RangedThreat; // nearest ranged hostile winding up (<= 16 m) or with a projectile in flight
         public double PressureIndex;
         public readonly InfluenceMap2D InfluenceMap = new InfluenceMap2D(12, 2.5);
 
@@ -411,6 +413,8 @@ namespace Automa.Brain
             double nearestDist = double.PositiveInfinity;
             EntitySnapshot? bestTarget = null;
             EntitySnapshot? windUpThreat = null;
+            EntitySnapshot? rangedThreat = null;
+            double rangedDist = double.PositiveInfinity;
             double rawPressure = 0.0;
 
             for (int i = 0; i < Hostiles.Count; i++)
@@ -422,16 +426,23 @@ namespace Automa.Brain
 
                 rawPressure += h.ThreatWeight / Math.Max(1.0, d * 0.35);
 
-                if (h.IsWindUp && d < 4.5) windUpThreat = h;
-                if (d < nearestDist)
+                if (h.IsWindUp && d < 4.5 && !h.IsRanged) windUpThreat = h;
+                if (h.IsRanged && ((h.IsWindUp && d <= 16.0) || h.ProjectileEta > 0.0) && d < rangedDist)
                 {
-                    nearestDist = d;
+                    rangedDist = d;
+                    rangedThreat = h;
+                }
+                double key = h.IsRanged ? d * 0.5 : d;
+                if (key < nearestDist)
+                {
+                    nearestDist = key;
                     bestTarget = h;
                 }
             }
 
             PrimaryTarget = bestTarget;
             ImminentThreat = windUpThreat;
+            RangedThreat = rangedThreat;
             PressureIndex = Math.Min(1.0, rawPressure / 3.5);
             InfluenceMap.Update(self.Position, Hostiles);
         }
@@ -822,7 +833,7 @@ namespace Automa.Brain
             for (int i = 0; i < goapPlanNames.Length; i++) goapPlanNames[i] = rawPlan[i].Name;
 
             // Autonomy-mode command & human-input interception policy
-            string immediateCommand = bestScore > 0.78
+            string immediateCommand = bestScore > 0.78 + 0.4 * (0.78 - profile.Aggression) // [CORE-003] continuous commit threshold
                 ? bestUtility.Id
                 : (goapPlanNames.Length > 0 ? goapPlanNames[0] : bestUtility.Id);
             bool interceptHumanInput = true;
@@ -844,6 +855,32 @@ namespace Automa.Brain
                     bestScore >= 0.75;
                 interceptHumanInput = isUrgentReflex || self.HealthRatio < 0.25;
                 if (!interceptHumanInput) immediateCommand = "HUMAN_PASS_THROUGH";
+            }
+
+            // [CORE-003] continuous aggression: stamina reserve = (1 - aggression) * 0.6
+            if (!inactive && !cruiseActive && !assistActive && Blackboard.ImminentThreat == null &&
+                (immediateCommand == "STRIKE_COMBO" || immediateCommand == "HEAVY_ASSAULT") &&
+                self.StaminaRatio < (1.0 - profile.Aggression) * 0.9)
+            {
+                immediateCommand = "CLOSE_DISTANCE";
+            }
+
+            // [CORE-003] critical health and nothing about to land in melee: heal beats fleeing
+            if (!inactive && !cruiseActive && !assistActive && Blackboard.ImminentThreat == null &&
+                self.HealthRatio < 0.3 && goapPlanNames.Length > 0 && goapPlanNames[0] == "TACTICAL_HEAL")
+            {
+                immediateCommand = "TACTICAL_HEAL";
+            }
+
+            // [CORE-003] ranged threat: lateral sidestep, dodge timed to the projectile (impact within 0.4 s)
+            EntitySnapshot? rt = Blackboard.RangedThreat;
+            bool rangedReflex = !inactive && rt != null && Blackboard.ImminentThreat == null && immediateCommand != "TACTICAL_HEAL";
+            if (rangedReflex)
+            {
+                double eta = rt.Value.ProjectileEta;
+                bool dodgeNow = eta > 0.0 && eta <= 0.4;
+                if (dodgeNow) immediateCommand = "EVADE_REPOSITION";
+                if (dodgeNow || !assistActive) interceptHumanInput = true;
             }
 
             // 5. Layer 1 — context steering synthesis
@@ -880,6 +917,22 @@ namespace Automa.Brain
                 // [FLAGS] idle: no steering output
                 direction = new Vec3(0.0, 0.0, 0.0);
                 speedMultiplier = 0.0;
+            }
+            else if (rangedReflex)
+            {
+                double ux = rt.Value.Position.X - self.Position.X;
+                double uz = rt.Value.Position.Z - self.Position.Z;
+                double ul = Math.Sqrt(ux * ux + uz * uz);
+                if (ul > 1e-6) { ux /= ul; uz /= ul; } else { ux = 0.0; uz = 0.0; }
+                double lx = -uz;
+                double lz = ux;
+                double side = self.Velocity.X * lx + self.Velocity.Z * lz >= 0.0 ? 1.0 : -1.0;
+                double mx = side * lx + (1.0 + profile.Aggression * 0.6) * ux;
+                double mz = side * lz + (1.0 + profile.Aggression * 0.6) * uz;
+                double ml = Math.Sqrt(mx * mx + mz * mz);
+                if (ml > 1e-9) { mx /= ml; mz /= ml; } else { mx = 0.0; mz = 0.0; }
+                direction = new Vec3(mx, 0.0, mz);
+                speedMultiplier = 1.0;
             }
 
             // 6. Layer 4 — presentation director

@@ -349,6 +349,7 @@ function TacticalBlackboard.new()
         stance = AutomaBrain.Stance.BALANCED,
         primaryTarget = nil,
         imminentThreat = nil,
+        rangedThreat = nil, -- nearest ranged hostile winding up (<= 16 m) or with a projectile in flight
         pressureIndex = 0.0,
         influenceMap = InfluenceMap2D.new(12, 2.5),
     }, TacticalBlackboard)
@@ -365,20 +366,28 @@ function TacticalBlackboard:refresh(selfState, hostiles, profile)
     local nearestDist = 1e308
     local bestTarget = nil
     local windUpThreat = nil
+    local rangedThreatPick = nil
+    local rangedDist = 1e308
     local rawPressure = 0.0
 
     for _, h in ipairs(self.hostiles) do
         local d = distXZ(selfState.position, h.position)
         rawPressure = rawPressure + h.threatWeight / math.max(1.0, d * 0.35)
-        if h.isWindUp and d < 4.5 then windUpThreat = h end
-        if d < nearestDist then
-            nearestDist = d
+        if h.isWindUp and d < 4.5 and not h.isRanged then windUpThreat = h end
+        if h.isRanged and ((h.isWindUp and d <= 16.0) or (h.projectileEta or 0.0) > 0.0) and d < rangedDist then
+            rangedDist = d
+            rangedThreatPick = h
+        end
+        local key = h.isRanged and (d * 0.5) or d
+        if key < nearestDist then
+            nearestDist = key
             bestTarget = h
         end
     end
 
     self.primaryTarget = bestTarget
     self.imminentThreat = windUpThreat
+    self.rangedThreat = rangedThreatPick
     self.pressureIndex = math.min(1.0, rawPressure / 3.5)
     self.influenceMap:update(selfState.position, self.hostiles)
 end
@@ -761,7 +770,7 @@ function AutomaBrain:tickBehaviors(selfState, hostiles, profile, presentationMod
 
     -- Autonomy-mode command & human-input interception policy
     local immediateCommand
-    if bestScore > 0.78 then
+    if bestScore > 0.78 + 0.4 * (0.78 - profile.aggression) then -- [CORE-003] continuous commit threshold
         immediateCommand = bestUtility.id
     elseif #goapPlanNames > 0 then
         immediateCommand = goapPlanNames[1]
@@ -782,6 +791,30 @@ function AutomaBrain:tickBehaviors(selfState, hostiles, profile, presentationMod
             and bestScore >= 0.75
         interceptHumanInput = isUrgentReflex or selfState.healthRatio < 0.25
         if not interceptHumanInput then immediateCommand = "HUMAN_PASS_THROUGH" end
+    end
+
+    -- [CORE-003] continuous aggression: stamina reserve = (1 - aggression) * 0.6
+    if not inactive and not cruiseActive and not assistActive and self.blackboard.imminentThreat == nil
+        and (immediateCommand == "STRIKE_COMBO" or immediateCommand == "HEAVY_ASSAULT")
+        and selfState.staminaRatio < (1.0 - profile.aggression) * 0.9 then
+        immediateCommand = "CLOSE_DISTANCE"
+    end
+
+    -- [CORE-003] critical health and nothing about to land in melee: heal beats fleeing
+    if not inactive and not cruiseActive and not assistActive and self.blackboard.imminentThreat == nil
+        and selfState.healthRatio < 0.3 and #goapPlanNames > 0 and goapPlanNames[1] == "TACTICAL_HEAL" then
+        immediateCommand = "TACTICAL_HEAL"
+    end
+
+    -- [CORE-003] ranged threat: lateral sidestep, dodge timed to the projectile (impact within 0.4 s)
+    local rt = self.blackboard.rangedThreat
+    local rangedReflex = (not inactive) and rt ~= nil and self.blackboard.imminentThreat == nil
+        and immediateCommand ~= "TACTICAL_HEAL"
+    if rangedReflex then
+        local eta = rt.projectileEta or 0.0
+        local dodgeNow = eta > 0.0 and eta <= 0.4
+        if dodgeNow then immediateCommand = "EVADE_REPOSITION" end
+        if dodgeNow or not assistActive then interceptHumanInput = true end
     end
 
     -- 5. Layer 1 — context steering synthesis
@@ -816,6 +849,21 @@ function AutomaBrain:tickBehaviors(selfState, hostiles, profile, presentationMod
         -- [FLAGS] idle: no steering output
         moveDir = { x = 0.0, y = 0.0, z = 0.0 }
         speedMultiplier = 0.0
+    elseif rangedReflex then
+        local ux = rt.position.x - selfState.position.x
+        local uz = rt.position.z - selfState.position.z
+        local ul = math.sqrt(ux * ux + uz * uz)
+        if ul > 1e-6 then ux = ux / ul; uz = uz / ul else ux = 0.0; uz = 0.0 end
+        local lx = -uz
+        local lz = ux
+        local vel = selfState.velocity or { x = 0.0, y = 0.0, z = 0.0 }
+        local side = (vel.x * lx + vel.z * lz >= 0.0) and 1.0 or -1.0
+        local mx = side * lx + (1.0 + profile.aggression * 0.6) * ux
+        local mz = side * lz + (1.0 + profile.aggression * 0.6) * uz
+        local ml = math.sqrt(mx * mx + mz * mz)
+        if ml > 1e-9 then mx = mx / ml; mz = mz / ml else mx = 0.0; mz = 0.0 end
+        moveDir = { x = mx, y = 0.0, z = mz }
+        speedMultiplier = 1.0
     end
 
     -- 6. Layer 4 — presentation director

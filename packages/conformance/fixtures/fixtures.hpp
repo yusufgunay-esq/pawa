@@ -350,6 +350,140 @@ inline const std::vector<ScenarioFixture>& fixtures() {
         static_cast<automa::AutonomyMode>(0),
         false, 4,
         true, automa::Vec3{40.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "ranged-windup-far",
+        automa::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"archer_1", automa::Vec3{12.0, 0.0, 3.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, true, true, 1.2}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 1,
+        false, automa::Vec3{0.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "ranged-projectile-soon",
+        automa::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"archer_1", automa::Vec3{10.0, 0.0, -4.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, true, 1.2, 0.3}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 1,
+        false, automa::Vec3{0.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "ranged-projectile-far",
+        automa::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"archer_1", automa::Vec3{10.0, 0.0, -4.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, true, 1.2, 0.9}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 1,
+        false, automa::Vec3{0.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "ranged-side-follows-motion",
+        automa::BehaviorProfile{0.2, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, -3.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"archer_1", automa::Vec3{11.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, true, true, 1.2}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 1,
+        false, automa::Vec3{0.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "ranged-assist-intercept",
+        automa::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"archer_1", automa::Vec3{9.0, 0.0, 2.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, true, true, 1.2, 0.25}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 2,
+        false, automa::Vec3{0.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "ranged-melee-priority",
+        automa::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"grunt_1", automa::Vec3{2.0, 0.0, 0.5}, automa::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, true, false, 1.0},
+                automa::EntitySnapshot{"archer_1", automa::Vec3{10.0, 0.0, 4.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, true, true, 1.2}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 1,
+        false, automa::Vec3{0.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "ranged-target-preferred",
+        automa::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.9, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"grunt_1", automa::Vec3{5.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0},
+                automa::EntitySnapshot{"archer_1", automa::Vec3{0.0, 0.0, 8.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, true, 1.2}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 1,
+        false, automa::Vec3{0.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "aggression-low-reserve",
+        automa::BehaviorProfile{0.15, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.6, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"h1", automa::Vec3{2.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.7, false, false, false, 1.0}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 1,
+        false, automa::Vec3{0.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "aggression-mid-reserve",
+        automa::BehaviorProfile{0.5, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.6, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"h1", automa::Vec3{2.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.7, false, false, false, 1.0}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 1,
+        false, automa::Vec3{0.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "aggression-mid-reserve-low-stamina",
+        automa::BehaviorProfile{0.5, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.4, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"h1", automa::Vec3{2.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.9, 0.7, false, false, false, 1.0}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 1,
+        false, automa::Vec3{0.0, 0.0, 0.0}
+    },
+    automa::conformance::ScenarioFixture{
+        "critical-heal-calm",
+        automa::BehaviorProfile{0.78, 0.92, 0.88, 95, 2.2},
+        automa::EntitySnapshot{"player_0", automa::Vec3{0.0, 0.0, 0.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.2, 0.9, false, false, false, 1.0},
+        std::vector<automa::EntitySnapshot>{
+                automa::EntitySnapshot{"h1", automa::Vec3{4.0, 0.0, 1.0}, automa::Vec3{0.0, 0.0, 0.0}, 0.7, 0.7, false, false, false, 1.0}
+        },
+        static_cast<automa::PresentationMode>(0),
+        static_cast<automa::AutonomyMode>(0),
+        false, 1,
+        false, automa::Vec3{0.0, 0.0, 0.0}
     }
     };
     return all;
