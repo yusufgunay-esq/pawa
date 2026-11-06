@@ -1,5 +1,6 @@
 Suggested model: Claude Sonnet 5.5 (High) (oyun YZ'si teşhisi + 4 dilde çekirdek) · Fallback / Yedek: Gemini 3.8 Flash (High)
 Önkoşul: 004 (adlar Stuntdouble)
+Devir notu: Sonnet yarıda durduruldu; yarım ve test edilmemiş değişiklikler `wip/005-kalabalik` dalında (20 dosya). O dalı incele: işe yarayanı al, gerisini at. Bitince main'e kanıtla (kök `npm test` + `node packages/stuntdouble-arena/run.mjs --compare`), açıklayıcı mesajla commit + push, dalı sil.
 
 # 005 — Kalabalık baskı altında karşı saldırı + 16 m ötesi okçu
 
