@@ -23,6 +23,9 @@ jobs:
       - name: Unit tests, profile validation, fixture freshness
         run: |
           npm run test:ts
+          npm run test:seams
+          npm run test:arena
+          node packages/automa-arena/run.mjs
           npm run validate
           npm run fixtures:check
       - name: Native conformance runners (C#, C++20, Lua 5.4) - all strict

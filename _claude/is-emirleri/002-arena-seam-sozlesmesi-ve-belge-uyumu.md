@@ -18,6 +18,9 @@ Suggested model: Claude Sonnet 5.5 (High) (simülasyon + adaptör sözleşmesi t
 3. **Profil etkisi gerçek olmalı:** aynı senaryoda `aggression` yüksek/düşük profil ölçülebilir fark (saldırı sayısı) üretmeli; testle kanıtla. Fark yoksa çekirdekteki kopukluğu bul ve düzelt (4 dile yay, 001 runner'ları yeşil kalsın).
 4. **Belge uyumu:** README ve `skills/automa/SKILL.md` bayrak modeline, arena kapısına ve seam sözleşmesine göre güncellenir; abartılı iddialar ("frame-perfect", doğrulanmamış motorlar) kanıtla sınırlanır. Stage 7 ve `contribute-recipe.mjs`: kod reposuna PR yok; yerel doğrulama + kullanıcı onayı + atlas gönderim paketi (`--bundle out.json`), gönderim hedefi atlas henüz yoksa "henüz açık değil" der ve dosyayı yerelde bırakır. `targets/_template/` içine `adapter-checklist.md` (seam → arena kapısı eşlemesi).
 
+5. **Belge kararları (Yusuf ile konuşuldu):** profil = persona değil, 5 ayar; hazır ayardan başlar, kullanıcı sözle ayarlar. Protagonist Fidelity (exe'den kahraman tarzı çıkarma) "ertelendi / isteğe bağlı" diye işaretlenir. Strateji merdiveninde erişilebilirse oyunun kendi yapay zekâsı (S1/S2) önce; DRM'li oyunda yalnız dış S4 (örnek: `targets/assassins-creed-odyssey/REPORT.md`, `targets/ghost-recon-breakpoint/REPORT.md` = ABORT örneği). README'de bu iki örneğe bağlantı. 001'in kararı belgelenir: aktif davranış yoksa `HUMAN_PASS_THROUGH`. F7 döngüsü 5 preset olarak kalır, belgede yazılır.
+6. CI (`.github/workflows/ci.yml`) ilk koşuda kırmızıysa `gh run view --log-failed` ile bak ve düzelt.
+
 ## Söylenmeyen ama gereken
 - Arena saf TS, `--experimental-strip-types` ile koşar, yeni npm bağımlılığı yok.
 - Rastgelelik yalnız seed'li PRNG.

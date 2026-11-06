@@ -57,7 +57,7 @@ Explain why the selected strategy tier (`S1`–`S5`) was chosen and how the shar
 
 ## 4. Three-Gate Verification Ledger
 
-- [ ] **Gate 1 — Smoke & Hotkey Hand-off:** `F5` toggles autonomy without frame stutter; `F6` cycles `TACTICAL` $\rightarrow$ `CINEMATIC_LIVE` $\rightarrow$ `CINEMATIC_RESOLVE`.
+- [ ] **Gate 1 — Smoke & Hand-off:** hand-over happens on the first hostile (or the user's toggle key) and returns about 2 s after the fight without frame stutter; manual input, cutscenes, menus and loading screens release control. See `adapter-checklist.md`.
 - [ ] **Gate 2 — Safety Interlocks:** Autonomy cleanly pauses on cutscenes, dialogues, menus, loading screens, and player death.
 - [ ] **Gate 3 — Protagonist Competence (5-Minute Live Combat):** Agent parries/dodges telegraphed (`isWindUp`) attacks, uses equipped skills, and navigates obstacles via 16-Slot Context Steering without oscillation.
 - [ ] **Gate 4 — Quest & Save Integrity:** `CINEMATIC_RESOLVE` triggers native encounter completion callbacks and advances quest objectives cleanly.

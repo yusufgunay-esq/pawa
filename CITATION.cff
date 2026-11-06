@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use AUTOMA or its 4-Layer Cognitive Brain in your research, mods, or autonomous agent benchmarks, please cite it as below."
 title: "AUTOMA: Autonomous Play Architecture for Single-Player Games"
-abstract: "An open-source cognitive architecture and reverse-engineering protocol that equips AI coding agents to inject 4-layer, user-configurable game autonomy (Orchestrator, Regressive A* GOAP, Compensated Utility AI, and 16-Slot Context Steering) with user-selectable Tactical and Cinematic presentation modes into existing single-player games."
+abstract: "An open-source architecture and reverse-engineering protocol that hands a single-player game's combat to a competent autonomous agent and gives control back afterwards. The game's own AI is the foundation; AUTOMA's 4-layer brain (Orchestrator, Regressive A* GOAP, Compensated Utility AI, 16-Slot Context Steering) is a competence layer that overrides only the native AI's weak moments, or drives alone when the native AI is unreachable. Composable behavior flags, a seam contract with safety interlocks, and a deterministic arena with automatic gates provide the evidence."
 authors:
   - family-names: "Günay"
     given-names: "Yusuf"
@@ -16,3 +16,13 @@ keywords:
   - context-steering
   - autonomous-agents
   - reverse-engineering
+preferred-citation:
+  type: software
+  title: "AUTOMA: Autonomous Play Architecture for Single-Player Games"
+  authors:
+    - family-names: "Günay"
+      given-names: "Yusuf"
+  year: 2026
+  version: 1.0.0
+  notes: "Computer software & Cognitive Architecture Specification"
+  url: "https://github.com/yusufgunay-esq/automa"

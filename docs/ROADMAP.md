@@ -7,9 +7,12 @@ The core is a **normal, user-configurable game AI**. The user decides what it do
 1. **User-fed profile** (`schemas/profile.schema.json`): free-form label plus numbers, from the user's own words or file.
 2. **Composable behaviors** (design below): several features active at once, chosen by the user's command.
 3. Live tactical combat on the game's native camera. Camera, music and fast-resolve stay optional extensions.
+4. **Architecture order (decided):** the game's own AI is the foundation (S1/S2); AUTOMA is a competence layer that only overrides its weak moments (wind-up parry/dodge, low-health retreat, target choice, oscillation); if the native AI is unreachable (DRM), AUTOMA's brain drives alone (S3/S4); S5 is the story-first shortcut.
+5. **Hand-over (decided):** `engage: 'onCombat'` (default) takes over on the first perceived hostile and hands back ~2 s after the fight; `engage: 'manual'` uses a user-configurable toggle key. No fixed hotkey. Manual input and cutscene/menu/loading always win.
+6. **Evidence:** `packages/automa-arena` gates the brain and runtime contract automatically (`npm test`).
 
 ## Composable behaviors (replaces the single-choice `AutonomyMode`)
-Today `AutonomyMode` is one exclusive value (cycle with F7). Target design: a **flag set** `Behaviors`, any combination.
+**Done (001):** `Behaviors` bit mask in all four SDKs; the five `AutonomyMode` names are presets and the optional preset-cycle key walks only those five. No active behavior => `HUMAN_PASS_THROUGH`. Open: a game-integration API to set an arbitrary mask from the user's words.
 
 | Flag | Meaning |
 |---|---|
@@ -30,7 +33,7 @@ Conflict rules (fixed, so all four SDKs agree):
 Work remaining: replace the enum with flags in `automa-brain-ts/cs/cpp/lua`, add combination scenarios to `packages/conformance`, regenerate fixtures, run `npm test`.
 
 ## Suggestions and shared learning (Phase 1.5)
-1. **Hand-over first, advice second.** The user hands a character to the AI (F5). Afterwards the agent may *suggest* additions to that character ("dies to archers: add `DEFENSIVE` vs ranged", "raise `reactionDelayMs`"). Suggestions are shown, never applied without the user's yes.
+1. **Hand-over first, advice second.** The user hands a character to the AI (automatically on combat, or with a toggle key of their choice). Afterwards the agent may *suggest* additions to that character ("dies to archers: add `DEFENSIVE` vs ranged", "raise `reactionDelayMs`"). Suggestions are shown, never applied without the user's yes.
 2. **Shared learning goes to a separate data repo (`yusufgunay-esq/automa-atlas`), not this one.** This repo (code, paper, skill) keeps a single author. Contributions are data only:
    - **Opt-in only**, asked once per contribution; no silent uploads.
    - **Submission, not pull request:** the agent sends a JSON bundle through a submission endpoint (issue form or small API). A bot commits it under the maintainer's identity, so contributors never become commit authors.
@@ -60,4 +63,5 @@ Work remaining: replace the enum with flags in `automa-brain-ts/cs/cpp/lua`, add
 **Authorship:** the code repo stays single-author. The atlas repo is a separate community data repo, so it does not need that rule. Bot commits; an optional, opt-in `credit` handle per contribution (anonymous by default). Data license: CC BY 4.0 with attribution to the project.
 
 ## Phase 2 (next step)
-**Protagonist Fidelity:** REA derives the story protagonist's real fighting style into the same profile schema, for a narrative-consistent takeover.
+**Protagonist Fidelity** (open idea, not a promise): REA derives the story protagonist's real fighting style into the same profile schema, for a narrative-consistent takeover.
+**"The AI works out the game itself"** (open idea): the agent discovers mechanics without a hand-written adapter.

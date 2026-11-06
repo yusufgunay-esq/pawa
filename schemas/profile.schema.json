@@ -44,7 +44,7 @@
       "type": "number",
       "minimum": 0.0,
       "maximum": 1.0,
-      "description": "[0,1] Inverse of stochastic noise. 1.0 = frame-perfect repetition, 0.0 = visibly human hesitation and mis-timing."
+      "description": "[0,1] Inverse of stochastic noise. 1.0 = repetition with no timing variation within the profile's reaction delay, 0.0 = clearly human hesitation and mis-timing."
     },
     "cinematicFlair": {
       "type": "number",

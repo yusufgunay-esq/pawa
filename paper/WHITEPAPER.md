@@ -2,7 +2,9 @@
 
 **Autonomous Play Architecture (AUTOMA)** addresses a longstanding structural asymmetry in interactive entertainment: narrative-driven games frequently cast the player as an elite operative, mythic mercenary, or master tactician, yet rely solely on raw human motor execution during repetitive combat encounters. When an encounter becomes tedious—or when a player wishes to experience combat as a directed action sequence—naive "bot takeover" toggles (`is_human = false`) fail because standard NPC AI is designed to serve as expendable opposition rather than a competent protagonist.
 
-AUTOMA solves this by pairing **Binary Seam Reconnaissance (via REA)** with an **Engine-Agnostic 4-Layer Cognitive Kernel (`@automa/brain`)** and a **Tri-Modal Presentation Director**.
+AUTOMA treats the game's own AI as the foundation and adds a competence layer on top: the native AI is written to lose, so AUTOMA overrides only its weak moments (wind-up parry/dodge, low-health retreat, target choice, oscillation). When the native AI is unreachable, the same brain drives alone. Hand-over is automatic on combat (`engage: onCombat`) or by a user-chosen toggle key.
+
+AUTOMA pairs **Binary Seam Reconnaissance (via REA)** with an **Engine-Agnostic 4-Layer Cognitive Kernel (`@automa/brain`)** and a **Tri-Modal Presentation Director**.
 
 ---
 
@@ -57,7 +59,7 @@ $$k^* = \arg\max_{k \in \{0..15\}} \big(I_k - \gamma D_k\big), \qquad \gamma = 1
 
 ## 2. Tri-Modal Presentation Director
 
-AUTOMA separates **Cognitive Execution** from **Visual Presentation**, allowing the user to switch modes live via hotkey (`F6`):
+AUTOMA separates **Cognitive Execution** from **Visual Presentation**, allowing the user to switch modes live via an optional, user-chosen hotkey:
 
 1. **`TACTICAL`:** $\text{TimeScale} = 1.0$, $\text{FOV} = 1.0\times$, $\text{Camera} = \texttt{PASSIVE}$. Standard gameplay view while the AUTOMA Brain executes combat.
 2. **`CINEMATIC_LIVE`:** $\text{Camera} = \texttt{ACTION\_TRACK}$ during movement and $\texttt{IMPACT\_SLOWMO}$ ($\text{TimeScale} = 0.35$, $\text{FOV} = 0.85\times$) during parries, counters, and finishers—turning live gameplay into an interactive action film.

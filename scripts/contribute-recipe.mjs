@@ -1,31 +1,36 @@
 #!/usr/bin/env node
 /**
- * AUTOMA Collective Atlas Sync — Upstream Recipe Contributor
+ * AUTOMA Atlas Bundle - local recipe verification and packaging
  * Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
  *
- * Validates a newly engineered game recipe in `targets/<game-slug>/`
- * (ensuring zero proprietary binaries or profilel OS paths are included)
- * and submits it upstream to `yusufgunay-esq/automa` via GitHub CLI (`gh`) Pull Request.
+ * Audits a game recipe in `targets/<game-slug>/` (no proprietary binaries, no personal OS paths)
+ * and, only with explicit user approval, writes a local atlas bundle.
+ * It opens NO pull request and contacts NO repository: the atlas is a separate data repo with a
+ * single writer (docs/ROADMAP.md) and its intake does not exist yet.
  *
  * Usage:
- *   node scripts/contribute-recipe.mjs <game-slug> [--dry-run]
+ *   node scripts/contribute-recipe.mjs <game-slug> --dry-run
+ *   node scripts/contribute-recipe.mjs <game-slug> --bundle out.json --user-approved
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, extname } from 'node:path';
-import { execSync } from 'node:child_process';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { join, extname, relative } from 'node:path';
 
-const UPSTREAM_REPO = 'yusufgunay-esq/automa';
+// Flip to true only when the atlas intake exists (separate data repo, bot-owned queue).
+const ATLAS_INTAKE_OPEN = false;
 const FORBIDDEN_EXTENSIONS = new Set([
   '.exe', '.dll', '.so', '.dylib', '.pak', '.asar', '.bin', '.iso', '.xapk', '.apk', '.aab', '.zip', '.7z', '.rar'
 ]);
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
-const slug = args.find((a) => !a.startsWith('--'));
+const approved = args.includes('--user-approved');
+const bundleIdx = args.indexOf('--bundle');
+const bundlePath = bundleIdx >= 0 ? args[bundleIdx + 1] : undefined;
+const slug = args.find((a, i) => !a.startsWith('--') && (bundleIdx < 0 || i !== bundleIdx + 1));
 
 if (!slug || slug === '_template') {
-  console.error('Usage: node scripts/contribute-recipe.mjs <game-slug> [--dry-run]');
+  console.error('Usage: node scripts/contribute-recipe.mjs <game-slug> (--dry-run | --bundle out.json --user-approved)');
   process.exit(1);
 }
 
@@ -74,41 +79,25 @@ for (const file of files) {
 
 console.log(`[AUTOMA Sync] Hygiene audit passed for targets/${slug} (${files.length} file(s)).`);
 
-if (dryRun) {
-  console.log(`[AUTOMA Sync] Dry-run complete. Ready to submit PR to ${UPSTREAM_REPO}.`);
+if (dryRun || !bundlePath) {
+  console.log('[AUTOMA Sync] Audit complete. Show the user what would be sent, then re-run with --bundle out.json --user-approved.');
   process.exit(0);
 }
 
-// 2. Automated Fork, Branch & PR Submission to yusufgunay-esq/automa
-try {
-  const branchName = `recipe/${slug}`;
-  console.log(`[AUTOMA Sync] Preparing branch ${branchName} for upstream ${UPSTREAM_REPO}...`);
-
-  execSync('gh auth status', { stdio: 'ignore' });
-  execSync(`gh repo fork ${UPSTREAM_REPO} --remote=true --clone=false`, { stdio: 'inherit' });
-  execSync(`git checkout -B ${branchName}`, { stdio: 'inherit' });
-  execSync(`git add targets/${slug}`, { stdio: 'inherit' });
-  execSync(`git commit -m "feat(target): add AUTOMA recipe and seam ledger for ${slug}"`, { stdio: 'inherit' });
-  execSync(`git push -u origin ${branchName}`, { stdio: 'inherit' });
-
-  const prTitle = `feat(target): AUTOMA autonomy recipe for ${slug}`;
-  const prBody = [
-    `## AUTOMA Target Recipe Submission: \`${slug}\``,
-    '',
-    'Submitted by an autonomous coding agent following the AUTOMA Stage-7 Collective Atlas protocol.',
-    '',
-    '- [x] Clean-room hygiene audit passed (zero game binaries or local user paths)',
-    `- [x] \`targets/${slug}/REPORT.md\` includes REA seam evidence (\`Seam.Input\`, \`Seam.Perception\`, \`Seam.NpcAI\`)`,
-  ].join('\n');
-
-  execSync(`gh pr create --repo ${UPSTREAM_REPO} --title "${prTitle}" --body "${prBody}"`, {
-    stdio: 'inherit',
-  });
-  console.log(`[AUTOMA Sync] Successfully submitted recipe PR to https://github.com/${UPSTREAM_REPO}`);
-} catch (err) {
-  console.log(
-    `\n[AUTOMA Sync] Could not auto-open PR via gh CLI. Submit targets/${slug}/REPORT.md directly at:\n` +
-      `https://github.com/${UPSTREAM_REPO}/pulls`
-  );
+if (!approved) {
+  console.error('[AUTOMA Sync] Refusing to write a bundle without --user-approved (pass it only after the user said yes).');
   process.exit(1);
+}
+
+// 2. Local bundle (data only). No git, no gh, no network.
+const bundle = {
+  schema: 'automa-atlas-bundle/1',
+  slug,
+  createdAt: new Date().toISOString(),
+  files: files.map((f) => ({ path: relative(targetDir, f).split('\\').join('/'), content: readFileSync(f, 'utf8') })),
+};
+writeFileSync(bundlePath, JSON.stringify(bundle, null, 2));
+console.log(`[AUTOMA Sync] Wrote local bundle ${bundlePath} (${bundle.files.length} file(s)).`);
+if (!ATLAS_INTAKE_OPEN) {
+  console.log('[AUTOMA Sync] Atlas submission is not open yet. The bundle stays on your disk; nothing was sent.');
 }

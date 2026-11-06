@@ -10,7 +10,7 @@
 [![Recon Engine](https://img.shields.io/badge/Binary_Recon-REA_Compatible-334155.svg)](skills/automa/SKILL.md)
 [![Architecture](https://img.shields.io/badge/Architecture-4--Layer_GOAP_%2B_Utility_AI-475569.svg)](paper/WHITEPAPER.md)
 
-[Whitepaper & Math](paper/WHITEPAPER.md) · [Agent Skill Protocol](skills/automa/SKILL.md) · [Shared Brain SDK](packages/) · [Profile Schema](schemas/profile.schema.json) · [Profile Presets](schemas/profiles.json) · [Target Recipes](targets/)
+[Whitepaper & Math](paper/WHITEPAPER.md) · [Roadmap](docs/ROADMAP.md) · [Arena](packages/automa-arena/) · [Agent Skill Protocol](skills/automa/SKILL.md) · [Shared Brain SDK](packages/) · [Profile Schema](schemas/profile.schema.json) · [Profile Presets](schemas/profiles.json) · [Target Recipes](targets/)
 
 </div>
 
@@ -18,31 +18,48 @@
 
 ## Abstract
 
-> **Core vs. Next Step.** AUTOMA's core is a *normal, configurable game AI*: the user feeds it whatever behaviour they want (aggression, range, discipline, reaction time, doctrine) and it plays accordingly. **Protagonist Fidelity** (an agent that derives the story protagonist's real fighting style from the binary and takes the character over in-narrative) is the **next step (Phase 2)**, built on top of the core and not required by it.
+> **What it is for.** Some players want the story, not the fifty filler fights in between, or they simply want to watch the character play well. AUTOMA is the *working* version of the old "bot takes over for me" toggle: it hands the fighting to a competent agent and gives control back when the fight is over. The profile is five optional knobs with sensible defaults, not a persona. Deriving the story protagonist's real fighting style from the binary (**Protagonist Fidelity**) and "let the AI work out the game by itself" stay open Phase-2 ideas, not part of the core.
 
-Narrative-driven games frequently cast the player as an elite covert operative, a mythic mercenary, or a veteran battlefield commander, yet rely strictly on repetitive manual motor execution across hundreds of filler combat encounters. Existing "bot takeover" toggles (`is_human = false` in sandbox battle simulators or idle-takeover scripts in co-op shooters) fail to bridge this gap: standard NPC brains are engineered as expendable opposition and immediately degrade into naive "charge-nearest-enemy" loops when bound to a player character.
+Narrative-driven games frequently cast the player as an elite covert operative, a mythic mercenary, or a veteran battlefield commander, yet rely strictly on repetitive manual motor execution across hundreds of filler combat encounters. Existing "bot takeover" toggles (`is_human = false` in sandbox battle simulators or idle-takeover scripts in co-op shooters) fail to bridge this gap: standard NPC brains are engineered as expendable opposition (written to lose), so they degrade into naive "charge-nearest-enemy" loops when bound to a player character.
 
-**AUTOMA (Autonomous Play Architecture)** is both an **AI Coding Agent Skill** (built to operate alongside [REA — Reverse Engineer Anything](skills/automa/SKILL.md)) and a **Shared Multi-Language Cognitive Brain SDK**. Point an agent (Claude Code, Antigravity, Codex, Cursor) at an installed single-player game and say:
+**AUTOMA (Autonomous Play Architecture)** is both an **AI Coding Agent Skill** (built to operate alongside [REA - Reverse Engineer Anything](skills/automa/SKILL.md)) and a **Shared Multi-Language Cognitive Brain SDK**. Point an agent (Claude Code, Antigravity, Codex, Cursor) at an installed single-player game and say:
 
-> *"AUTOMA Assassin's Creed Odyssey — when combat starts, let my character fight autonomously with a Spartan Vanguard profile and allow me to switch between live tactical combat and cinematic action camera."*
+> *"AUTOMA this game: when combat starts, let my character fight on its own and give it back to me afterwards."*
+
+### Architecture order (how AUTOMA treats the game's own AI)
+
+1. **The game's own AI is the foundation** (strategies S1 companion/elite-NPC brain, S2 developer autoplay): its animations and mechanics are already correct.
+2. **AUTOMA is a competence layer on top.** The native AI was written to lose, so AUTOMA only overrides its weak moments: parry/dodge on a wind-up, retreat at low health, target choice, oscillation damping. Every override is recorded with its reason.
+3. **If the native AI is unreachable (DRM etc.), AUTOMA's brain drives alone** (S3 in-process, S4 external bridge).
+4. **Story-first shortcut S5:** clean encounter resolve.
+
+Where an anti-cheat or DRM wall makes any of this unsafe, the answer is to stop: see [`targets/ghost-recon-breakpoint/REPORT.md`](targets/ghost-recon-breakpoint/REPORT.md) (ABORT example) and [`targets/assassins-creed-odyssey/REPORT.md`](targets/assassins-creed-odyssey/REPORT.md) (VMProtect: external S4 only).
 
 ---
 
-## 1. Five Core Autonomy Modes (+ Optional Phase-2 Extensions)
+## 1. Composable Behaviors (Five Presets) and Hand-over Policy
 
-AUTOMA is engineered around a strict separation of concerns: **Core Gameplay Autonomy** comes first (with the native player camera untouched), while camera, reactive music, and fast-resolve remain strictly optional Phase-2 extensions. Beyond full combat takeover, the shared AUTOMA Brain (`packages/automa-brain-*`) natively supports **five distinct operating modes**:
+The brain takes a **bit mask of behaviors**; the five classic modes are named presets over it (`AUTONOMY_PRESETS`):
 
-### A. Core Autonomy Modes (`AutonomyMode`)
-
-| Mode Identifier | Name | Runtime Behavior & Player Experience |
+| Flag | Bit | Meaning |
 |---|---|---|
-| `FULL_COMBAT` *(Default)* | **Full Protagonist Combat** | Press `F5` and the 4-Layer AUTOMA Brain fights, parries, dodges, and chains abilities in real time while keeping the game's standard camera completely intact. |
-| `CO_PILOT` | **Reflex & Parry Co-Pilot** | *"I drive, AUTOMA parries."* Human inputs pass straight through (`HUMAN_PASS_THROUGH`), but the millisecond an enemy telegraphs a lethal attack (`isWindUp`) or health drops critically, AUTOMA intercepts for a single action to execute a frame-perfect deflect, dodge, or emergency heal. |
-| `GRIND_AUTOPILOT` | **Open-World Chore & Loot Cruise** | Eliminates open-world fatigue. Out of combat, the agent follows active waypoints/roads, auto-loots fallen enemies and resource nodes (`CRUISE_OR_LOOT`), and switches to `FULL_COMBAT` if ambushed. |
-| `SHADOW_SURVIVAL` | **Boss Pattern Coach (Zero Offense)** | Enters strict `DEFENSIVE` stance—never attacking, only weaving, spacing, and parrying every boss combo via 16-Slot Context Steering so the player can study brutal boss patterns safely before taking over. |
-| `COMMANDER` | **Macro Tactical Commander** | The player issues high-level doctrine orders (*"Focus Ranged"*, *"Hold Ground"*, *"All-Out Assault"*) while AUTOMA executes the low-level motor combat. |
+| `COMBAT` | 1 | Fight: close in, chain attacks, parry/dodge. |
+| `ASSIST` | 2 | Human drives; AUTOMA intercepts only for an urgent reflex (parry/dodge on a wind-up, heal at low health). Inert while `COMBAT` is set and an enemy exists. |
+| `CRUISE` | 4 | Out of combat: follow waypoints, loot. Runs only while no enemy exists. |
+| `DEFENSIVE` | 8 | Never attack; weave, space and parry. Overrides offense. |
+| `COMMAND` | 16 | Player issues doctrine orders, AUTOMA executes motor combat. |
 
-> **Modes combine.** The five modes are named presets. The target design ([docs/ROADMAP.md](docs/ROADMAP.md)) makes them composable behavior flags, so a command like *"loot and fight, but only parry while I drive"* can activate several at once.
+| Preset (`AutonomyMode`) | Mask | Experience |
+|---|---|---|
+| `FULL_COMBAT` (default) | `COMBAT` | AUTOMA fights, parries, dodges and chains abilities on the native camera. |
+| `CO_PILOT` | `ASSIST` | "I drive, AUTOMA parries": human input passes (`HUMAN_PASS_THROUGH`) except urgent reflexes. |
+| `GRIND_AUTOPILOT` | `CRUISE`+`COMBAT` | Chore and loot cruise, fights when ambushed. |
+| `SHADOW_SURVIVAL` | `DEFENSIVE` | Zero-offense boss pattern coach. |
+| `COMMANDER` | `COMBAT`+`COMMAND` | Macro orders, AUTOMA does the motor work. |
+
+Decision (001): **if no behavior is active** (mask 0, `CRUISE` alone while an enemy exists, `COMMAND` alone) the output is `HUMAN_PASS_THROUGH`: no intercept, no steering. Cycling presets in a game (an optional hotkey) walks the five presets; arbitrary masks are set by the user's words, not a key.
+
+**Hand-over (`AutomaRuntime`, [`packages/automa-seams-ts`](packages/automa-seams-ts/src/index.ts)).** Default `engage: 'onCombat'`: AUTOMA takes over as soon as a hostile is perceived and gives control back after the fight (no hostile for 2 s). `engage: 'manual'` uses a toggle bound to a key *you* choose (`toggleKey`; no fixed key). In both modes, manual input hands control back at once, and cutscene / menu / loading interlocks keep AUTOMA inert (no command or steering is written; at most one neutral `release`). The arena proves each of these (section 4).
 
 ### B. Optional Post-Core Extensions (Phase 2 — Added Only When Requested)
 
@@ -106,55 +123,70 @@ Because game modding spans managed C#, native C++, embedded Lua, and out-of-proc
 
 ---
 
-## 4. The Three Core Seams (+ Optional Phase-2 Extensions)
+## 4. Adapter Seam Contract and the Arena
 
-When an AI agent is instructed to **AUTOMA a target game**, it follows [skills/automa/SKILL.md](skills/automa/SKILL.md) to extract the **Three Core Seams** using REA. Camera, reactive music, and fast-resolve hooks remain strictly optional Phase-2 extensions:
+When an AI agent is instructed to **AUTOMA a target game**, it follows [skills/automa/SKILL.md](skills/automa/SKILL.md) to find the game's seams with REA and implement the contract in code ([`packages/automa-seams-ts`](packages/automa-seams-ts/src/index.ts); C# mirror in [`AutomaSeams.cs`](packages/automa-brain-cs/AutomaSeams.cs)):
 
-| Seam / Extension | Tier | Target Subsystem | Required Binary Evidence |
+| Seam | Tier | Contract | Required Binary Evidence |
 |---|---|---|---|
-| `Seam.Input` | **Core (Mandatory)** | Player Controller & Action Dispatch | Internal command handlers (`Move`, `Attack`, `Parry`, `Dodge`, `UseAbility`). |
-| `Seam.Perception` | **Core (Mandatory)** | World State & Telegraphing | Active entity array, health/stamina offsets, and enemy attack wind-up flags. |
-| `Seam.NpcAI` | **Core (Mandatory)** | Native NPC / Companion Brain | Existing Behavior Tree, combat evaluator, or dormant autoplay switch. |
-| `Ext.Camera` | *Optional (Phase 2)* | Action Camera & Time Dilation | Camera FOV/orbit transform and `timeScale` hooks (`CINEMATIC_LIVE`). |
-| `Ext.Audio` | *Optional (Phase 2)* | Reactive Combat Music / Stingers | Dynamic music intensity / protagonist theme trigger hooks. |
-| `Ext.Encounter` | *Optional (Phase 2)* | Encounter Lifecycle & Quests | Native encounter-completion callbacks (`CINEMATIC_RESOLVE`). |
+| `PerceptionSeam` (`Seam.Perception`) | **Core** | `self()`, `hostiles()`, `waypoint()` | Entity array, health/stamina, enemy wind-up flags. |
+| `InputSeam` (`Seam.Input`) | **Core** | `command(id)`, `steer(dir, speed)`, `release()` | Internal command handlers (`Move`, `Attack`, `Parry`, `Dodge`). |
+| `InterlockSeam` | **Core (safety)** | `cutscene()`, `menu()`, `loading()`, `manualOverride()` | State flags for dialogue, menus, loading, controller activity. |
+| `NativeAiSeam` (`Seam.NpcAI`) | Optional, preferred | `available()`, `proposeCommand()` | Behavior tree / combat evaluator / autoplay switch (S1/S2). |
+| `Ext.Camera`, `Ext.Audio`, `Ext.Encounter` | *Optional (Phase 2)* | - | FOV/time scale, music hooks, encounter callbacks. |
+
+[`targets/_template/adapter-checklist.md`](targets/_template/adapter-checklist.md) maps each seam to the arena gate that proves it.
+
+### The Arena: evidence that the brain actually plays
+
+[`packages/automa-arena`](packages/automa-arena/) is a deterministic (seeded) 2D simulator that drives `AutomaRuntime` through these seams: enemies approach, telegraph a wind-up, strike; parry and dodge windows; damage; obstacles; waypoints and loot. Eight scenarios (duel, 3-enemy surround, archer + melee, DEFENSIVE boss combo, cruise + ambush, onCombat hand-over, native-AI overlay, interlocks) must pass fixed gates: survival, telegraphed strikes avoided, zero attacks under `DEFENSIVE`, bounded steering reversals, zero input while locked, same-tick manual hand-back, takeover and hand-back timing, and "native AI + AUTOMA beats the same native AI alone".
+
+```bash
+node packages/automa-arena/run.mjs                    # table of gates, exit 1 on failure
+node packages/automa-arena/run.mjs --scenario duel --seed 3 --json
+node packages/automa-arena/run.mjs --html replay.html # single-file replay (works on a phone)
+```
+
+What this does **not** prove: real-game behavior. It proves the brain and runtime contract in a simplified world; every real adapter still needs its own live check. Known limit: a ranged wind-up beyond the brain's 4.5 m imminence radius is not reacted to (reported as `unreactableHit`, not hidden).
 
 ---
 
-## 5. Collective Game Autonomy Atlas (Self-Feeding Upstream Protocol)
+## 5. Collective Game Autonomy Atlas (Local Verification, Consent, Bundle)
 
-AUTOMA is designed as a **self-growing collective intelligence repository**. Whenever a user anywhere in the world instructs their AI coding agent to AUTOMA a game:
+The atlas is **not** this code repository: per [docs/ROADMAP.md](docs/ROADMAP.md) it is a separate data repo with a single writer and approved submissions only. The flow today:
 
-1. **Lookup First (`Stage 0`):** The agent checks `targets/<game-slug>/` in `yusufgunay-esq/automa`. If another agent has already mapped the game's seams, the mod is built in seconds without redundant reverse engineering.
-2. **Upstream Recipe Sync (`Stage 7`):** When an agent reverse-engineers a new game with REA, it records the discovered memory offsets, hook signatures, and clean-room adapter in `targets/<game-slug>/REPORT.md` and runs [`scripts/contribute-recipe.mjs`](scripts/contribute-recipe.mjs):
+1. **Lookup first (`Stage 0`):** check `targets/<game-slug>/` here for a recipe before reverse engineering again.
+2. **Local verification (`Stage 7`):** the agent audits the recipe on the contributor's machine (no binaries, no personal paths) and shows the user exactly what would be sent.
+3. **With the user's consent only**, it writes an atlas bundle:
    ```bash
-   # Audits for zero proprietary binaries / zero profilel paths, then opens a PR to yusufgunay-esq/automa
-   node scripts/contribute-recipe.mjs <game-slug>
+   node scripts/contribute-recipe.mjs <game-slug> --dry-run                          # audit only
+   node scripts/contribute-recipe.mjs <game-slug> --bundle out.json --user-approved  # local bundle
    ```
-   Every user's agent automatically feeds newly discovered game seams and adapters back into **`yusufgunay-esq/automa`** via Pull Request, turning this repository into the canonical global atlas of game autonomy seams.
+4. **Submission is not open yet.** The script opens no pull request and talks to no repository; the bundle stays on your disk until the atlas intake exists.
 
 ---
 
-## 6. Profile: Fed By the User, Never Picked From a Menu
+## 6. Profile: Five Optional Knobs, Not a Persona
 
-**Tier 1 (core, now): User-Fed Profile.** The user (or their agent, from a plain-language description) writes the `profile.json`: any playstyle, any numbers. No game knowledge is needed, and it works for any controllable unit: the player character, a companion, or any NPC. **Tier 2 (next step, Phase 2): Protagonist Fidelity.** REA derives the numbers from the protagonist's real animation and commitment behaviour so the takeover is narrative-consistent. The schema is identical for both tiers; only the *source* of the numbers differs.
+The profile is **five numbers** (`aggression`, `discipline`, `cinematicFlair`, `reactionDelayMs`, `preferredRange`) plus a free-form label. It **starts from a ready preset and works well unchanged**; the user adjusts it in plain words ("be more careful", "stay at range") and the agent edits the numbers. It works for any controllable unit: the player character, a companion, any NPC.
 
-"Configurable Autonomy" is the whole point of the project, so AUTOMA deliberately ships **no closed taxonomy of playstyles**. A fixed enum of five classes ("Operative / Vanguard / Scholar / Skirmisher / Guardian") would mean *"every protagonist in every game fits five boxes"* — the opposite of profile alignment. An arcane duelist, a drunken brawler and a pacifist monk are all first-class.
+**Phase 2 (open idea, not a promise): Protagonist Fidelity.** REA could derive the numbers from the protagonist's real animation and commitment behaviour; the schema would be identical, only the *source* of the numbers differs.
+
+AUTOMA ships **no closed taxonomy of playstyles**: an arcane duelist, a drunken brawler and a pacifist monk are all first-class.
 
 | | Closed taxonomy (rejected) | AUTOMA's approach |
 |---|---|---|
-| How the style is chosen | Pick one of five boxes | The agent **derives** it from REA evidence |
+| How the style is chosen | Pick one of five boxes | Start from a preset, adjust by words (or, in Phase 2, derive from REA evidence) |
 | Games that do not fit | Forced into the nearest box | Author their own `profile.json` |
-| Role of the reverse-engineering engine | Cannot leave the list | Reads the protagonist's real animation/commitment behaviour and produces the numbers |
 | `archetype` label | Enum, validated against a list | Free-form string, any label the game deserves |
 
 Concretely:
 
 1. **[`schemas/profile.schema.json`](schemas/profile.schema.json)** validates ranges and shapes only — `archetype` is a free-form label, not an enum.
-2. **[`schemas/profiles.json`](schemas/profiles.json)** holds five **optional starting templates** (including an `ARCANE_SCHOLAR` and a `RANGED_SKIRMISHER`, both missing from the old enum). Fork the closest one, then re-tune every number against evidence and rename the label.
+2. **[`schemas/profiles.json`](schemas/profiles.json)** holds five **optional starting templates** (including an `ARCANE_SCHOLAR` and a `RANGED_SKIRMISHER`, both missing from the old enum). Start from the closest one and adjust; a game-specific profile should be re-tuned against evidence.
 3. **Every target writes its own** `targets/<game-slug>/profile.json`, with an `evidence` array recording which symbols and timings justified each parameter, validated by `node scripts/validate-profiles.mjs <game-slug>`.
 
-Derivation is prescriptive, not vibes: `preferredRange` comes from weapon reach and attack-animation distance, `aggression` from the ratio of committed attacks to repositioning in the combat state machine, `discipline` from the parry-window length found in `Seam.Input`, `cinematicFlair` from the presence of counters/finishers/hit-stop hooks, and `reactionDelayMs` from dodge/parry commitment frames. A profile that is still byte-identical to a preset is treated as a specification failure.
+Derivation is prescriptive, not vibes: `preferredRange` comes from weapon reach and attack-animation distance, `aggression` from the ratio of committed attacks to repositioning in the combat state machine, `discipline` from the parry-window length found in `Seam.Input`, `cinematicFlair` from the presence of counters/finishers/hit-stop hooks, and `reactionDelayMs` from dodge/parry commitment frames. For a profile that claims to be evidence-derived, being byte-identical to a preset is a specification failure.
 
 ---
 
@@ -165,39 +197,29 @@ AUTOMA/
 ├── .claude-plugin/          # Agent plugin manifest (Claude Code / Antigravity)
 ├── packages/
 │   ├── automa-brain-ts/       # Reference 4-Layer Cognitive Kernel (TypeScript + Node test suite)
-│   ├── automa-brain-cs/       # Drop-in C# Kernel for Unity Mono / IL2CPP (BepInEx / MelonLoader)
-│   ├── automa-brain-cpp/      # Header-only C++20 Kernel for Native DLL Hooking (Anvil / Unreal)
-│   └── automa-brain-lua/      # Portable Lua Kernel for UE4SS / Cyber Engine Tweaks / VScript
-├── paper/
-│   └── WHITEPAPER.md        # Formal mathematical specification & academic references
-├── schemas/
-│   ├── profile.schema.json  # Profile contract (free-form playstyle label — NO fixed taxonomy)
-│   ├── profiles.schema.json  # Contract for the optional preset library
-│   └── profiles.json         # Five OPTIONAL starting templates, meant to be re-derived per game
-├── scripts/
-│   ├── contribute-recipe.mjs# Automated hygiene audit & upstream PR contributor to yusufgunay-esq/automa
-│   └── validate-profiles.mjs# Zero-dependency profile contract validator
-├── skills/
-│   └── automa/                # Agent skill definition, strategy ladder (S1-S5) & engine matrix
-└── targets/
-    └── _template/REPORT.md  # Standardized 3-Core-Seam & 4-Gate verification report for new games
+│   ├── automa-brain-cs/       # Drop-in C# Kernel + AutomaSeams.cs (BepInEx / MelonLoader)
+│   ├── automa-brain-cpp/      # Header-only C++20 Kernel for Native DLL Hooking
+│   ├── automa-brain-lua/      # Portable Lua Kernel for UE4SS / Cyber Engine Tweaks
+│   ├── automa-seams-ts/       # Seam contract + AutomaRuntime (engage policy, interlocks, native-AI override)
+│   ├── automa-arena/          # Deterministic simulator + automatic gates (run.mjs)
+│   └── conformance/           # Cross-language fixtures and C#/C++/Lua runners
+├── paper/ docs/               # Whitepaper and roadmap (CC BY 4.0, see LICENSE-CC-BY-4.0.md)
+├── schemas/                   # Profile contract + five OPTIONAL starting presets
+├── scripts/                   # Hygiene audit / atlas bundle, profile validator, conformance drivers
+├── skills/automa/             # Agent skill, strategy ladder (S1-S5), engine matrix
+└── targets/                   # Per-game recipes (_template, assassins-creed-odyssey, ghost-recon-breakpoint)
 ```
 
 ---
 
 ## 8. Quick Verification
 
-Run the reference cognitive kernel test suite (Node.js 22+):
+Node.js 22.6+ (TypeScript runs through `--experimental-strip-types`; no npm dependencies):
 
 ```bash
-cd packages/automa-brain-ts
-npm test
-```
-
-Validate the profile contracts (reference kernel + every shipped target):
-
-```bash
-node scripts/validate-profiles.mjs
+npm test                  # kernel + seam + arena tests, arena gate table, profile validation, fixture freshness, C# conformance if dotnet exists
+npm run arena             # gate table only
+npm run conformance:all   # strict C# / C++20 / Lua runners (CI does this)
 ```
 
 ---
@@ -211,7 +233,9 @@ node scripts/validate-profiles.mjs
 
 ## Citation
 
-If you build upon AUTOMA's cognitive architecture, profile schemas, or target adapters in academic work or open-source projects, please cite [`CITATION.cff`](CITATION.cff):
+If you build upon AUTOMA's cognitive architecture, profile schemas, or target adapters in academic work or open-source projects, please cite [`CITATION.cff`](CITATION.cff). The text below is identical to its `preferred-citation`:
+
+> Günay, Y. (2026). *AUTOMA: Autonomous Play Architecture for Single-Player Games* (Version 1.0.0) [Computer software & Cognitive Architecture Specification]. https://github.com/yusufgunay-esq/automa
 
 ```bibtex
 @software{gunay2026automa,
@@ -219,6 +243,7 @@ If you build upon AUTOMA's cognitive architecture, profile schemas, or target ad
   title     = {{AUTOMA: Autonomous Play Architecture for Single-Player Games}},
   year      = {2026},
   version   = {1.0.0},
+  note      = {Computer software \& Cognitive Architecture Specification},
   license   = {MPL-2.0},
   url       = {https://github.com/yusufgunay-esq/automa}
 }
@@ -226,7 +251,5 @@ If you build upon AUTOMA's cognitive architecture, profile schemas, or target ad
 
 ## License & Mandatory Academic Attribution
 
-AUTOMA employs a dual-protection structure designed for open-source scientific software:
-
-1. **Software & SDK (`packages/`, `skills/`, `targets/`):** Licensed under the **Mozilla Public License 2.0 (MPL-2.0)**. Any modification or redistribution of covered files must retain the copyright notice crediting **Yusuf Günay** ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)).
-2. **Whitepaper, Mathematical Formulation & Research Protocols (`paper/`, `schemas/`):** Licensed under **Creative Commons Attribution 4.0 International (CC BY 4.0)**. Any academic thesis, dissertation, conference proceeding, preprint, or technical report that uses, benchmarks, or references AUTOMA is **legally required** to credit **Yusuf Günay** by name via the citation above ([`CITATION.cff`](CITATION.cff)).
+1. **Software & SDK (`packages/`, `skills/`, `targets/`, `scripts/`, `schemas/`):** **Mozilla Public License 2.0 (MPL-2.0)**. Modified covered files stay open under the same license; the copyright notice crediting **Yusuf Günay** must be retained ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)). Your own separate code can stay closed.
+2. **Whitepaper and roadmap (`paper/`, `docs/`):** **Creative Commons Attribution 4.0 International (CC BY 4.0)**, see [`LICENSE-CC-BY-4.0.md`](LICENSE-CC-BY-4.0.md). Any thesis, paper, preprint or technical report that uses or evaluates AUTOMA must credit **Yusuf Günay** with the citation above.

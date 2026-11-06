@@ -41,5 +41,5 @@ node scripts/validate-profiles.mjs <game-slug>
 
 ## 3. Adapting to the Player's Live Build
 
-At toggle time (`F5`) and whenever equipment changes, inspect the player's equipped weapon class, unlocked active skills, and quick-slot consumables via `Seam.Perception`, and map them to the GOAP/Utility action descriptors. Never hardcode an ability the player has not unlocked.
+At hand-over time (first hostile, or the user's toggle) and whenever equipment changes, inspect the player's equipped weapon class, unlocked active skills, and quick-slot consumables via `Seam.Perception`, and map them to the GOAP/Utility action descriptors. Never hardcode an ability the player has not unlocked.
 

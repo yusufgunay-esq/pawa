@@ -1,32 +1,22 @@
 ---
 name: automa
-description: Autonomous Play Architecture (AUTOMA). Reverse engineer any single-player game with REA, discover its controller/AI/camera seams, and inject a 4-layer, user-configurable autonomous game brain (Orchestrator, Regressive A* GOAP, Compensated Utility AI, 16-Slot Context Steering) with user-selectable Tactical, Cinematic Live, and Cinematic Resolve presentation modes. Trigger when the user says "AUTOMA this game", "şu oyuna AUTOMA yap", "add autopilot/auto-combat to <game>", or wants a character to play autonomously with a behaviour profile they define (Protagonist Fidelity, i.e. mimicking the story protagonist, is an optional Phase-2 tier).
+description: Autonomous Play Architecture (AUTOMA). Reverse engineer any single-player game with REA, discover its controller/perception/native-AI seams, and give the player's character a competent autonomous fighter: the game's own AI as the base, AUTOMA's 4-layer brain (Orchestrator, Regressive A* GOAP, Compensated Utility AI, 16-Slot Context Steering) as a competence layer or standalone. Trigger when the user says "AUTOMA this game", "şu oyuna AUTOMA yap", "add autopilot/auto-combat to <game>", or wants a character to play fights on its own and hand control back afterwards. Protagonist Fidelity (mimicking the story protagonist) is an open Phase-2 idea.
 metadata:
   version: "1.0.0"
 ---
 
 # AUTOMA — Autonomous Play Architecture
 
-AUTOMA gives any single-player game a **normal, user-configurable AI**. With a single hotkey (`F5`), a controllable character is handed over to a **Configurable Autonomy Proxy Agent** that fights, dodges, parries, and executes abilities in real time according to a behaviour profile *the user feeds it*. Mimicking the story protagonist (Protagonist Fidelity) is the optional **Phase-2** tier, not the core—while keeping the game's native camera and flow completely intact (like *Left 4 Dead 2* or *Warband* `F5`, but powered by a genuine 4-layer tactical brain instead of a naive bot).
+Purpose: a player who wants the story (or just wants to watch) hands the fighting to a competent agent; control returns when the fight is over. It is the *working* version of the old "bot takes over" toggle. The profile is five optional knobs with a good default, not a persona.
 
 ---
 
-## 1. Five Core Autonomy Modes (`F5` / `F7`) & Optional Phase-2 Extensions
+## 1. Behaviors (Five Presets), Hand-over, Architecture Order
 
-AUTOMA is not limited to a single "bot takeover" toggle. The cognitive kernel (`packages/automa-brain-*`) supports **Five Distinct Autonomy Modes** (`AutonomyMode`), while keeping camera, music, and fast-resolve as optional Phase-2 extensions:
-
-### A. Core Autonomy Operating Modes (`AutonomyMode`)
-1. **`FULL_COMBAT` (Default — Live AI Control):** Press `F5` and the 4-Layer AUTOMA Brain takes full control of combat, movement, parries, and ability rotations in real time while keeping the native player camera intact.
-2. **`CO_PILOT` (Reflex & Micro-Assist Mode — *"I Drive, AUTOMA Parries"*):** The human player retains full movement and attack control (`HUMAN_PASS_THROUGH`), but the millisecond an enemy telegraphs a lethal strike (`isWindUp == true`) or health drops critically, AUTOMA's Compensated Utility scorer intercepts for a single frame to execute a frame-perfect parry/deflect, dodge, or emergency heal.
-3. **`GRIND_AUTOPILOT` (Open-World Chore, Loot & Waypoint Cruise):** Eliminates open-world fatigue. Out of combat, the agent steers along the active waypoint/road, automatically loots fallen enemies and resource nodes (`CRUISE_OR_LOOT`), and seamlessly switches to `FULL_COMBAT` if ambushed.
-4. **`SHADOW_SURVIVAL` (Zero-Offense Boss Pattern Coach):** Designed for learning brutal bosses. The agent enters strict `DEFENSIVE` stance—never attacking, only weaving, spacing, and parrying every boss combo via 16-Slot Context Steering so the player can study attack patterns safely before taking over.
-5. **`COMMANDER` (High-Level Tactical Doctrine):** The player issues macro orders (*"Focus Ranged"*, *"Hold Ground"*, *"Go All-In"*) while AUTOMA executes the low-level motor combat.
-
-### B. Optional Post-Core Extensions (Phase 2 — Only When Requested)
-- **`Ext.Camera` (`CINEMATIC_LIVE`):** Dynamic FOV framing and hit-stop slow-motion on parries and finishers.
-- **`Ext.Audio` (Reactive Combat Music / Stingers):** Swells combat music intensity or triggers protagonist theme stingers during high-utility maneuvers.
-- **`Ext.Resolve` (`CINEMATIC_RESOLVE`):** Choreographed encounter-completion hook for skipping filler fights cleanly.
-- **`Ext.Telemetry` (Scientific / Thesis Benchmark Logger):** Exports per-tick GOAP plans, Utility scores, and Influence Map entropy to CSV/JSON for academic research.
+- **Behavior flags** (`Behaviors` bit mask): `COMBAT`=1, `ASSIST`=2, `CRUISE`=4, `DEFENSIVE`=8, `COMMAND`=16. The five `AutonomyMode` names are presets (`FULL_COMBAT`=COMBAT, `CO_PILOT`=ASSIST, `GRIND_AUTOPILOT`=CRUISE+COMBAT, `SHADOW_SURVIVAL`=DEFENSIVE, `COMMANDER`=COMBAT+COMMAND). Rules: DEFENSIVE overrides offense; ASSIST is inert while COMBAT is set and an enemy exists; CRUISE runs only while no enemy exists; **no active behavior => `HUMAN_PASS_THROUGH`** (no intercept, no steering). An optional preset-cycle key walks the five presets; other masks come from the user's words.
+- **Hand-over** (`AutomaRuntime`, `packages/automa-seams-ts`): default `engage: 'onCombat'` takes over when a hostile is perceived and hands back after ~2 s without hostiles; `engage: 'manual'` uses a toggle bound to a key the user picks (`toggleKey`, no fixed key; F5 etc. are only examples). Manual input hands control back immediately; cutscene/menu/loading interlocks keep AUTOMA inert.
+- **Architecture order:** (1) the game's own AI is the foundation (S1/S2); (2) AUTOMA is a competence layer on top, overriding only weak moments (wind-up parry/dodge, low-health retreat, target choice, oscillation) and logging each override reason; (3) if native AI is unreachable (DRM), AUTOMA drives alone (S3/S4); (4) S5 story-first resolve.
+- **Phase 2 / open (not core):** camera (`Ext.Camera`), reactive audio, fast-resolve (`Ext.Resolve`), telemetry, **Protagonist Fidelity** (REA-derived fighting style), "let the AI figure out the game itself". Only when the user asks.
 
 ---
 
@@ -58,12 +48,10 @@ Using REA static cross-references (`xrefs`, `search_strings`, `procedure_pseudo_
 *(Optional Phase 2 Seams — only locate if the user explicitly asks for camera, music, or skip extensions: `Ext.Camera` for FOV/time-dilation, `Ext.Audio` for music/stinger triggers, `Ext.Encounter` for fast-resolve callbacks.)*
 
 ### Stage 3: Strategy Selection (`S1` → `S5` Ladder)
-Select the highest-fidelity strategy from [references/strategies.md](references/strategies.md) and document why any simpler tier was insufficient:
-- **S1 — Hybrid Brain Grafting:** Graft `AutomaBrain` onto the game's native NPC navigation/animation controller while overriding target perception and ability scoring.
-- **S2 — Dormant Developer / Bot Switch Activation:** Unlock built-in engine autoplay/spectator routines discovered via REA and augment them with AUTOMA's Utility scorer.
-- **S3 — NativeAUTOMA Adapter (Recommended Standard):** Link `automa-brain-*` directly into the game process; read `Seam.Perception` each tick and dispatch motor intents directly into `Seam.Input` and `Seam.Camera`.
-- **S4 — External Memory + Synthetic Input Bridge:** Run `automa-brain-ts` out-of-process when internal hooking is unstable.
-- **S5 — Pure Narrative Resolve:** Hook `Seam.Encounter` and `Seam.Camera` to transition combat encounters directly into choreographed resolution cuts.
+Pick in this order and document why a higher tier was not possible ([references/strategies.md](references/strategies.md)):
+1. **S1 / S2 first, if reachable:** the game's own AI (companion/elite NPC brain, or developer autoplay) is the foundation: its animations and mechanics are already right. Bind it to the player character and add AUTOMA as a **competence layer** (`NativeAiSeam`): the native AI was written to lose, so AUTOMA only overrides weak moments.
+2. **S3 / S4 when native AI is unreachable** (DRM, VMProtect, no hook): AUTOMA's brain drives alone, in-process (S3) or via an external bridge (S4). Examples: `targets/assassins-creed-odyssey/REPORT.md` (VMProtect: S4 only), `targets/ghost-recon-breakpoint/REPORT.md` (ABORT: Denuvo + anti-cheat traces).
+3. **S5 story-first shortcut:** clean encounter resolve.
 
 ### Stage 4: Profile (User-Fed by Default, Evidence-Derived in Phase 2)
 **Tier 1 (default):** take the profile from the user's own description or file; ask only if a value matters and is unclear, otherwise fork the closest preset. Do not run protagonist analysis unless asked.
@@ -75,29 +63,19 @@ Select the highest-fidelity strategy from [references/strategies.md](references/
 3. Fill the `evidence` array with the symbols/timings that justify each parameter, then validate: `node scripts/validate-profiles.mjs <game-slug>`.
 4. If the shipped profile is still byte-identical to a preset, that is a specification failure — re-derive it.
 
-### Stage 5: Adapter Implementation & Safety Interlocks
-Wire the chosen `automa-brain-*` package to the Five Seams. Every AUTOMA adapter **must** implement automatic disengage interlocks on:
-- Cutscene / dialogue active
-- Menu / inventory / map open
-- Loading screen or level transition
-- Player manual override (optional instant hand-back on WASD/Stick input)
+### Stage 5: Adapter Implementation and Seam Contract
+Implement the seams from `packages/automa-seams-ts` (C# mirror: `packages/automa-brain-cs/AutomaSeams.cs`) and hand them to `AutomaRuntime`: `PerceptionSeam`, `InputSeam`, `InterlockSeam` (cutscene / menu / loading / manual override: all mandatory) and, when S1/S2 is reachable, `NativeAiSeam`. Fill `targets/_template/adapter-checklist.md` (seam -> arena gate).
 
-### Stage 6: Live Execution & 3-Gate Verification
-Compiling is not completion. Run the game and verify:
-1. **Smoke Gate:** Clean startup, `F5` toggles autonomy without frame hitching, `F6` cycles `TACTICAL` → `CINEMATIC_LIVE` → `CINEMATIC_RESOLVE`.
-2. **Tactical Competence Gate:** Watch 5 minutes of combat. Verify the agent parries/dodges telegraphed (`isWindUp`) strikes, utilizes equipped abilities, and avoids obstacle oscillation via 16-Slot Context Steering.
-3. **Quest Integrity Gate:** Trigger `CINEMATIC_RESOLVE` during an objective fight and verify that the next quest stage unlocks cleanly.
+### Stage 6: Verification Gates
+Compiling is not completion.
+1. **Arena gate (automatic):** `node packages/automa-arena/run.mjs` must print `ALL GATES PASS` (kernel + runtime contract: survival, avoided telegraphs, no offense under DEFENSIVE, bounded steering reversals, zero input while locked, same-tick manual hand-back, onCombat takeover/hand-back, native-AI overlay beats native alone). It does not prove the real game.
+2. **Live smoke gate:** clean startup; hand-over happens on the first hostile and returns ~2 s after the fight; manual input and cutscenes release control; no frame hitching.
+3. **Live competence gate:** a short real fight: parries/dodges telegraphed strikes, no oscillation; walk the adapter checklist.
+4. **Quest integrity gate (only if `Ext.Resolve`/S5 is used):** the next quest stage unlocks cleanly.
 
-### Stage 7: Collective Atlas Sync — Contribute Recipe Upstream to `yusufgunay-esq/automa`
-AUTOMA is a self-growing **Collective Game Autonomy Atlas**. Every time an agent engineers or refines a target recipe (`targets/<game-slug>/REPORT.md`, `profile.json`, and clean-room adapter source), it **must** feed the learned seams and adapter back to the central repository (`yusufgunay-esq/automa`) so no future user or agent ever has to reverse-engineer the same game twice:
-
-1. Complete `targets/<game-slug>/REPORT.md` with exact REA seam symbols/RVAs, strategy tier justification, and verification results.
-2. Run the hygiene & privacy check:
-   ```bash
-   node scripts/contribute-recipe.mjs <game-slug> --dry-run
-   ```
-   *(Verifies zero `.exe`/`.dll`/`.pak` binaries and zero profilel OS username paths are present).*
-3. With the user's confirmation, submit the recipe upstream as an automated Pull Request to `yusufgunay-esq/automa`:
-   ```bash
-   node scripts/contribute-recipe.mjs <game-slug>
-   ```
+### Stage 7: Atlas Bundle (Local Verification, Consent, No PR to the Code Repo)
+The atlas is a separate data repo with a single writer (see `docs/ROADMAP.md`); do **not** open pull requests against the code repository.
+1. Complete `targets/<game-slug>/REPORT.md` (seam symbols/RVAs, strategy justification, verification results).
+2. Audit locally: `node scripts/contribute-recipe.mjs <game-slug> --dry-run` (no binaries, no personal paths).
+3. Show the user exactly what would be sent and ask for consent. Only after a yes: `node scripts/contribute-recipe.mjs <game-slug> --bundle out.json --user-approved`.
+4. Submission target does not exist yet: the script says "not open yet" and the bundle stays local. Never push or PR anywhere.
