@@ -1,16 +1,16 @@
 <div align="center">
 
-# AUTOMA
-### Autonomous Play Architecture
+# Stuntdouble
+### Competent combat hand-over for story-driven single-player games
 
 **An Open-Source, User-Configurable Game AI & Reverse-Engineering Protocol for Single-Player Games**
 
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-1e293b.svg)](LICENSE)
 [![Cognitive Kernel](https://img.shields.io/badge/Brain_Kernel-TS_%7C_C%23_%7C_C%2B%2B20_%7C_Lua-0f172a.svg)](#3-shared-multi-language-brain-sdk-packages)
-[![Recon Engine](https://img.shields.io/badge/Binary_Recon-REA_Compatible-334155.svg)](skills/automa/SKILL.md)
+[![Recon Engine](https://img.shields.io/badge/Binary_Recon-REA_Compatible-334155.svg)](skills/stuntdouble/SKILL.md)
 [![Architecture](https://img.shields.io/badge/Architecture-4--Layer_GOAP_%2B_Utility_AI-475569.svg)](paper/WHITEPAPER.md)
 
-[Whitepaper & Math](paper/WHITEPAPER.md) · [Roadmap](docs/ROADMAP.md) · [Arena](packages/automa-arena/) · [Agent Skill Protocol](skills/automa/SKILL.md) · [Shared Brain SDK](packages/) · [Profile Schema](schemas/profile.schema.json) · [Profile Presets](schemas/profiles.json) · [Target Recipes](targets/)
+[Whitepaper & Math](paper/WHITEPAPER.md) · [Roadmap](docs/ROADMAP.md) · [Arena](packages/stuntdouble-arena/) · [Agent Skill Protocol](skills/stuntdouble/SKILL.md) · [Shared Brain SDK](packages/) · [Profile Schema](schemas/profile.schema.json) · [Profile Presets](schemas/profiles.json) · [Target Recipes](targets/)
 
 </div>
 
@@ -18,19 +18,19 @@
 
 ## Abstract
 
-> **What it is for.** Some players want the story, not the fifty filler fights in between, or they simply want to watch the character play well. AUTOMA is the *working* version of the old "bot takes over for me" toggle: it hands the fighting to a competent agent and gives control back when the fight is over. The profile is five optional knobs with sensible defaults, not a persona. Deriving the story protagonist's real fighting style from the binary (**Protagonist Fidelity**) and "let the AI work out the game by itself" stay open Phase-2 ideas, not part of the core.
+> **What it is for.** Some players want the story, not the fifty filler fights in between, or they simply want to watch the character play well. Stuntdouble is the *working* version of the old "bot takes over for me" toggle: it hands the fighting to a competent agent and gives control back when the fight is over. The profile is five optional knobs with sensible defaults, not a persona. Deriving the story protagonist's real fighting style from the binary (**Protagonist Fidelity**) and "let the AI work out the game by itself" stay open Phase-2 ideas, not part of the core.
 
 Narrative-driven games frequently cast the player as an elite covert operative, a mythic mercenary, or a veteran battlefield commander, yet rely strictly on repetitive manual motor execution across hundreds of filler combat encounters. Existing "bot takeover" toggles (`is_human = false` in sandbox battle simulators or idle-takeover scripts in co-op shooters) fail to bridge this gap: standard NPC brains are engineered as expendable opposition (written to lose), so they degrade into naive "charge-nearest-enemy" loops when bound to a player character.
 
-**AUTOMA (Autonomous Play Architecture)** is both an **AI Coding Agent Skill** (built to operate alongside [REA - Reverse Engineer Anything](skills/automa/SKILL.md)) and a **Shared Multi-Language Cognitive Brain SDK**. Point an agent (Claude Code, Antigravity, Codex, Cursor) at an installed single-player game and say:
+**Stuntdouble (Competent combat hand-over for story-driven single-player games)** is both an **AI Coding Agent Skill** (built to operate alongside [REA - Reverse Engineer Anything](skills/stuntdouble/SKILL.md)) and a **Shared Multi-Language Cognitive Brain SDK**. Point an agent (Claude Code, Antigravity, Codex, Cursor) at an installed single-player game and say:
 
-> *"AUTOMA this game: when combat starts, let my character fight on its own and give it back to me afterwards."*
+> *"Stuntdouble this game: when combat starts, let my character fight on its own and give it back to me afterwards."*
 
-### Architecture order (how AUTOMA treats the game's own AI)
+### Architecture order (how Stuntdouble treats the game's own AI)
 
 1. **The game's own AI is the foundation** (strategies S1 companion/elite-NPC brain, S2 developer autoplay): its animations and mechanics are already correct.
-2. **AUTOMA is a competence layer on top.** The native AI was written to lose, so AUTOMA only overrides its weak moments: parry/dodge on a wind-up, retreat at low health, target choice, oscillation damping. Every override is recorded with its reason.
-3. **If the native AI is unreachable (DRM etc.), AUTOMA's brain drives alone** (S3 in-process, S4 external bridge).
+2. **Stuntdouble is a competence layer on top.** The native AI was written to lose, so Stuntdouble only overrides its weak moments: parry/dodge on a wind-up, retreat at low health, target choice, oscillation damping. Every override is recorded with its reason.
+3. **If the native AI is unreachable (DRM etc.), Stuntdouble's brain drives alone** (S3 in-process, S4 external bridge).
 4. **Story-first shortcut S5:** clean encounter resolve.
 
 Where an anti-cheat or DRM wall makes any of this unsafe, the answer is to stop: see [`targets/ghost-recon-breakpoint/REPORT.md`](targets/ghost-recon-breakpoint/REPORT.md) (ABORT example) and [`targets/assassins-creed-odyssey/REPORT.md`](targets/assassins-creed-odyssey/REPORT.md) (VMProtect: external S4 only).
@@ -44,22 +44,22 @@ The brain takes a **bit mask of behaviors**; the five classic modes are named pr
 | Flag | Bit | Meaning |
 |---|---|---|
 | `COMBAT` | 1 | Fight: close in, chain attacks, parry/dodge. |
-| `ASSIST` | 2 | Human drives; AUTOMA intercepts only for an urgent reflex (parry/dodge on a wind-up, heal at low health). Inert while `COMBAT` is set and an enemy exists. |
+| `ASSIST` | 2 | Human drives; Stuntdouble intercepts only for an urgent reflex (parry/dodge on a wind-up, heal at low health). Inert while `COMBAT` is set and an enemy exists. |
 | `CRUISE` | 4 | Out of combat: follow waypoints, loot. Runs only while no enemy exists. |
 | `DEFENSIVE` | 8 | Never attack; weave, space and parry. Overrides offense. |
-| `COMMAND` | 16 | Player issues doctrine orders, AUTOMA executes motor combat. |
+| `COMMAND` | 16 | Player issues doctrine orders, Stuntdouble executes motor combat. |
 
 | Preset (`AutonomyMode`) | Mask | Experience |
 |---|---|---|
-| `FULL_COMBAT` (default) | `COMBAT` | AUTOMA fights, parries, dodges and chains abilities on the native camera. |
-| `CO_PILOT` | `ASSIST` | "I drive, AUTOMA parries": human input passes (`HUMAN_PASS_THROUGH`) except urgent reflexes. |
+| `FULL_COMBAT` (default) | `COMBAT` | Stuntdouble fights, parries, dodges and chains abilities on the native camera. |
+| `CO_PILOT` | `ASSIST` | "I drive, Stuntdouble parries": human input passes (`HUMAN_PASS_THROUGH`) except urgent reflexes. |
 | `GRIND_AUTOPILOT` | `CRUISE`+`COMBAT` | Chore and loot cruise, fights when ambushed. |
 | `SHADOW_SURVIVAL` | `DEFENSIVE` | Zero-offense boss pattern coach. |
-| `COMMANDER` | `COMBAT`+`COMMAND` | Macro orders, AUTOMA does the motor work. |
+| `COMMANDER` | `COMBAT`+`COMMAND` | Macro orders, Stuntdouble does the motor work. |
 
 Decision (001): **if no behavior is active** (mask 0, `CRUISE` alone while an enemy exists, `COMMAND` alone) the output is `HUMAN_PASS_THROUGH`: no intercept, no steering. Cycling presets in a game (an optional hotkey) walks the five presets; arbitrary masks are set by the user's words, not a key.
 
-**Hand-over (`AutomaRuntime`, [`packages/automa-seams-ts`](packages/automa-seams-ts/src/index.ts)).** Default `engage: 'onCombat'`: AUTOMA takes over as soon as a hostile is perceived and gives control back after the fight (no hostile for 2 s). `engage: 'manual'` uses a toggle bound to a key *you* choose (`toggleKey`; no fixed key). In both modes, manual input hands control back at once, and cutscene / menu / loading interlocks keep AUTOMA inert (no command or steering is written; at most one neutral `release`). The arena proves each of these (section 4).
+**Hand-over (`StuntRuntime`, [`packages/stuntdouble-seams-ts`](packages/stuntdouble-seams-ts/src/index.ts)).** Default `engage: 'onCombat'`: Stuntdouble takes over as soon as a hostile is perceived and gives control back after the fight (no hostile for 2 s). `engage: 'manual'` uses a toggle bound to a key *you* choose (`toggleKey`; no fixed key). In both modes, manual input hands control back at once, and cutscene / menu / loading interlocks keep Stuntdouble inert (no command or steering is written; at most one neutral `release`). The arena proves each of these (section 4).
 
 ### B. Optional Post-Core Extensions (Phase 2 — Added Only When Requested)
 
@@ -74,7 +74,7 @@ Decision (001): **if no behavior is active** (mask 0, `CRUISE` alone while an en
 
 ## 2. Four-Layer Cognitive Architecture
 
-To prevent each game mod from reinventing fragile `if/else` combat scripts, every target links against the unified **AUTOMA 4-Layer Cognitive Architecture** ([full mathematical formulation in `paper/WHITEPAPER.md`](paper/WHITEPAPER.md)):
+To prevent each game mod from reinventing fragile `if/else` combat scripts, every target links against the unified **Stuntdouble 4-Layer Cognitive Architecture** ([full mathematical formulation in `paper/WHITEPAPER.md`](paper/WHITEPAPER.md)):
 
 ```mermaid
 flowchart TD
@@ -85,7 +85,7 @@ flowchart TD
         S_E["Seam.Encounter (Quest & Victory Callbacks)"]
     end
 
-    subgraph AutomaKernel["AUTOMA Shared Cognitive Brain (@automa/brain)"]
+    subgraph StuntKernel["Stuntdouble Shared Cognitive Brain (@stuntdouble/brain)"]
         L4["Layer 4: Narrative & Tactical Orchestrator<br/>(Profile Profile, Stance Selection & Presentation Director)"]
         L3["Layer 3: Regressive A* GOAP Planner + Compensated Utility AI<br/>(Multi-Step Action Chains & Reflex Interrupts)"]
         L2["Layer 2: Tactical Blackboard & 2D Spatial Influence Map<br/>(Threat Heatmaps, Safe-Pocket Search & Aggro Tracking)"]
@@ -112,20 +112,20 @@ flowchart TD
 
 ## 3. Shared Multi-Language Brain SDK (`packages/`)
 
-Because game modding spans managed C#, native C++, embedded Lua, and out-of-process TypeScript, AUTOMA maintains a synchronized, zero-dependency implementation of the 4-Layer Brain across all four ecosystems. Every target game adapter stays a thin 150-line bridge that feeds `EntitySnapshot` structs into the shared kernel:
+Because game modding spans managed C#, native C++, embedded Lua, and out-of-process TypeScript, Stuntdouble maintains a synchronized, zero-dependency implementation of the 4-Layer Brain across all four ecosystems. Every target game adapter stays a thin 150-line bridge that feeds `EntitySnapshot` structs into the shared kernel:
 
 | Package Path | Target Engines & Mod Loaders | Implementation Highlights |
 |---|---|---|
-| [`packages/automa-brain-ts`](packages/automa-brain-ts/src/index.ts) | Reference Spec, Electron/JS Games, External Bridges | Full TypeScript reference kernel + automated test suite (`npm test`). |
-| [`packages/automa-brain-cs`](packages/automa-brain-cs/AutomaBrain.cs) | Unity Mono & IL2CPP (`BepInEx`, `MelonLoader`), .NET | Single-file drop-in C# kernel (`Automa.Brain.AutomaBrainKernel`), zero GC allocation in steering loop. |
-| [`packages/automa-brain-cpp`](packages/automa-brain-cpp/include/automa/automa_brain.hpp) | Native C++ Engines (`AnvilNext`, `Unreal C++`, `MinHook` Proxy) | Header-only C++20 (`automa::BrainKernel`), `constexpr`/stack-allocated `std::array` slots. |
-| [`packages/automa-brain-lua`](packages/automa-brain-lua/automa_brain.lua) | `UE4SS` (Unreal 4/5), `Cyber Engine Tweaks` (`REDengine`), `Source` | Pure Lua 5.1+/LuaJIT module with identical compensated utility and 16-slot steering. |
+| [`packages/stuntdouble-brain-ts`](packages/stuntdouble-brain-ts/src/index.ts) | Reference Spec, Electron/JS Games, External Bridges | Full TypeScript reference kernel + automated test suite (`npm test`). |
+| [`packages/stuntdouble-brain-cs`](packages/stuntdouble-brain-cs/StuntBrain.cs) | Unity Mono & IL2CPP (`BepInEx`, `MelonLoader`), .NET | Single-file drop-in C# kernel (`Stuntdouble.Brain.StuntBrainKernel`), zero GC allocation in steering loop. |
+| [`packages/stuntdouble-brain-cpp`](packages/stuntdouble-brain-cpp/include/stuntdouble/stunt_brain.hpp) | Native C++ Engines (`AnvilNext`, `Unreal C++`, `MinHook` Proxy) | Header-only C++20 (`stuntdouble::BrainKernel`), `constexpr`/stack-allocated `std::array` slots. |
+| [`packages/stuntdouble-brain-lua`](packages/stuntdouble-brain-lua/stunt_brain.lua) | `UE4SS` (Unreal 4/5), `Cyber Engine Tweaks` (`REDengine`), `Source` | Pure Lua 5.1+/LuaJIT module with identical compensated utility and 16-slot steering. |
 
 ---
 
 ## 4. Adapter Seam Contract and the Arena
 
-When an AI agent is instructed to **AUTOMA a target game**, it follows [skills/automa/SKILL.md](skills/automa/SKILL.md) to find the game's seams with REA and implement the contract in code ([`packages/automa-seams-ts`](packages/automa-seams-ts/src/index.ts); C# mirror in [`AutomaSeams.cs`](packages/automa-brain-cs/AutomaSeams.cs)):
+When an AI agent is instructed to **Stuntdouble a target game**, it follows [skills/stuntdouble/SKILL.md](skills/stuntdouble/SKILL.md) to find the game's seams with REA and implement the contract in code ([`packages/stuntdouble-seams-ts`](packages/stuntdouble-seams-ts/src/index.ts); C# mirror in [`StuntSeams.cs`](packages/stuntdouble-brain-cs/StuntSeams.cs)):
 
 | Seam | Tier | Contract | Required Binary Evidence |
 |---|---|---|---|
@@ -139,23 +139,23 @@ When an AI agent is instructed to **AUTOMA a target game**, it follows [skills/a
 
 ### The Arena: evidence that the brain actually plays
 
-[`packages/automa-arena`](packages/automa-arena/) is a deterministic (seeded) 2D simulator that drives `AutomaRuntime` through these seams: enemies approach, telegraph a wind-up, strike; parry and dodge windows; damage; obstacles; waypoints and loot. Eight scenarios (duel, 3-enemy surround, archer + melee, DEFENSIVE boss combo, cruise + ambush, onCombat hand-over, native-AI overlay, interlocks) must pass fixed gates: survival, telegraphed strikes avoided, zero attacks under `DEFENSIVE`, bounded steering reversals, zero input while locked, same-tick manual hand-back, takeover and hand-back timing, and "native AI + AUTOMA beats the same native AI alone".
+[`packages/stuntdouble-arena`](packages/stuntdouble-arena/) is a deterministic (seeded) 2D simulator that drives `StuntRuntime` through these seams: enemies approach, telegraph a wind-up, strike; parry and dodge windows; damage; obstacles; waypoints and loot. Eight scenarios (duel, 3-enemy surround, archer + melee, DEFENSIVE boss combo, cruise + ambush, onCombat hand-over, native-AI overlay, interlocks) must pass fixed gates: survival, telegraphed strikes avoided, zero attacks under `DEFENSIVE`, bounded steering reversals, zero input while locked, same-tick manual hand-back, takeover and hand-back timing, and "native AI + Stuntdouble beats the same native AI alone".
 
 ```bash
-node packages/automa-arena/run.mjs                    # table of gates, exit 1 on failure
-node packages/automa-arena/run.mjs --scenario duel --seed 3 --json
-node packages/automa-arena/run.mjs --html replay.html # single-file replay (works on a phone; shows projectiles)
-node packages/automa-arena/run.mjs --compare           # 4 agents x 3 difficulty tiers, fixed hard-tier gate
+node packages/stuntdouble-arena/run.mjs                    # table of gates, exit 1 on failure
+node packages/stuntdouble-arena/run.mjs --scenario duel --seed 3 --json
+node packages/stuntdouble-arena/run.mjs --html replay.html # single-file replay (works on a phone; shows projectiles)
+node packages/stuntdouble-arena/run.mjs --compare           # 4 agents x 3 difficulty tiers, fixed hard-tier gate
 ```
 
-**Difficulty tiers and agent comparison.** Three extra scenarios (`arena_t1..t3`) use a harder enemy model: variable wind-ups, feints (fake wind-up, then a quick real one), coordinated simultaneous strikes, flanking, archers with real projectiles that lead a moving target, a multi-hit boss combo, and a one-hit parry. `--compare` runs four agents on the same seeds (1-8): (a) naive bot (nearest enemy, swing), (b) weak native AI (heals, guards only late and sometimes, blind to ranged/feints), (c) AUTOMA alone, (d) weak native AI + AUTOMA layer. Measured result:
+**Difficulty tiers and agent comparison.** Three extra scenarios (`arena_t1..t3`) use a harder enemy model: variable wind-ups, feints (fake wind-up, then a quick real one), coordinated simultaneous strikes, flanking, archers with real projectiles that lead a moving target, a multi-hit boss combo, and a one-hit parry. `--compare` runs four agents on the same seeds (1-8): (a) naive bot (nearest enemy, swing), (b) weak native AI (heals, guards only late and sometimes, blind to ranged/feints), (c) Stuntdouble alone, (d) weak native AI + Stuntdouble layer. Measured result:
 
 | Hard tier (arena_t3) | survived | hp end | damage taken | hits |
 |---|---|---|---|---|
 | (a) naive bot | 0/8 | 0 | 112 | 9.9 |
 | (b) weak native AI | 5/8 | 40 | 142 | 11.1 |
-| (c) AUTOMA | 8/8 | 81 | 19 | 3.0 |
-| (d) native + AUTOMA | 8/8 | 79 | 30 | 4.9 |
+| (c) Stuntdouble | 8/8 | 81 | 19 | 3.0 |
+| (d) native + Stuntdouble | 8/8 | 79 | 30 | 4.9 |
 
 Tier gates also bound human-plausibility: steering reversals, wall hugging (<= 15% of ticks at the edge), single-command spam (<= 85%), and zero hits from telegraphs the brain could not see. The brain reacts to ranged wind-ups up to 16 m and to projectiles in flight (optional `projectileEta`): lateral sidestep, dodge timed to the impact.
 
@@ -183,9 +183,9 @@ The profile is **five numbers** (`aggression`, `discipline`, `cinematicFlair`, `
 
 **Phase 2 (open idea, not a promise): Protagonist Fidelity.** REA could derive the numbers from the protagonist's real animation and commitment behaviour; the schema would be identical, only the *source* of the numbers differs.
 
-AUTOMA ships **no closed taxonomy of playstyles**: an arcane duelist, a drunken brawler and a pacifist monk are all first-class.
+Stuntdouble ships **no closed taxonomy of playstyles**: an arcane duelist, a drunken brawler and a pacifist monk are all first-class.
 
-| | Closed taxonomy (rejected) | AUTOMA's approach |
+| | Closed taxonomy (rejected) | Stuntdouble's approach |
 |---|---|---|
 | How the style is chosen | Pick one of five boxes | Start from a preset, adjust by words (or, in Phase 2, derive from REA evidence) |
 | Games that do not fit | Forced into the nearest box | Author their own `profile.json` |
@@ -204,20 +204,20 @@ Derivation is prescriptive, not vibes: `preferredRange` comes from weapon reach 
 ## 7. Repository Structure
 
 ```text
-AUTOMA/
+Stuntdouble/
 ├── .claude-plugin/          # Agent plugin manifest (Claude Code / Antigravity)
 ├── packages/
-│   ├── automa-brain-ts/       # Reference 4-Layer Cognitive Kernel (TypeScript + Node test suite)
-│   ├── automa-brain-cs/       # Drop-in C# Kernel + AutomaSeams.cs (BepInEx / MelonLoader)
-│   ├── automa-brain-cpp/      # Header-only C++20 Kernel for Native DLL Hooking
-│   ├── automa-brain-lua/      # Portable Lua Kernel for UE4SS / Cyber Engine Tweaks
-│   ├── automa-seams-ts/       # Seam contract + AutomaRuntime (engage policy, interlocks, native-AI override)
-│   ├── automa-arena/          # Deterministic simulator + automatic gates (run.mjs)
+│   ├── stuntdouble-brain-ts/       # Reference 4-Layer Cognitive Kernel (TypeScript + Node test suite)
+│   ├── stuntdouble-brain-cs/       # Drop-in C# Kernel + StuntSeams.cs (BepInEx / MelonLoader)
+│   ├── stuntdouble-brain-cpp/      # Header-only C++20 Kernel for Native DLL Hooking
+│   ├── stuntdouble-brain-lua/      # Portable Lua Kernel for UE4SS / Cyber Engine Tweaks
+│   ├── stuntdouble-seams-ts/       # Seam contract + StuntRuntime (engage policy, interlocks, native-AI override)
+│   ├── stuntdouble-arena/          # Deterministic simulator + automatic gates (run.mjs)
 │   └── conformance/           # Cross-language fixtures and C#/C++/Lua runners
 ├── paper/ docs/               # Whitepaper and roadmap (CC BY 4.0, see LICENSE-CC-BY-4.0.md)
 ├── schemas/                   # Profile contract + five OPTIONAL starting presets
 ├── scripts/                   # Hygiene audit / atlas bundle, profile validator, conformance drivers
-├── skills/automa/             # Agent skill, strategy ladder (S1-S5), engine matrix
+├── skills/stuntdouble/             # Agent skill, strategy ladder (S1-S5), engine matrix
 └── targets/                   # Per-game recipes (_template, assassins-creed-odyssey, ghost-recon-breakpoint)
 ```
 
@@ -237,30 +237,30 @@ npm run conformance:all   # strict C# / C++20 / Lua runners (CI does this)
 
 ## 9. Scope & Operational Ethics
 
-- **Single-Player & Offline Only:** AUTOMA strictly targets offline, single-player games. Targets with online competitive modes or kernel anti-cheat drivers (`EAC`, `BattlEye`, `Vanguard`) are rejected at Stage 1 reconnaissance.
+- **Single-Player & Offline Only:** Stuntdouble strictly targets offline, single-player games. Targets with online competitive modes or kernel anti-cheat drivers (`EAC`, `BattlEye`, `Vanguard`) are rejected at Stage 1 reconnaissance.
 - **Zero Proprietary Assets:** No game binaries, `.pak` files, or proprietary assets are ever committed to this repository—only clean-room adapter source code, profile definitions, and REA seam documentation.
 
 ---
 
 ## Citation
 
-If you build upon AUTOMA's cognitive architecture, profile schemas, or target adapters in academic work or open-source projects, please cite [`CITATION.cff`](CITATION.cff). The text below is identical to its `preferred-citation`:
+If you build upon Stuntdouble's cognitive architecture, profile schemas, or target adapters in academic work or open-source projects, please cite [`CITATION.cff`](CITATION.cff). The text below is identical to its `preferred-citation`:
 
-> Günay, Y. (2026). *AUTOMA: Autonomous Play Architecture for Single-Player Games* (Version 1.0.0) [Computer software & Cognitive Architecture Specification]. https://github.com/yusufgunay-esq/automa
+> Günay, Y. (2026). *Stuntdouble: Competent combat hand-over for story-driven single-player games* (Version 1.0.0) [Computer software & Cognitive Architecture Specification]. https://github.com/yusufgunay-esq/stuntdouble
 
 ```bibtex
-@software{gunay2026automa,
+@software{gunay2026stuntdouble,
   author    = {G{\"u}nay, Yusuf},
-  title     = {{AUTOMA: Autonomous Play Architecture for Single-Player Games}},
+  title     = {{Stuntdouble: Competent combat hand-over for story-driven single-player games}},
   year      = {2026},
   version   = {1.0.0},
   note      = {Computer software \& Cognitive Architecture Specification},
   license   = {MPL-2.0},
-  url       = {https://github.com/yusufgunay-esq/automa}
+  url       = {https://github.com/yusufgunay-esq/stuntdouble}
 }
 ```
 
 ## License & Mandatory Academic Attribution
 
 1. **Software & SDK (`packages/`, `skills/`, `targets/`, `scripts/`, `schemas/`):** **Mozilla Public License 2.0 (MPL-2.0)**. Modified covered files stay open under the same license; the copyright notice crediting **Yusuf Günay** must be retained ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)). Your own separate code can stay closed.
-2. **Whitepaper and roadmap (`paper/`, `docs/`):** **Creative Commons Attribution 4.0 International (CC BY 4.0)**, see [`LICENSE-CC-BY-4.0.md`](LICENSE-CC-BY-4.0.md). Any thesis, paper, preprint or technical report that uses or evaluates AUTOMA must credit **Yusuf Günay** with the citation above.
+2. **Whitepaper and roadmap (`paper/`, `docs/`):** **Creative Commons Attribution 4.0 International (CC BY 4.0)**, see [`LICENSE-CC-BY-4.0.md`](LICENSE-CC-BY-4.0.md). Any thesis, paper, preprint or technical report that uses or evaluates Stuntdouble must credit **Yusuf Günay** with the citation above.

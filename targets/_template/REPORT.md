@@ -1,8 +1,8 @@
-# AUTOMA Target Report: <Game Title> (<Version / Platform>)
+# Stuntdouble Target Report: <Game Title> (<Version / Platform>)
 
 - **Target Slug:** `<game-slug>`
 - **Status:** `RECON` | `PROTOTYPE` | `VERIFIED`
-- **Brain Runtime Linked:** `automa-brain-cs` | `automa-brain-cpp` | `automa-brain-lua` | `automa-brain-ts`
+- **Brain Runtime Linked:** `stuntdouble-brain-cs` | `stuntdouble-brain-cpp` | `stuntdouble-brain-lua` | `stuntdouble-brain-ts`
 - **Strategy Tier Used:** `S1` | `S2` | `S3` | `S4` | `S5`
 - **Default Profile Profile:** `<game-slug>` (authored per protagonist — see `profile.json`; free-form `archetype` label, **presets are only starting points**)
 - **Supported Presentation Modes:** `TACTICAL`, `CINEMATIC_LIVE`, `CINEMATIC_RESOLVE`
@@ -51,7 +51,7 @@
 
 ## 3. Strategy Justification & Architecture Notes
 
-Explain why the selected strategy tier (`S1`–`S5`) was chosen and how the shared `AutomaBrain` kernel interfaces with the target's state and action hooks.
+Explain why the selected strategy tier (`S1`–`S5`) was chosen and how the shared `StuntBrain` kernel interfaces with the target's state and action hooks.
 
 ---
 

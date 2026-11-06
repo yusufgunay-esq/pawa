@@ -1,15 +1,15 @@
-# AUTOMA Roadmap
+# Stuntdouble Roadmap
 
 ## Principle
-The core is a **normal, user-configurable game AI**. The user decides what it does; AUTOMA never imposes a protagonist or a fixed playstyle.
+The core is a **normal, user-configurable game AI**. The user decides what it does; Stuntdouble never imposes a protagonist or a fixed playstyle.
 
 ## Phase 1 (core)
 1. **User-fed profile** (`schemas/profile.schema.json`): free-form label plus numbers, from the user's own words or file.
 2. **Composable behaviors** (design below): several features active at once, chosen by the user's command.
 3. Live tactical combat on the game's native camera. Camera, music and fast-resolve stay optional extensions.
-4. **Architecture order (decided):** the game's own AI is the foundation (S1/S2); AUTOMA is a competence layer that only overrides its weak moments (wind-up parry/dodge, low-health retreat, target choice, oscillation); if the native AI is unreachable (DRM), AUTOMA's brain drives alone (S3/S4); S5 is the story-first shortcut.
+4. **Architecture order (decided):** the game's own AI is the foundation (S1/S2); Stuntdouble is a competence layer that only overrides its weak moments (wind-up parry/dodge, low-health retreat, target choice, oscillation); if the native AI is unreachable (DRM), Stuntdouble's brain drives alone (S3/S4); S5 is the story-first shortcut.
 5. **Hand-over (decided):** `engage: 'onCombat'` (default) takes over on the first perceived hostile and hands back ~2 s after the fight; `engage: 'manual'` uses a user-configurable toggle key. No fixed hotkey. Manual input and cutscene/menu/loading always win.
-6. **Evidence:** `packages/automa-arena` gates the brain and runtime contract automatically (`npm test`).
+6. **Evidence:** `packages/stuntdouble-arena` gates the brain and runtime contract automatically (`npm test`).
 
 ## Composable behaviors (replaces the single-choice `AutonomyMode`)
 **Done (001):** `Behaviors` bit mask in all four SDKs; the five `AutonomyMode` names are presets and the optional preset-cycle key walks only those five. No active behavior => `HUMAN_PASS_THROUGH`. Open: a game-integration API to set an arbitrary mask from the user's words.
@@ -17,7 +17,7 @@ The core is a **normal, user-configurable game AI**. The user decides what it do
 | Flag | Meaning |
 |---|---|
 | `COMBAT` | Fights: attacks, dodges, parries, abilities. |
-| `ASSIST` | Human input passes through; AUTOMA only intercepts lethal wind-ups and low health. |
+| `ASSIST` | Human input passes through; Stuntdouble only intercepts lethal wind-ups and low health. |
 | `CRUISE` | With no hostiles: follow waypoint, loot nodes and corpses. |
 | `DEFENSIVE` | Zero offense: only space, weave and parry. |
 | `COMMAND` | Obeys user doctrine orders ("focus ranged", "hold ground"). |
@@ -30,11 +30,11 @@ Conflict rules (fixed, so all four SDKs agree):
 - `CRUISE` only acts when no hostiles are present.
 - Natural-language command ("loot and fight but don't touch my camera") is mapped by the agent to a flag set plus profile; the old five modes become named presets, so existing conformance fixtures stay valid.
 
-Work remaining: replace the enum with flags in `automa-brain-ts/cs/cpp/lua`, add combination scenarios to `packages/conformance`, regenerate fixtures, run `npm test`.
+Work remaining: replace the enum with flags in `stuntdouble-brain-ts/cs/cpp/lua`, add combination scenarios to `packages/conformance`, regenerate fixtures, run `npm test`.
 
 ## Suggestions and shared learning (Phase 1.5)
 1. **Hand-over first, advice second.** The user hands a character to the AI (automatically on combat, or with a toggle key of their choice). Afterwards the agent may *suggest* additions to that character ("dies to archers: add `DEFENSIVE` vs ranged", "raise `reactionDelayMs`"). Suggestions are shown, never applied without the user's yes.
-2. **Shared learning goes to a separate data repo (`yusufgunay-esq/automa-atlas`), not this one.** This repo (code, paper, skill) keeps a single author. Contributions are data only:
+2. **Shared learning goes to a separate data repo (`yusufgunay-esq/stuntdouble-atlas`), not this one.** This repo (code, paper, skill) keeps a single author. Contributions are data only:
    - **Opt-in only**, asked once per contribution; no silent uploads.
    - **Submission, not pull request:** the agent sends a JSON bundle through a submission endpoint (issue form or small API). A bot commits it under the maintainer's identity, so contributors never become commit authors.
    - **Automatic review, no human step:** a GitHub Action validates the bundle (schema, size cap, JSON only, no executable content, no URLs/paths/keys/binaries, sane value ranges, duplicate check) and an agent reviewer flags anything odd. Pass: auto-merge. Fail: auto-reject with the reason.

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * AUTOMA Profile Validator
+ * Stuntdouble Profile Validator
  * Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
  *
  * Zero-dependency validation of every profile document in the repository against

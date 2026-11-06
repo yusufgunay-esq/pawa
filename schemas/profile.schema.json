@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/yusufgunay-esq/automa/schemas/profile.schema.json",
-  "title": "AUTOMA Behavior Profile",
+  "$id": "https://github.com/yusufgunay-esq/stuntdouble/schemas/profile.schema.json",
+  "title": "Stuntdouble Behavior Profile",
   "description": "Behavioral parameter set that makes the autonomous agent play the way the user (Tier 1) or the game's protagonist evidence (Tier 2, Phase 2) dictates. There is deliberately no fixed taxonomy of playstyles: `archetype` is a free-form label authored per target game by the agent, derived from reverse-engineered evidence about how the protagonist actually moves, commits to attacks, and recovers. schemas/profiles.json contains optional starting templates, not a closed set.",
   "type": "object",
   "required": [

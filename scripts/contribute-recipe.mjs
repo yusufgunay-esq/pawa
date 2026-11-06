@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * AUTOMA Atlas Bundle - local recipe verification and packaging
+ * Stuntdouble Atlas Bundle - local recipe verification and packaging
  * Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
  *
  * Audits a game recipe in `targets/<game-slug>/` (no proprietary binaries, no personal OS paths)
@@ -36,13 +36,13 @@ if (!slug || slug === '_template') {
 
 const targetDir = join(process.cwd(), 'targets', slug);
 if (!existsSync(targetDir)) {
-  console.error(`[AUTOMA Sync] Target directory not found: targets/${slug}`);
+  console.error(`[Stuntdouble Sync] Target directory not found: targets/${slug}`);
   process.exit(1);
 }
 
 const reportPath = join(targetDir, 'REPORT.md');
 if (!existsSync(reportPath)) {
-  console.error(`[AUTOMA Sync] Missing mandatory targets/${slug}/REPORT.md`);
+  console.error(`[Stuntdouble Sync] Missing mandatory targets/${slug}/REPORT.md`);
   process.exit(1);
 }
 
@@ -66,38 +66,38 @@ const profilelPathRegex = /([A-Za-z]:\\Users\\[^\\/\s"']+|\/Users\/[^/\s"']+|\/h
 for (const file of files) {
   const ext = extname(file).toLowerCase();
   if (FORBIDDEN_EXTENSIONS.has(ext)) {
-    console.error(`[AUTOMA Sync] Blocked proprietary/binary file: ${file}`);
+    console.error(`[Stuntdouble Sync] Blocked proprietary/binary file: ${file}`);
     process.exit(1);
   }
   const content = readFileSync(file, 'utf8');
   const match = content.match(profilelPathRegex);
   if (match) {
-    console.error(`[AUTOMA Sync] Profilel local path detected in ${file}: "${match[0]}". Replace with <GAME_DIR>.`);
+    console.error(`[Stuntdouble Sync] Profilel local path detected in ${file}: "${match[0]}". Replace with <GAME_DIR>.`);
     process.exit(1);
   }
 }
 
-console.log(`[AUTOMA Sync] Hygiene audit passed for targets/${slug} (${files.length} file(s)).`);
+console.log(`[Stuntdouble Sync] Hygiene audit passed for targets/${slug} (${files.length} file(s)).`);
 
 if (dryRun || !bundlePath) {
-  console.log('[AUTOMA Sync] Audit complete. Show the user what would be sent, then re-run with --bundle out.json --user-approved.');
+  console.log('[Stuntdouble Sync] Audit complete. Show the user what would be sent, then re-run with --bundle out.json --user-approved.');
   process.exit(0);
 }
 
 if (!approved) {
-  console.error('[AUTOMA Sync] Refusing to write a bundle without --user-approved (pass it only after the user said yes).');
+  console.error('[Stuntdouble Sync] Refusing to write a bundle without --user-approved (pass it only after the user said yes).');
   process.exit(1);
 }
 
 // 2. Local bundle (data only). No git, no gh, no network.
 const bundle = {
-  schema: 'automa-atlas-bundle/1',
+  schema: 'stuntdouble-atlas-bundle/1',
   slug,
   createdAt: new Date().toISOString(),
   files: files.map((f) => ({ path: relative(targetDir, f).split('\\').join('/'), content: readFileSync(f, 'utf8') })),
 };
 writeFileSync(bundlePath, JSON.stringify(bundle, null, 2));
-console.log(`[AUTOMA Sync] Wrote local bundle ${bundlePath} (${bundle.files.length} file(s)).`);
+console.log(`[Stuntdouble Sync] Wrote local bundle ${bundlePath} (${bundle.files.length} file(s)).`);
 if (!ATLAS_INTAKE_OPEN) {
-  console.log('[AUTOMA Sync] Atlas submission is not open yet. The bundle stays on your disk; nothing was sent.');
+  console.log('[Stuntdouble Sync] Atlas submission is not open yet. The bundle stays on your disk; nothing was sent.');
 }

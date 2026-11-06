@@ -1,0 +1,12 @@
+{
+  "name": "@stuntdouble/brain",
+  "version": "0.1.0",
+  "description": "Portable 4-Layer Cognitive Architecture (Orchestrator, Regressive A* GOAP, Compensated Utility AI, Spatial Influence Map, 16-Slot Context Steering) for Stuntdouble Autonomous Game Agents.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "node --experimental-strip-types --test tests/brain.test.ts"
+  },
+  "author": "Yusuf Günay",
+  "license": "MPL-2.0"
+}

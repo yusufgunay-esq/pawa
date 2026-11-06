@@ -1,8 +1,8 @@
-# AUTOMA Target Report: Assassin's Creed Odyssey (version not verified / PC, Ubisoft Connect)
+# Stuntdouble Target Report: Assassin's Creed Odyssey (version not verified / PC, Ubisoft Connect)
 
 - **Target Slug:** `assassins-creed-odyssey`
 - **Status:** `RECON` (Stage 1 passed with caveats)
-- **Brain Runtime Linked:** none yet (planned: `automa-brain-ts`, out-of-process)
+- **Brain Runtime Linked:** none yet (planned: `stuntdouble-brain-ts`, out-of-process)
 - **Strategy Tier:** `S4` recommended, not implemented
 - **Profile:** empty, supplied by the user later
 
@@ -37,7 +37,7 @@ Unexplored lead: `ugc\schemas\v1` JSON files (actions, conditions, npcs) are pla
 
 ## 3. Strategy Justification
 
-- **S4 (recommended):** external memory read plus synthetic input, with `automa-brain-ts` out of process. Touches the protection least.
+- **S4 (recommended):** external memory read plus synthetic input, with `stuntdouble-brain-ts` out of process. Touches the protection least.
 - **S3 (conditional):** DLL proxy. The only candidates are app-folder DLLs (`bink2w64`, `oo2core_4`). Not verified; it would run inside the protected process, so it is not pursued for now.
 - **S1/S2:** rejected because they need decompiling the protected exe.
 - **S5:** not verified.
@@ -50,7 +50,7 @@ Note: the install folder holds the user's own earlier experiments: a Cheat Engin
 3. Which memory structures hold the entity list, health and wind-up flags? (next step: runtime observation, with the user's go)
 
 ## 5. Verification Ledger
-- [ ] Arena gates pass with the planned profile (`packages/automa-arena`)
+- [ ] Arena gates pass with the planned profile (`packages/stuntdouble-arena`)
 - [ ] Smoke: F5 hand-off without stutter
 - [ ] Interlocks: pause on cutscene/menu/loading/death
 - [ ] 5-minute live combat competence

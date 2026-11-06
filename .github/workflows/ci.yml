@@ -25,7 +25,7 @@ jobs:
           npm run test:ts
           npm run test:seams
           npm run test:arena
-          node packages/automa-arena/run.mjs
+          node packages/stuntdouble-arena/run.mjs
           npm run validate
           npm run fixtures:check
       - name: Native conformance runners (C#, C++20, Lua 5.4) - all strict

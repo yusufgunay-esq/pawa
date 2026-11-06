@@ -34,8 +34,8 @@ const runners = {
   cpp: () => {
     const cxx = ['g++', 'clang++'].find((c) => has(c));
     if (!cxx) return null;
-    const out = join(mkdtempSync(join(tmpdir(), 'automa-cpp-')), process.platform === 'win32' ? 'runner.exe' : 'runner');
-    const b = run(cxx, ['-std=c++20', '-O2', '-I', join(ROOT, 'packages', 'automa-brain-cpp', 'include'),
+    const out = join(mkdtempSync(join(tmpdir(), 'stuntdouble-cpp-')), process.platform === 'win32' ? 'runner.exe' : 'runner');
+    const b = run(cxx, ['-std=c++20', '-O2', '-I', join(ROOT, 'packages', 'stuntdouble-brain-cpp', 'include'),
       '-I', join(CONF, 'fixtures'), join(CONF, 'runners', 'cpp', 'runner.cpp'), '-o', out]);
     return b.status === 0 ? run(out, []).status : b.status;
   },

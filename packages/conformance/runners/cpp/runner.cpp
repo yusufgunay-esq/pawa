@@ -1,5 +1,5 @@
-// AUTOMA conformance runner (C++20). Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
-// Build: g++ -std=c++20 -O2 -I packages/automa-brain-cpp/include -I packages/conformance/fixtures \
+// Stuntdouble conformance runner (C++20). Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
+// Build: g++ -std=c++20 -O2 -I packages/stuntdouble-brain-cpp/include -I packages/conformance/fixtures \
 //            packages/conformance/runners/cpp/runner.cpp -o runner && ./runner
 // Legacy-name scenarios run through BOTH tick(AutonomyMode) and tick_behaviors(mask).
 #include <cmath>
@@ -7,14 +7,14 @@
 #include <string>
 #include <vector>
 
-#include "automa/automa_brain.hpp"
+#include "stuntdouble/stunt_brain.hpp"
 #include "fixtures.hpp"
 #include "expected.hpp"
 
 namespace {
 
 constexpr double kTol = 1e-6;
-using automa::conformance::ExpectedDecision;
+using stuntdouble::conformance::ExpectedDecision;
 
 void cmp_num(std::vector<std::string>& errs, const char* field, double got, double want) {
     if (!(std::fabs(got - want) <= kTol)) {
@@ -26,9 +26,9 @@ void cmp_str(std::vector<std::string>& errs, const char* field, const std::strin
     if (got != want) errs.push_back(std::string(field) + ": got " + got + " want " + want);
 }
 
-std::vector<std::string> diff(const automa::Decision& d, const ExpectedDecision& e) {
+std::vector<std::string> diff(const stuntdouble::Decision& d, const ExpectedDecision& e) {
     std::vector<std::string> errs;
-    cmp_str(errs, "stance", automa::to_string(d.stance), e.stance);
+    cmp_str(errs, "stance", stuntdouble::to_string(d.stance), e.stance);
     cmp_str(errs, "interceptHumanInput", d.intercept_human_input ? "true" : "false", e.intercept ? "true" : "false");
     cmp_str(errs, "selectedUtilityAction", std::string(d.selected_utility_action), e.utility);
     cmp_num(errs, "utilityScore", d.utility_score, e.score);
@@ -52,8 +52,8 @@ std::vector<std::string> diff(const automa::Decision& d, const ExpectedDecision&
 } // namespace
 
 int main() {
-    const auto& fx = automa::conformance::fixtures();
-    const auto& ex = automa::conformance::expected();
+    const auto& fx = stuntdouble::conformance::fixtures();
+    const auto& ex = stuntdouble::conformance::expected();
     if (fx.size() != ex.size()) {
         std::printf("FAIL: fixtures (%zu) and expected (%zu) differ in length\n", fx.size(), ex.size());
         return 1;
@@ -63,17 +63,17 @@ int main() {
     for (std::size_t i = 0; i < fx.size(); ++i) {
         const auto& f = fx[i];
         const auto& e = ex[i];
-        const automa::Vec3* wp = f.has_waypoint ? &f.waypoint : nullptr;
+        const stuntdouble::Vec3* wp = f.has_waypoint ? &f.waypoint : nullptr;
         std::vector<std::string> errs;
         if (f.id != e.id) errs.push_back("id mismatch: fixture " + f.id + " vs expected " + e.id);
 
         if (f.has_autonomy) {
-            automa::BrainKernel k1;
+            stuntdouble::BrainKernel k1;
             for (auto& m : diff(k1.tick(f.self, f.hostiles, f.profile, f.presentation, f.autonomy, wp), e)) {
                 errs.push_back("[enum] " + m);
             }
         }
-        automa::BrainKernel k2;
+        stuntdouble::BrainKernel k2;
         for (auto& m : diff(k2.tick_behaviors(f.self, f.hostiles, f.profile, f.presentation, f.behaviors, wp), e)) {
             errs.push_back("[mask] " + m);
         }

@@ -1,0 +1,12 @@
+{
+  "name": "@stuntdouble/seams",
+  "version": "0.1.0",
+  "description": "Adapter contract for Stuntdouble: Perception / Input / Interlock seams + StuntRuntime (zero dependencies).",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "node --experimental-strip-types --test tests/runtime.test.ts"
+  },
+  "author": "Yusuf Günay",
+  "license": "MPL-2.0"
+}

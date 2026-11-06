@@ -1,6 +1,6 @@
 {
-  "name": "automa",
-  "displayName": "AUTOMA — Autonomous Play Architecture",
+  "name": "stuntdouble",
+  "displayName": "Stuntdouble — Competent combat hand-over for story-driven single-player games",
   "version": "1.0.0",
   "description": "Reverse engineer single-player games with REA and inject a 4-layer, user-configurable autonomous game brain (GOAP + Compensated Utility AI + Context Steering) with Tactical, Cinematic Live, and Cinematic Resolve modes.",
   "author": {
@@ -8,7 +8,7 @@
   },
   "license": "MPL-2.0",
   "keywords": [
-    "automa",
+    "stuntdouble",
     "game-ai",
     "goap",
     "utility-ai",

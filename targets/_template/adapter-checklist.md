@@ -1,6 +1,6 @@
 # Adapter checklist (seam -> arena gate)
 
-Implement the seams from `packages/automa-seams-ts` (C#: `packages/automa-brain-cs/AutomaSeams.cs`) and tick each line. The arena (`node packages/automa-arena/run.mjs`) proves the contract in a simulator; the live column is what you must still check in the real game.
+Implement the seams from `packages/stuntdouble-seams-ts` (C#: `packages/stuntdouble-brain-cs/StuntSeams.cs`) and tick each line. The arena (`node packages/stuntdouble-arena/run.mjs`) proves the contract in a simulator; the live column is what you must still check in the real game.
 
 | Seam / rule | What the adapter must do | Arena gate that proves the contract | Live check in the game |
 |---|---|---|---|

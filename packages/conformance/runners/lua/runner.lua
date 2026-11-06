@@ -1,11 +1,11 @@
--- AUTOMA conformance runner (Lua 5.4 / LuaJIT). Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
+-- Stuntdouble conformance runner (Lua 5.4 / LuaJIT). Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
 -- Usage: lua packages/conformance/runners/lua/runner.lua   (run from anywhere)
 -- Legacy-name scenarios run through BOTH tick(autonomyEnum) and tickBehaviors(mask).
 local script = (arg and arg[0]) or "runner.lua"
 local dir = script:gsub("\\", "/"):match("^(.*)/") or "."
-package.path = dir .. "/../../fixtures/?.lua;" .. dir .. "/../../../automa-brain-lua/?.lua;" .. package.path
+package.path = dir .. "/../../fixtures/?.lua;" .. dir .. "/../../../stuntdouble-brain-lua/?.lua;" .. package.path
 
-local AutomaBrain = require("automa_brain")
+local StuntBrain = require("stunt_brain")
 local fixtures = require("fixtures")
 local expected = require("expected")
 
@@ -54,12 +54,12 @@ for i, f in ipairs(fixtures) do
     if f.id ~= e.id then errs[#errs + 1] = "id mismatch: fixture " .. f.id .. " vs expected " .. e.id end
 
     if f.autonomy ~= nil then
-        local brain = AutomaBrain.new(f.profile, {})
+        local brain = StuntBrain.new(f.profile, {})
         for _, m in ipairs(diff(brain:tick(f.self, f.hostiles, f.profile, f.presentation, f.autonomy, wp), e)) do
             errs[#errs + 1] = "[enum] " .. m
         end
     end
-    local brain2 = AutomaBrain.new(f.profile, {})
+    local brain2 = StuntBrain.new(f.profile, {})
     for _, m in ipairs(diff(brain2:tickBehaviors(f.self, f.hostiles, f.profile, f.presentation, f.behaviors, wp), e)) do
         errs[#errs + 1] = "[mask] " .. m
     end

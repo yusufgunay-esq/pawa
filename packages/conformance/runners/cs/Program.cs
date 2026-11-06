@@ -1,11 +1,11 @@
-// AUTOMA conformance runner (C#). Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
-// Replays every fixture through AutomaBrainKernel and diffs against the TS reference decisions.
+// Stuntdouble conformance runner (C#). Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
+// Replays every fixture through StuntBrainKernel and diffs against the TS reference decisions.
 // Legacy-name scenarios run through BOTH Tick(AutonomyMode) and TickBehaviors(mask).
 using System;
 using System.Collections.Generic;
-using Automa.Brain;
+using Stuntdouble.Brain;
 
-namespace Automa.Conformance
+namespace Stuntdouble.Conformance
 {
     public static class Program
     {
@@ -21,7 +21,7 @@ namespace Automa.Conformance
             if (got != want) errs.Add(field + ": got " + (got ?? "null") + " want " + (want ?? "null"));
         }
 
-        private static List<string> Diff(AutomaDecision d, ExpectedDecision e)
+        private static List<string> Diff(StuntDecision d, ExpectedDecision e)
         {
             var errs = new List<string>();
             Cmp(errs, "stance", d.Stance.ToString().ToUpperInvariant(), e.Stance);
@@ -61,10 +61,10 @@ namespace Automa.Conformance
 
                 if (f.HasAutonomy)
                 {
-                    var k1 = new AutomaBrainKernel();
+                    var k1 = new StuntBrainKernel();
                     foreach (string m in Diff(k1.Tick(f.Self, f.Hostiles, f.Profile, f.Presentation, f.Autonomy, wp), e)) errs.Add("[enum] " + m);
                 }
-                var k2 = new AutomaBrainKernel();
+                var k2 = new StuntBrainKernel();
                 foreach (string m in Diff(k2.TickBehaviors(f.Self, f.Hostiles, f.Profile, f.Presentation, (Behaviors)f.Behaviors, wp), e)) errs.Add("[mask] " + m);
 
                 if (errs.Count == 0) passed++;

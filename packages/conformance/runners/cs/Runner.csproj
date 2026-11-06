@@ -4,12 +4,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>disable</Nullable>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <RootNamespace>Automa.Conformance</RootNamespace>
-    <AssemblyName>automa-conformance</AssemblyName>
+    <RootNamespace>Stuntdouble.Conformance</RootNamespace>
+    <AssemblyName>stuntdouble-conformance</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
-    <Compile Include="../../../automa-brain-cs/AutomaBrain.cs" Link="AutomaBrain.cs" />
+    <Compile Include="../../../stuntdouble-brain-cs/StuntBrain.cs" Link="StuntBrain.cs" />
     <Compile Include="../../fixtures/fixtures.cs" Link="fixtures.cs" />
     <Compile Include="../../fixtures/expected.cs" Link="expected.cs" />
   </ItemGroup>

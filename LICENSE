@@ -5,15 +5,15 @@ This software and cognitive architecture were created by Yusuf Günay; this copy
 Değiştirdiğin Mozilla Public License kapsamındaki dosyalar aynı lisansla açık kalır; kendi eklediğin ayrı kodu kapalı tutabilirsin.
 
 Akademik ve Bilimsel Atıf Şartı / Academic & Scientific Attribution Requirement:
-Bu depodaki bilişsel mimariyi (4-Layer AUTOMA Brain), matematiksel formülasyonu (paper/WHITEPAPER.md),
+Bu depodaki bilişsel mimariyi (4-Layer Stuntdouble Brain), matematiksel formülasyonu (paper/WHITEPAPER.md),
 persona şemalarını veya hedef analiz protokollerini tez, akademik makale, teknik rapor, konferans bildirisi
 ya da bilimsel yayında kullanan, referans alan veya kıyaslayan herkes, kaynakçada "Yusuf Günay" adına ve
-"AUTOMA: Autonomous Play Architecture for Single-Player Games" eserine (bkz. CITATION.cff) açıkça atıf
+"Stuntdouble: Competent combat hand-over for story-driven single-player games" eserine (bkz. CITATION.cff) açıkça atıf
 yapmakla yükümlüdür. Makale ve tez metinleri Creative Commons Attribution 4.0 International (CC BY 4.0)
 kapsamında yalnızca "Yusuf Günay" adına açık atıf yapılması şartıyla kullanılabilir.
 
 Any thesis, dissertation, academic paper, technical report, or scientific publication that uses, benchmarks,
-adapts, or builds upon the AUTOMA cognitive architecture, mathematical specifications (paper/WHITEPAPER.md),
+adapts, or builds upon the Stuntdouble cognitive architecture, mathematical specifications (paper/WHITEPAPER.md),
 persona schemas, or target protocols must explicitly cite "Yusuf Günay" as the original author (see CITATION.cff).
 All research documentation and whitepapers in this repository are licensed under Creative Commons Attribution 4.0
 International (CC BY 4.0), which legally requires explicit attribution to "Yusuf Günay" in any academic or

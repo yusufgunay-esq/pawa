@@ -1,5 +1,5 @@
 /**
- * AUTOMA Cross-Language Conformance — TypeScript reference emitter
+ * Stuntdouble Cross-Language Conformance — TypeScript reference emitter
  * Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
  *
  * Runs the scenario corpus through the TypeScript reference kernel and writes:
@@ -12,14 +12,14 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { AutomaBrain, resolveBehaviors } from '../automa-brain-ts/src/index.ts';
+import { StuntBrain, resolveBehaviors } from '../stuntdouble-brain-ts/src/index.ts';
 import { SCENARIOS } from './scenarios.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 export function runScenario(scenario) {
   // Fresh brain per scenario: the discipline jitter cursor and blackboard must not leak.
-  const brain = new AutomaBrain();
+  const brain = new StuntBrain();
   const decision = brain.tick(
     scenario.self,
     scenario.hostiles,

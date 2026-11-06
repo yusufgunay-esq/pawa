@@ -1,8 +1,8 @@
-AUTOMA (Autonomous Play Architecture)
+Stuntdouble (Competent combat hand-over for story-driven single-player games)
 Copyright (c) 2026 Yusuf Günay.
 
 This product includes software and scientific specifications developed by
-Yusuf Günay (https://github.com/yusufgunay-esq/automa).
+Yusuf Günay (https://github.com/yusufgunay-esq/stuntdouble).
 
 1. Source Code Notice (MPL-2.0):
    All source code inside packages/, skills/, scripts/, schemas/ and targets/ is subject to the
@@ -14,8 +14,8 @@ Yusuf Günay (https://github.com/yusufgunay-esq/automa).
    (paper/WHITEPAPER.md), the roadmap (docs/) and evaluation protocols are licensed under the
    Creative Commons Attribution 4.0 International License (CC BY 4.0), see LICENSE-CC-BY-4.0.md.
    Any academic thesis, dissertation, peer-reviewed paper, preprint, or
-   technical report utilizing or evaluating AUTOMA must explicitly cite:
+   technical report utilizing or evaluating Stuntdouble must explicitly cite:
 
-   Günay, Y. (2026). AUTOMA: Autonomous Play Architecture for Single-Player Games
+   Günay, Y. (2026). Stuntdouble: Competent combat hand-over for story-driven single-player games
    (Version 1.0.0) [Computer software & Cognitive Architecture Specification].
-   https://github.com/yusufgunay-esq/automa
+   https://github.com/yusufgunay-esq/stuntdouble

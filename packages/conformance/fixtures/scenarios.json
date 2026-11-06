@@ -1095,7 +1095,7 @@
   },
   {
     "id": "combo-assist-cruise-clear",
-    "note": "ASSIST|CRUISE with no enemy: cruise drives, AUTOMA keeps the controller.",
+    "note": "ASSIST|CRUISE with no enemy: cruise drives, Stuntdouble keeps the controller.",
     "profile": {
       "id": "conformance_reference",
       "name": "Conformance Reference Protagonist",
@@ -1258,7 +1258,7 @@
   },
   {
     "id": "combo-assist-combat-enemy",
-    "note": "ASSIST|COMBAT with an enemy present: ASSIST is inert, AUTOMA fights.",
+    "note": "ASSIST|COMBAT with an enemy present: ASSIST is inert, Stuntdouble fights.",
     "profile": {
       "id": "conformance_reference",
       "name": "Conformance Reference Protagonist",

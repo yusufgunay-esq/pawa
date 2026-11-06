@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/yusufgunay-esq/automa/schemas/profiles.schema.json",
-  "title": "AUTOMA Profile Preset Library",
+  "$id": "https://github.com/yusufgunay-esq/stuntdouble/schemas/profiles.schema.json",
+  "title": "Stuntdouble Profile Preset Library",
   "description": "Optional starting templates for protagonist profiles. These are NOT a taxonomy: any target game may author its own profile.json with any playstyle label. A preset is meant to be forked, re-tuned against REA evidence, and then diverged from.",
   "type": "object",
   "required": ["presets"],

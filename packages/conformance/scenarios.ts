@@ -1,5 +1,5 @@
 /**
- * AUTOMA Cross-Language Conformance — Scenario Corpus
+ * Stuntdouble Cross-Language Conformance — Scenario Corpus
  * Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
  *
  * The single source of truth for the differential test suite. Each scenario is a
@@ -10,8 +10,8 @@
  * Add a scenario here rather than editing generated fixtures: fixtures are outputs.
  */
 
-import { Behavior } from '../automa-brain-ts/src/index.ts';
-import type { AutonomyMode, Behaviors, EntitySnapshot, BehaviorProfile, PresentationMode, Vec3 } from '../../automa-brain-ts/src/index.ts';
+import { Behavior } from '../stuntdouble-brain-ts/src/index.ts';
+import type { AutonomyMode, Behaviors, EntitySnapshot, BehaviorProfile, PresentationMode, Vec3 } from '../../stuntdouble-brain-ts/src/index.ts';
 
 export interface Scenario {
   id: string;
@@ -257,7 +257,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     id: 'combo-assist-cruise-clear',
-    note: 'ASSIST|CRUISE with no enemy: cruise drives, AUTOMA keeps the controller.',
+    note: 'ASSIST|CRUISE with no enemy: cruise drives, Stuntdouble keeps the controller.',
     profile: BASE_PERSONA,
     self: IDLE_SELF,
     hostiles: [],
@@ -287,7 +287,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     id: 'combo-assist-combat-enemy',
-    note: 'ASSIST|COMBAT with an enemy present: ASSIST is inert, AUTOMA fights.',
+    note: 'ASSIST|COMBAT with an enemy present: ASSIST is inert, Stuntdouble fights.',
     profile: BASE_PERSONA,
     self: IDLE_SELF,
     hostiles: [hostile({ id: 'boss_1', position: { x: 2.0, y: 0, z: 0 }, healthRatio: 0.8, threatWeight: 2.0 })],

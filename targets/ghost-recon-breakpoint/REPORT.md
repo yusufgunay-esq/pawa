@@ -1,4 +1,4 @@
-# AUTOMA Target Report: Ghost Recon Breakpoint (version not verified / PC, Ubisoft Connect)
+# Stuntdouble Target Report: Ghost Recon Breakpoint (version not verified / PC, Ubisoft Connect)
 
 - **Target Slug:** `ghost-recon-breakpoint`
 - **Status:** `ABORTED` (Stage 1 ethics gate)
@@ -6,7 +6,7 @@
 - **Strategy Tier Used:** none (S1–S5 all rejected)
 - **Profile:** not derived
 
-**DECISION: ABORT.** Denuvo-protected executable plus online services and anti-cheat components. This falls outside AUTOMA's scope (single-player, offline, no anti-cheat, never work against DRM).
+**DECISION: ABORT.** Denuvo-protected executable plus online services and anti-cheat components. This falls outside Stuntdouble's scope (single-player, offline, no anti-cheat, never work against DRM).
 
 ---
 
