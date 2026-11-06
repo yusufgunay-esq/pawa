@@ -1,30 +1,36 @@
-# Architecture & Mathematical Foundations of PAWA
+# Architecture & Mathematical Foundations of AUTOMA
 
-**Persona-Aligned World Autonomy (PAWA)** addresses a longstanding structural asymmetry in interactive entertainment: narrative-driven games frequently cast the player as an elite operative, mythic mercenary, or master tactician, yet rely solely on raw human motor execution during repetitive combat encounters. When an encounter becomes tedious—or when a player wishes to experience combat as a directed action sequence—naive "bot takeover" toggles (`is_human = false`) fail because standard NPC AI is designed to serve as expendable opposition rather than a competent protagonist.
+**Autonomous Play Architecture (AUTOMA)** addresses a longstanding structural asymmetry in interactive entertainment: narrative-driven games frequently cast the player as an elite operative, mythic mercenary, or master tactician, yet rely solely on raw human motor execution during repetitive combat encounters. When an encounter becomes tedious—or when a player wishes to experience combat as a directed action sequence—naive "bot takeover" toggles (`is_human = false`) fail because standard NPC AI is designed to serve as expendable opposition rather than a competent protagonist.
 
-PAWA solves this by pairing **Binary Seam Reconnaissance (via REA)** with an **Engine-Agnostic 4-Layer Cognitive Kernel (`@pawa/brain`)** and a **Tri-Modal Presentation Director**.
+AUTOMA solves this by pairing **Binary Seam Reconnaissance (via REA)** with an **Engine-Agnostic 4-Layer Cognitive Kernel (`@automa/brain`)** and a **Tri-Modal Presentation Director**.
 
 ---
 
 ## 1. Hierarchical 4-Layer Cognitive Architecture
 
-Every PAWA Brain implementation (`TypeScript`, `C#`, `C++20`, `Lua`) executes a deterministic-stochastic hybrid tick divided into four strict layers:
+Every AUTOMA Brain implementation (`TypeScript`, `C#`, `C++20`, `Lua`) executes a deterministic-stochastic hybrid tick divided into four strict layers:
 
-$$\mathcal{T}_{\text{PAWA}}(t) = \mathcal{L}_1\Big(\mathcal{L}_2(S_t), \; \mathcal{L}_3\big(\mathcal{L}_2(S_t), \mathcal{L}_4(\mathcal{P})\big)\Big)$$
+$$\mathcal{T}_{\text{AUTOMA}}(t) = \mathcal{L}_1\Big(\mathcal{L}_2(S_t), \; \mathcal{L}_3\big(\mathcal{L}_2(S_t), \mathcal{L}_4(\mathcal{P})\big)\Big)$$
 
 ### Layer 4: Narrative & Tactical Orchestrator ($\mathcal{L}_4$)
-Evaluates global encounter pressure, protagonist health/stamina ratios, and the loaded **Persona Profile** $\mathcal{P} = \langle \alpha, \delta, \phi, \tau_r, r^* \rangle$ (where $\alpha \in [0,1]$ is aggression, $\delta \in [0,1]$ is discipline, $\phi \in [0,1]$ is cinematic flair, $\tau_r$ is motor latency, and $r^*$ is preferred engagement range).
+Evaluates global encounter pressure, protagonist health/stamina ratios, and the loaded **Profile Profile** $\mathcal{P} = \langle \alpha, \delta, \phi, \tau_r, r^* \rangle$ (where $\alpha \in [0,1]$ is aggression, $\delta \in [0,1]$ is discipline, $\phi \in [0,1]$ is cinematic flair, $\tau_r$ is motor latency, and $r^*$ is preferred engagement range).
 - Selects the active **Tactical Stance** $\sigma \in \{\text{AGGRESSIVE}, \text{BALANCED}, \text{DEFENSIVE}, \text{EVASIVE}, \text{STEALTH}\}$.
 - Emits the high-level **Goal State** $G^*$ for the GOAP planner and the **Camera Directive** $\mathcal{C}_t$ for the Presentation Director.
+
+**Note on the profile space.** $\mathcal{P}$ is a continuous five-dimensional parameter vector, *not* a choice among a finite set of character classes. AUTOMA deliberately defines no archetype taxonomy: a protagonist is characterised by where it sits in $\mathcal{P}$, and its descriptive label is free-form metadata. This matters because a taxonomised roster ("operative / vanguard / scholar / skirmisher / guardian") partitions the space into five points and rejects everything between them, which is precisely the failure mode profile alignment is meant to avoid. Empirical estimates $\hat{\mathcal{P}}$ are derived per target game from reverse-engineered behavioural evidence — animation commitment frames for $\alpha$ and $\tau_r$, the parry window for $\delta$, the presence of counter/finisher states for $\phi$, and weapon reach for $r^*$.
 
 ### Layer 3A: Makeup-Value Compensated Utility AI ($\mathcal{L}_{3A}$)
 To evaluate immediate reflex overrides (such as deflecting an incoming telegraphed attack or executing a vulnerable target), each candidate action $a \in \mathcal{A}_U$ aggregates $n$ normalized considerations $q_i \in [0, 1]$ mapped through response curves (Linear, Polynomial, Logistic Sigmoid).
 
-To prevent actions with higher consideration counts $n$ from suffering multiplicative underflow, PAWA applies **Dave Mark's Makeup Value Compensation**:
+To prevent actions with higher consideration counts $n$ from suffering multiplicative underflow, AUTOMA applies **Dave Mark's Makeup Value Compensation**:
 
 $$\mu = 1 - \frac{1}{n}, \qquad \hat{q}_i = q_i + (1 - q_i)\,\mu\,q_i, \qquad U(a) = \prod_{i=1}^{n} \hat{q}_i + \epsilon_{\delta}$$
 
-where $\epsilon_{\delta} \sim \mathcal{U}\big(-\frac{1-\delta}{10}, +\frac{1-\delta}{10}\big)$ introduces discipline-bounded stochastic variation so repeated encounters never look robotic.
+where $\epsilon_{\delta} \in [-(1-\delta)/10,\ +(1-\delta)/10]$ bounds the stochastic variation so repeated encounters never look robotic. Rather than a platform PRNG (whose stream differs between runtimes and cannot be reproduced in a regression test), AUTOMA uses the golden-ratio additive recurrence
+
+$$\epsilon_{\delta}^{(k)} = \frac{1-\delta}{10}\Big(2\big(k\varphi^{-1} \bmod 1\big) - 1\Big), \qquad \varphi^{-1} = 0.6180339887498949$$
+
+with $k$ the consideration index within a single tick. This low-discrepancy sequence is deterministic, seed-free and bit-identical in TypeScript, C#, C++ and Lua, which is what allows the four kernels to be differentially tested decision-for-decision.
 
 ### Layer 3B: Regressive $A^*$ Goal-Oriented Action Planner ($\mathcal{L}_{3B}$)
 Following Jeff Orkin's F.E.A.R. formulation, multi-step tactical sequences (e.g., $\texttt{CLOSE\_DISTANCE} \rightarrow \texttt{HEAVY\_ASSAULT} \rightarrow \texttt{EXECUTE\_FINISHER}$) are synthesized via backward regressive $A^*$ search from the Orchestrator's desired goal proposition set $G^*$ back to the current world state $W_t$:
@@ -39,7 +45,7 @@ $$I(\mathbf{p}_{u,v}) = \sum_{a \in \text{Allies}} \frac{w_a}{1 + \lambda_a \|\m
 When the Orchestrator transitions into $\text{DEFENSIVE}$ or $\text{EVASIVE}$ stance, the highest-scoring pocket $\arg\max_{\mathbf{p}} I(\mathbf{p})$ becomes the immediate navigation anchor.
 
 ### Layer 1: 16-Slot Context Steering ($\mathcal{L}_1$)
-Classical vector-sum steering suffers from local minima oscillation when an obstacle sits directly between the agent and its target. PAWA implements **16-Slot Context Steering** (Fray, 2013):
+Classical vector-sum steering suffers from local minima oscillation when an obstacle sits directly between the agent and its target. AUTOMA implements **16-Slot Context Steering** (Fray, 2013):
 1. Sixteen unit radial basis vectors $\mathbf{d}_k = (\cos \theta_k, 0, \sin \theta_k)$ for $\theta_k = \frac{2\pi k}{16}$ are evaluated per tick.
 2. **Interest Array** $I_k \in [0,1]$ rewards alignment toward the optimal combat ring $r^*$.
 3. **Danger Array** $D_k \in [0,1]$ projects repulsive cones around hostile wind-up radii and environmental hazards.
@@ -51,9 +57,9 @@ $$k^* = \arg\max_{k \in \{0..15\}} \big(I_k - \gamma D_k\big), \qquad \gamma = 1
 
 ## 2. Tri-Modal Presentation Director
 
-PAWA separates **Cognitive Execution** from **Visual Presentation**, allowing the user to switch modes live via hotkey (`F6`):
+AUTOMA separates **Cognitive Execution** from **Visual Presentation**, allowing the user to switch modes live via hotkey (`F6`):
 
-1. **`TACTICAL`:** $\text{TimeScale} = 1.0$, $\text{FOV} = 1.0\times$, $\text{Camera} = \texttt{PASSIVE}$. Standard gameplay view while the PAWA Brain executes combat.
+1. **`TACTICAL`:** $\text{TimeScale} = 1.0$, $\text{FOV} = 1.0\times$, $\text{Camera} = \texttt{PASSIVE}$. Standard gameplay view while the AUTOMA Brain executes combat.
 2. **`CINEMATIC_LIVE`:** $\text{Camera} = \texttt{ACTION\_TRACK}$ during movement and $\texttt{IMPACT\_SLOWMO}$ ($\text{TimeScale} = 0.35$, $\text{FOV} = 0.85\times$) during parries, counters, and finishers—turning live gameplay into an interactive action film.
 3. **`CINEMATIC_RESOLVE`:** $\text{Camera} = \texttt{FINISH\_CUT}$. Bridges the encounter with a choreographed camera transition while invoking the engine's native encounter-victory callbacks (`Seam.Encounter`) so all quest flags and XP rewards fire cleanly.
 

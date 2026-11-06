@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yusufgunay-esq/automa/schemas/profile.schema.json",
+  "title": "AUTOMA Behavior Profile",
+  "description": "Behavioral parameter set that makes the autonomous agent play the way the user (Tier 1) or the game's protagonist evidence (Tier 2, Phase 2) dictates. There is deliberately no fixed taxonomy of playstyles: `archetype` is a free-form label authored per target game by the agent, derived from reverse-engineered evidence about how the protagonist actually moves, commits to attacks, and recovers. schemas/profiles.json contains optional starting templates, not a closed set.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "archetype",
+    "aggression",
+    "discipline",
+    "cinematicFlair",
+    "reactionDelayMs",
+    "preferredRange",
+    "defaultPresentationMode"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "description": "Stable slug, also used as the profile file name: targets/<game>/profile.json."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable profile name, ideally the protagonist's own name (e.g. \"Kassandra — Spartan Misthios\")."
+    },
+    "archetype": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 48,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9 _-]*$",
+      "description": "FREE-FORM playstyle label. No enumeration is imposed: write the label that fits the protagonist (e.g. TACTICAL_OPERATIVE, SPARTAN_MISTHIOS, STEALTH_ASSASSIN, DRUNKEN_BRAWLER, PACIFIST_MONK). Presets in schemas/profiles.json are optional starting points, never a required choice."
+    },
+    "aggression": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "[0,1] Bias toward offensive actions, gap closing, and committing to exchanges."
+    },
+    "discipline": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "[0,1] Inverse of stochastic noise. 1.0 = frame-perfect repetition, 0.0 = visibly human hesitation and mis-timing."
+    },
+    "cinematicFlair": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "[0,1] Preference for parries, finishers and dramatic timing over plain efficiency."
+    },
+    "reactionDelayMs": {
+      "type": "integer",
+      "minimum": 20,
+      "maximum": 500,
+      "description": "Simulated motor latency before a motor intent is dispatched."
+    },
+    "preferredRange": {
+      "type": "number",
+      "minimum": 0.5,
+      "maximum": 100.0,
+      "description": "Optimal engagement ring in meters; the Layer 1 steering interest map orbits this distance."
+    },
+    "defaultPresentationMode": {
+      "type": "string",
+      "enum": ["TACTICAL", "CINEMATIC_LIVE", "CINEMATIC_RESOLVE"],
+      "description": "Presentation director mode at handover. TACTICAL leaves the native camera untouched."
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Optional but encouraged: how each parameter was derived (REA seam symbols, observed animation timings, reference gameplay footage). Keeps profile tuning auditable instead of guessed."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional free-form designer rationale for this protagonist's behavior."
+    }
+  }
+}

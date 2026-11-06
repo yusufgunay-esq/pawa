@@ -1,0 +1,977 @@
+[
+  {
+    "id": "deflect-windup-tactical",
+    "note": "Single telegraphed strike at close range; tactical camera must stay passive.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": true,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 1.5,
+        "id": "mercenary_1",
+        "position": {
+          "x": 1.8,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": "FULL_COMBAT"
+  },
+  {
+    "id": "deflect-windup-cinematic",
+    "note": "Same tick under CINEMATIC_LIVE: counter must trigger hit-stop slow-mo.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": true,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 1.5,
+        "id": "mercenary_1",
+        "position": {
+          "x": 1.8,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "CINEMATIC_LIVE",
+    "autonomy": "FULL_COMBAT"
+  },
+  {
+    "id": "deflect-windup-low-flair",
+    "note": "cinematicFlair <= 0.5 must soften the slow-mo to 0.65 and drop counter priority.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.2,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 1.5,
+        "id": "mercenary_1",
+        "position": {
+          "x": 1.8,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "CINEMATIC_LIVE",
+    "autonomy": "FULL_COMBAT"
+  },
+  {
+    "id": "finisher-open",
+    "note": "Weak enemy at mid range: finisher utility must win and the GOAP chain must close in.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.18,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "guard_1",
+        "position": {
+          "x": 2.4,
+          "y": 0,
+          "z": 0.2
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": "FULL_COMBAT"
+  },
+  {
+    "id": "evasive-critical-health",
+    "note": "Critical health with two hostiles: EVASIVE stance, safest-pocket navigation.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.21,
+      "staminaRatio": 0.3,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 2.2,
+        "id": "brute_1",
+        "position": {
+          "x": 2.5,
+          "y": 0,
+          "z": 1.5
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 2,
+        "id": "brute_2",
+        "position": {
+          "x": -1.5,
+          "y": 0,
+          "z": -2.5
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": "FULL_COMBAT"
+  },
+  {
+    "id": "crowded-pressure",
+    "note": "Four hostiles: DEFENSIVE via pressureIndex, repulsion hazards from every side.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "h1",
+        "position": {
+          "x": 1.5,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "h2",
+        "position": {
+          "x": -1.5,
+          "y": 0,
+          "z": 0
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "h3",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 1.5
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "h4",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": -1.5
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": "FULL_COMBAT"
+  },
+  {
+    "id": "co-pilot-pass-through",
+    "note": "CO_PILOT with a calm enemy: human keeps the controller, no interception.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.8,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 2,
+        "id": "boss_1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": "CO_PILOT"
+  },
+  {
+    "id": "co-pilot-interrupt",
+    "note": "CO_PILOT the instant the boss telegraphs: single-frame reflex intercept.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.8,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 2,
+        "id": "boss_1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": "CO_PILOT"
+  },
+  {
+    "id": "shadow-survival",
+    "note": "SHADOW_SURVIVAL must never select STRIKE_COMBO or EXECUTE_FINISHER.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.1,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 2,
+        "id": "boss_1",
+        "position": {
+          "x": 1.5,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": "SHADOW_SURVIVAL"
+  },
+  {
+    "id": "grind-cruise",
+    "note": "GRIND_AUTOPILOT with no hostiles: cruise toward the waypoint at 0.5 ring.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [],
+    "presentation": "TACTICAL",
+    "autonomy": "GRIND_AUTOPILOT",
+    "waypoint": {
+      "x": 50,
+      "y": 0,
+      "z": 0
+    }
+  },
+  {
+    "id": "grind-idle-scan",
+    "note": "GRIND_AUTOPILOT without a waypoint: idle scan, no cruise command.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [],
+    "presentation": "TACTICAL",
+    "autonomy": "GRIND_AUTOPILOT"
+  },
+  {
+    "id": "commander-assault",
+    "note": "COMMANDER behaves like FULL_COMBAT at the motor layer (doctrine is external).",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.55,
+      "discipline": 0.7,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1.4,
+        "id": "h1",
+        "position": {
+          "x": 3.2,
+          "y": 0,
+          "z": 0.4
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": "COMMANDER"
+  },
+  {
+    "id": "empty-world-stealth",
+    "note": "No hostiles at all: STEALTH stance, goal collapses to threatNeutralized.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [],
+    "presentation": "TACTICAL",
+    "autonomy": "FULL_COMBAT"
+  },
+  {
+    "id": "cinematic-resolve",
+    "note": "CINEMATIC_RESOLVE always returns the FINISH_CUT directive at 1.75x.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.5,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1,
+        "id": "guard_1",
+        "position": {
+          "x": 6,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "CINEMATIC_RESOLVE",
+    "autonomy": "FULL_COMBAT"
+  },
+  {
+    "id": "obstacle-steering",
+    "note": "Target directly behind a wind-up hazard: steering must deflect sideways.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.78,
+      "discipline": 0.92,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 95,
+      "preferredRange": 1
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": true,
+        "isRanged": false,
+        "threatWeight": 3,
+        "id": "wall_1",
+        "position": {
+          "x": 2,
+          "y": 0,
+          "z": 0
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": "FULL_COMBAT"
+  },
+  {
+    "id": "wide-range-kiter",
+    "note": "Arcane-style wide ring with high discipline: kite behaviour at 8m.",
+    "profile": {
+      "id": "conformance_kiter",
+      "name": "Conformance Kiter",
+      "aggression": 0.46,
+      "discipline": 1,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 120,
+      "preferredRange": 8
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": -3.5,
+        "y": 0,
+        "z": 2
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.9,
+      "staminaRatio": 0.9,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1.7,
+        "id": "melee_1",
+        "position": {
+          "x": 1,
+          "y": 0,
+          "z": 1
+        }
+      },
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.7,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": true,
+        "threatWeight": 1.2,
+        "id": "ranged_1",
+        "position": {
+          "x": 6,
+          "y": 0,
+          "z": -2
+        }
+      }
+    ],
+    "presentation": "CINEMATIC_LIVE",
+    "autonomy": "FULL_COMBAT"
+  },
+  {
+    "id": "low-discipline-jitter",
+    "note": "discipline 0.0 maximises the deterministic jitter; ordering must still match exactly.",
+    "profile": {
+      "id": "conformance_reference",
+      "name": "Conformance Reference Protagonist",
+      "aggression": 0.5,
+      "discipline": 0,
+      "cinematicFlair": 0.5,
+      "reactionDelayMs": 95,
+      "preferredRange": 2.2
+    },
+    "self": {
+      "id": "player_0",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "healthRatio": 0.55,
+      "staminaRatio": 0.55,
+      "isAttacking": false,
+      "isWindUp": false,
+      "isRanged": false,
+      "threatWeight": 1
+    },
+    "hostiles": [
+      {
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "healthRatio": 0.4,
+        "staminaRatio": 0.7,
+        "isAttacking": false,
+        "isWindUp": false,
+        "isRanged": false,
+        "threatWeight": 1.3,
+        "id": "h1",
+        "position": {
+          "x": 2.6,
+          "y": 0,
+          "z": 0.6
+        }
+      }
+    ],
+    "presentation": "TACTICAL",
+    "autonomy": "FULL_COMBAT"
+  }
+]

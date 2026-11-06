@@ -1,5 +1,5 @@
 /**
- * PAWA Core Brain Architecture (pawa-brain-ts)
+ * AUTOMA Core Brain Architecture (automa-brain-ts)
  * Copyright (c) 2026 Yusuf Günay. Licensed under MPL-2.0.
  *
  * Implements a zero-dependency, deterministic/stochastic 4-Layer Autonomous Proxy Agent:
@@ -13,6 +13,13 @@
 // 0. CORE TYPES & INTERFACES
 // ============================================================================
 
+export type AutonomyMode =
+  | 'FULL_COMBAT'     // Complete autonomous combat & movement (Default)
+  | 'CO_PILOT'        // Human steers & attacks; AUTOMA intercepts only urgent reflexes (Parry/Dodge/Heal)
+  | 'GRIND_AUTOPILOT' // Open-world waypoint navigation, auto-loot/harvest, and trash-mob clearing
+  | 'SHADOW_SURVIVAL' // Zero-offense evasion & parry showcase to study boss attack patterns safely
+  | 'COMMANDER';      // Human issues high-level target/stance orders; AUTOMA executes motor combat
+
 export type PresentationMode = 'TACTICAL' | 'CINEMATIC_LIVE' | 'CINEMATIC_RESOLVE';
 export type TacticalStance = 'AGGRESSIVE' | 'BALANCED' | 'DEFENSIVE' | 'EVASIVE' | 'STEALTH';
 
@@ -22,7 +29,28 @@ export interface Vec3 {
   z: number;
 }
 
-export interface PersonaProfile {
+/**
+ * XZ-plane distance. Deliberately `Math.sqrt(dx*dx + dz*dz)` rather than `Math.hypot`:
+ * hypot's compensated summation differs from a plain sqrt in the last ulp, which would
+ * break bit-level agreement with the C#, C++ and Lua kernels in packages/conformance.
+ */
+export function distXZ(ax: number, az: number, bx: number, bz: number): number {
+  const dx = bx - ax;
+  const dz = bz - az;
+  return Math.sqrt(dx * dx + dz * dz);
+}
+
+/**
+ * Decimal quantisation shared by every AUTOMA kernel: floor(x * 10^digits + 0.5) / 10^digits.
+ * `toFixed`/`toString` pipelines disagree on halfway cases between runtimes, so the
+ * conformance harness compares values produced by this exact routine on all four sides.
+ */
+export function quantize(value: number, digits: number): number {
+  const scale = Math.pow(10, digits);
+  return Math.floor(value * scale + 0.5) / scale;
+}
+
+export interface BehaviorProfile {
   id: string;
   name: string;
   aggression: number;      // [0, 1] Bias towards offensive actions and gap closing
@@ -44,9 +72,12 @@ export interface EntitySnapshot {
   threatWeight: number;    // Base danger level (e.g., 1.0 grunt, 3.0 elite/boss)
 }
 
-export interface WorldStateMap {
-  [key: string]: boolean | number | string;
-}
+/**
+ * Boolean proposition set used by the GOAP planner. Restricting the domain to
+ * booleans is what makes the regressive search byte-for-byte reproducible in
+ * TypeScript, C#, C++ and Lua (see packages/conformance).
+ */
+export type WorldStateMap = Record<string, boolean>;
 
 export interface CameraDirective {
   mode: 'PASSIVE' | 'DYNAMIC_ORBIT' | 'ACTION_TRACK' | 'IMPACT_SLOWMO' | 'FINISH_CUT';
@@ -87,7 +118,7 @@ export class ContextSteering {
 
     const dx = targetPos.x - selfPos.x;
     const dz = targetPos.z - selfPos.z;
-    const dist = Math.hypot(dx, dz);
+    const dist = Math.sqrt(dx * dx + dz * dz);
     const toTargetDir: Vec3 = dist > 1e-5 ? { x: dx / dist, y: 0, z: dz / dist } : { x: 0, y: 0, z: 0 };
 
     // Populate Interest Map
@@ -111,7 +142,7 @@ export class ContextSteering {
     for (const h of hazards) {
       const hx = h.position.x - selfPos.x;
       const hz = h.position.z - selfPos.z;
-      const hDist = Math.hypot(hx, hz);
+      const hDist = Math.sqrt(hx * hx + hz * hz);
       if (hDist >= h.radius || hDist < 1e-5) continue;
 
       const hDir: Vec3 = { x: hx / hDist, y: 0, z: hz / hDist };
@@ -170,11 +201,11 @@ export class InfluenceMap2D {
 
         let score = 0;
         for (const h of hostiles) {
-          const d = Math.hypot(worldX - h.position.x, worldZ - h.position.z);
+          const d = distXZ(worldX, worldZ, h.position.x, h.position.z);
           score -= (h.threatWeight * (h.isWindUp ? 1.75 : 1.0)) / (1.0 + d * 0.45);
         }
         for (const a of allies) {
-          const d = Math.hypot(worldX - a.position.x, worldZ - a.position.z);
+          const d = distXZ(worldX, worldZ, a.position.x, a.position.z);
           score += a.threatWeight / (1.0 + d * 0.5);
         }
         this.grid[gz * this.gridSize + gx] = score;
@@ -210,7 +241,7 @@ export class InfluenceMap2D {
 export class TacticalBlackboard {
   public self!: EntitySnapshot;
   public hostiles: EntitySnapshot[] = [];
-  public persona!: PersonaProfile;
+  public profile!: BehaviorProfile;
   public presentationMode: PresentationMode = 'TACTICAL';
   public stance: TacticalStance = 'BALANCED';
   public primaryTarget: EntitySnapshot | null = null;
@@ -219,10 +250,10 @@ export class TacticalBlackboard {
   public influenceMap = new InfluenceMap2D(12, 2.5);
   public customData: Record<string, unknown> = {};
 
-  public refresh(self: EntitySnapshot, hostiles: EntitySnapshot[], persona: PersonaProfile): void {
+  public refresh(self: EntitySnapshot, hostiles: EntitySnapshot[], profile: BehaviorProfile): void {
     this.self = self;
     this.hostiles = hostiles.filter((h) => h.healthRatio > 0);
-    this.persona = persona;
+    this.profile = profile;
 
     // Identify imminent wind-up threat and primary target
     let nearestDist = Infinity;
@@ -231,7 +262,7 @@ export class TacticalBlackboard {
     let rawPressure = 0;
 
     for (const h of this.hostiles) {
-      const d = Math.hypot(h.position.x - self.position.x, h.position.z - self.position.z);
+      const d = distXZ(h.position.x, h.position.z, self.position.x, self.position.z);
       rawPressure += h.threatWeight / Math.max(1.0, d * 0.35);
 
       if (h.isWindUp && d < 4.5) {
@@ -252,16 +283,18 @@ export class TacticalBlackboard {
   public toWorldState(): WorldStateMap {
     const hasTarget = this.primaryTarget !== null;
     const dist = hasTarget
-      ? Math.hypot(
-          this.primaryTarget!.position.x - this.self.position.x,
-          this.primaryTarget!.position.z - this.self.position.z
+      ? distXZ(
+          this.primaryTarget!.position.x,
+          this.primaryTarget!.position.z,
+          this.self.position.x,
+          this.self.position.z
         )
       : Infinity;
 
     return {
       hasHostiles: this.hostiles.length > 0,
       inMeleeRange: dist <= 2.8,
-      inPreferredRange: dist <= this.persona.preferredRange * 1.2,
+      inPreferredRange: dist <= this.profile.preferredRange * 1.2,
       underImminentAttack: this.imminentThreat !== null,
       threatNeutralized: this.imminentThreat === null,
       healthCritical: this.self.healthRatio < 0.3,
@@ -286,6 +319,31 @@ export const Curves = {
     return 1.0 / (1.0 + Math.exp(-k * (clamped - x0)));
   },
 };
+
+/**
+ * Deterministic ε_δ discipline jitter (see paper/WHITEPAPER.md §Layer 3A).
+ *
+ * A golden-ratio additive recurrence (the Kronecker / Van der Corput low-discrepancy
+ * sequence) is used instead of a PRNG so the exact same ±amplitude is reproduced by
+ * every runtime and every conformance run — no seeding, no platform RNG drift.
+ */
+export class DisciplineJitter {
+  private static readonly GOLDEN_CONJUGATE = 0.6180339887498949;
+  private cursor = 0;
+
+  public reset(): void {
+    this.cursor = 0;
+  }
+
+  /** Returns ε_δ ∈ [-amp, +amp] where amp = (1 - discipline) / 10. */
+  public next(discipline: number): number {
+    this.cursor += 1;
+    const scaled = this.cursor * DisciplineJitter.GOLDEN_CONJUGATE;
+    const u = scaled - Math.floor(scaled);
+    const d = Math.max(0, Math.min(1, discipline));
+    return ((1 - d) / 10) * (2 * u - 1);
+  }
+}
 
 export interface Consideration {
   name: string;
@@ -453,11 +511,13 @@ export class GoapPlanner {
 }
 
 // ============================================================================
-// 5. LAYER 4: ORCHESTRATOR & UNIFIED PAWA BRAIN
+// 5. LAYER 4: ORCHESTRATOR & UNIFIED AUTOMA BRAIN
 // ============================================================================
 
-export interface PawaDecision {
+export interface AutomaDecision {
+  autonomyMode: AutonomyMode;
   stance: TacticalStance;
+  interceptHumanInput: boolean; // True when AUTOMA overrides human controller this tick
   selectedUtilityAction: string;
   utilityScore: number;
   goapPlan: string[];
@@ -467,16 +527,17 @@ export interface PawaDecision {
   cameraDirective: CameraDirective;
 }
 
-export class PawaBrain {
+export class AutomaBrain {
   public readonly blackboard = new TacticalBlackboard();
   public readonly steering = new ContextSteering(16);
   public readonly planner = new GoapPlanner();
+  private readonly jitter = new DisciplineJitter();
   private readonly utilityActions: UtilityAction[];
   private readonly goapActions: GoapAction[];
 
   constructor(customUtilityActions?: UtilityAction[], customGoapActions?: GoapAction[]) {
-    this.utilityActions = customUtilityActions ?? PawaBrain.defaultUtilityActions();
-    this.goapActions = customGoapActions ?? PawaBrain.defaultGoapActions();
+    this.utilityActions = customUtilityActions ?? AutomaBrain.defaultUtilityActions();
+    this.goapActions = customGoapActions ?? AutomaBrain.defaultGoapActions();
   }
 
   /**
@@ -485,23 +546,31 @@ export class PawaBrain {
   public tick(
     self: EntitySnapshot,
     hostiles: EntitySnapshot[],
-    persona: PersonaProfile,
-    presentationMode: PresentationMode = 'TACTICAL'
-  ): PawaDecision {
+    profile: BehaviorProfile,
+    presentationMode: PresentationMode = 'TACTICAL',
+    autonomyMode: AutonomyMode = 'FULL_COMBAT',
+    waypointOrLootPos?: Vec3
+  ): AutomaDecision {
     // 1. Update Layer 2 (Blackboard + Spatial Influence Map)
     this.blackboard.presentationMode = presentationMode;
-    this.blackboard.refresh(self, hostiles, persona);
+    this.blackboard.refresh(self, hostiles, profile);
 
-    // 2. Layer 4: Orchestrator evaluates stance & high-level goal
-    const stance = this.evaluateStance();
+    // 2. Layer 4: Orchestrator evaluates stance & high-level goal based on AutonomyMode
+    const stance =
+      autonomyMode === 'SHADOW_SURVIVAL' ? 'DEFENSIVE' : this.evaluateStance();
     this.blackboard.stance = stance;
     const goalState = this.selectGoalForStance(stance);
 
-    // 3. Layer 3A: Evaluate Utility AI with compensated scoring
+    // 3. Layer 3A: Evaluate Utility AI with compensated scoring (+ deterministic ε_δ jitter)
     let bestUtility = this.utilityActions[0];
     let bestScore = -1;
+    this.jitter.reset();
     for (const ua of this.utilityActions) {
-      const s = ua.score(this.blackboard);
+      if (autonomyMode === 'SHADOW_SURVIVAL' && (ua.id === 'STRIKE_COMBO' || ua.id === 'EXECUTE_FINISHER')) {
+        continue; // Shadow Survival strictly parries and evades without attacking
+      }
+      const jittered = ua.score(this.blackboard) + this.jitter.next(profile.discipline);
+      const s = Math.max(0, Math.min(1, jittered));
       if (s > bestScore) {
         bestScore = s;
         bestUtility = ua;
@@ -513,13 +582,29 @@ export class PawaBrain {
     const rawPlan = this.planner.plan(worldState, goalState, this.goapActions, this.blackboard) ?? [];
     const goapPlanNames = rawPlan.map((a) => a.name);
 
-    // Immediate command merges urgent reflex utility (e.g. Parry/Dodge) with GOAP step 0
-    const immediateCommand =
+    // Determine immediate command and human-input interception policy per AutonomyMode
+    let immediateCommand =
       bestScore > 0.78 ? bestUtility.id : goapPlanNames[0] ?? bestUtility.id;
+    let interceptHumanInput = true;
+
+    if (autonomyMode === 'CO_PILOT') {
+      // Only intercept human controls when an urgent defensive reflex (Parry/Evade/Heal) crosses threshold
+      const isUrgentReflex =
+        (bestUtility.id === 'DEFLECT_COUNTER' || bestUtility.id === 'EVADE_REPOSITION') &&
+        bestScore >= 0.75;
+      interceptHumanInput = isUrgentReflex || self.healthRatio < 0.25;
+      if (!interceptHumanInput) {
+        immediateCommand = 'HUMAN_PASS_THROUGH';
+      }
+    } else if (autonomyMode === 'GRIND_AUTOPILOT' && this.blackboard.hostiles.length === 0) {
+      immediateCommand = waypointOrLootPos ? 'CRUISE_OR_LOOT' : 'IDLE_SCAN';
+    }
 
     // 5. Layer 1: Context Steering vector synthesis
     let navTarget = self.position;
-    if (stance === 'EVASIVE' || stance === 'DEFENSIVE') {
+    if (autonomyMode === 'GRIND_AUTOPILOT' && this.blackboard.hostiles.length === 0 && waypointOrLootPos) {
+      navTarget = waypointOrLootPos;
+    } else if (stance === 'EVASIVE' || stance === 'DEFENSIVE') {
       navTarget = this.blackboard.influenceMap.findSafestPocket(self.position);
     } else if (this.blackboard.primaryTarget) {
       navTarget = this.blackboard.primaryTarget.position;
@@ -531,28 +616,35 @@ export class PawaBrain {
       weight: h.threatWeight * (h.isWindUp ? 1.8 : 1.0),
     }));
 
+    const prefRange =
+      autonomyMode === 'GRIND_AUTOPILOT' && this.blackboard.hostiles.length === 0
+        ? 0.5
+        : profile.preferredRange;
+
     const { direction, speedMultiplier } = this.steering.computeMoveVector(
       self.position,
       navTarget,
-      persona.preferredRange,
+      prefRange,
       hazards
     );
 
-    // 6. Layer 4: Presentation & Camera Director
+    // 6. Layer 4: Optional Presentation & Camera Director
     const cameraDirective = this.computeCameraDirective(
       presentationMode,
       immediateCommand,
-      persona
+      profile
     );
 
     return {
+      autonomyMode,
       stance,
+      interceptHumanInput,
       selectedUtilityAction: bestUtility.id,
-      utilityScore: Number(bestScore.toFixed(4)),
+      utilityScore: quantize(bestScore, 4),
       goapPlan: goapPlanNames,
       immediateCommand,
       steeringMove: direction,
-      speedMultiplier: Number(speedMultiplier.toFixed(3)),
+      speedMultiplier: quantize(speedMultiplier, 3),
       cameraDirective,
     };
   }
@@ -562,7 +654,7 @@ export class PawaBrain {
     if (bb.hostiles.length === 0) return 'STEALTH';
     if (bb.self.healthRatio < 0.28) return 'EVASIVE';
     if (bb.imminentThreat !== null || bb.pressureIndex > 0.72) return 'DEFENSIVE';
-    if (bb.persona.aggression >= 0.65 && bb.self.staminaRatio > 0.35) return 'AGGRESSIVE';
+    if (bb.profile.aggression >= 0.65 && bb.self.staminaRatio > 0.35) return 'AGGRESSIVE';
     return 'BALANCED';
   }
 
@@ -584,7 +676,7 @@ export class PawaBrain {
   private computeCameraDirective(
     mode: PresentationMode,
     command: string,
-    persona: PersonaProfile
+    profile: BehaviorProfile
   ): CameraDirective {
     const targetId = this.blackboard.primaryTarget?.id ?? null;
 
@@ -610,7 +702,7 @@ export class PawaBrain {
     if (command === 'EXECUTE_FINISHER' || command === 'DEFLECT_COUNTER') {
       return {
         mode: 'IMPACT_SLOWMO',
-        timeScale: persona.cinematicFlair > 0.5 ? 0.35 : 0.65,
+        timeScale: profile.cinematicFlair > 0.5 ? 0.35 : 0.65,
         fovMultiplier: 0.85,
         focusTargetId: targetId,
       };
@@ -634,7 +726,7 @@ export class PawaBrain {
         },
         {
           name: 'ProtagonistFlair',
-          evaluate: (bb) => bb.persona.cinematicFlair * 0.5 + 0.5,
+          evaluate: (bb) => bb.profile.cinematicFlair * 0.5 + 0.5,
           curve: Curves.linear,
         },
       ]),
@@ -649,9 +741,11 @@ export class PawaBrain {
           name: 'CloseProximity',
           evaluate: (bb) => {
             if (!bb.primaryTarget) return 0;
-            const d = Math.hypot(
-              bb.primaryTarget.position.x - bb.self.position.x,
-              bb.primaryTarget.position.z - bb.self.position.z
+            const d = distXZ(
+              bb.primaryTarget.position.x,
+              bb.primaryTarget.position.z,
+              bb.self.position.x,
+              bb.self.position.z
             );
             return Math.max(0, 1.0 - d / 3.5);
           },
@@ -678,7 +772,7 @@ export class PawaBrain {
         },
         {
           name: 'AggressionDrive',
-          evaluate: (bb) => bb.persona.aggression,
+          evaluate: (bb) => bb.profile.aggression,
           curve: Curves.linear,
         },
       ]),

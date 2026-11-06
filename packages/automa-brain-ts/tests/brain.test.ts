@@ -1,15 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PawaBrain,
+  AutomaBrain,
   ContextSteering,
   GoapPlanner,
   TacticalBlackboard,
   type EntitySnapshot,
-  type PersonaProfile,
+  type BehaviorProfile,
 } from '../src/index.ts';
 
-const PROTAGONIST_OPERATIVE: PersonaProfile = {
+const PROTAGONIST_OPERATIVE: BehaviorProfile = {
   id: 'stealth_operative',
   name: 'Covert Operative Archetype',
   aggression: 0.78,
@@ -48,14 +48,14 @@ test('Layer 3B: Regressive A* GOAP Planner synthesizes 3-step combat chain to el
   };
   const goalState = { enemyEliminated: true };
 
-  const plan = planner.plan(currentState, goalState, PawaBrain.defaultGoapActions(), bb);
+  const plan = planner.plan(currentState, goalState, AutomaBrain.defaultGoapActions(), bb);
   assert.ok(plan !== null, 'Planner must find a valid action sequence');
   const names = plan.map((a) => a.name);
   assert.deepEqual(names, ['CLOSE_DISTANCE', 'HEAVY_ASSAULT', 'EXECUTE_FINISHER']);
 });
 
-test('Layer 4 + 3A: PawaBrain triggers DEFLECT_COUNTER and IMPACT_SLOWMO camera on enemy wind-up in CINEMATIC_LIVE mode', () => {
-  const brain = new PawaBrain();
+test('Layer 4 + 3A: AutomaBrain triggers DEFLECT_COUNTER and IMPACT_SLOWMO camera on enemy wind-up in CINEMATIC_LIVE mode', () => {
+  const brain = new AutomaBrain();
   const self: EntitySnapshot = {
     id: 'player_0',
     position: { x: 0, y: 0, z: 0 },
@@ -90,7 +90,7 @@ test('Layer 4 + 3A: PawaBrain triggers DEFLECT_COUNTER and IMPACT_SLOWMO camera 
 });
 
 test('Presentation Mode Tri-State: TACTICAL vs CINEMATIC_RESOLVE camera directives', () => {
-  const brain = new PawaBrain();
+  const brain = new AutomaBrain();
   const self: EntitySnapshot = {
     id: 'player_0',
     position: { x: 0, y: 0, z: 0 },
@@ -121,4 +121,84 @@ test('Presentation Mode Tri-State: TACTICAL vs CINEMATIC_RESOLVE camera directiv
   const resolveDecision = brain.tick(self, [hostile], PROTAGONIST_OPERATIVE, 'CINEMATIC_RESOLVE');
   assert.equal(resolveDecision.cameraDirective.mode, 'FINISH_CUT');
   assert.equal(resolveDecision.cameraDirective.timeScale, 1.75);
+});
+
+test('Autonomy Modes: CO_PILOT passes human input through until imminent enemy wind-up triggers reflex parry', () => {
+  const brain = new AutomaBrain();
+  const self: EntitySnapshot = {
+    id: 'player_0',
+    position: { x: 0, y: 0, z: 0 },
+    velocity: { x: 0, y: 0, z: 0 },
+    healthRatio: 0.9,
+    staminaRatio: 0.9,
+    isAttacking: false,
+    isWindUp: false,
+    isRanged: false,
+    threatWeight: 1.0,
+  };
+
+  const calmHostile: EntitySnapshot = {
+    id: 'boss_1',
+    position: { x: 2.0, y: 0, z: 0 },
+    velocity: { x: 0, y: 0, z: 0 },
+    healthRatio: 0.8,
+    staminaRatio: 0.8,
+    isAttacking: false,
+    isWindUp: false,
+    isRanged: false,
+    threatWeight: 2.0,
+  };
+
+  // When enemy is not telegraphing an attack, CO_PILOT lets human control pass through
+  const passThrough = brain.tick(self, [calmHostile], PROTAGONIST_OPERATIVE, 'TACTICAL', 'CO_PILOT');
+  assert.equal(passThrough.interceptHumanInput, false);
+  assert.equal(passThrough.immediateCommand, 'HUMAN_PASS_THROUGH');
+
+  // The millisecond the enemy telegraphs a strike (isWindUp: true), CO_PILOT intercepts with DEFLECT_COUNTER
+  const windUpHostile: EntitySnapshot = { ...calmHostile, isWindUp: true };
+  const reflexIntercept = brain.tick(self, [windUpHostile], PROTAGONIST_OPERATIVE, 'TACTICAL', 'CO_PILOT');
+  assert.equal(reflexIntercept.interceptHumanInput, true);
+  assert.equal(reflexIntercept.immediateCommand, 'DEFLECT_COUNTER');
+});
+
+test('Autonomy Modes: SHADOW_SURVIVAL strictly evades/deflects without attacking, GRIND_AUTOPILOT cruises to waypoint', () => {
+  const brain = new AutomaBrain();
+  const self: EntitySnapshot = {
+    id: 'player_0',
+    position: { x: 0, y: 0, z: 0 },
+    velocity: { x: 0, y: 0, z: 0 },
+    healthRatio: 0.9,
+    staminaRatio: 0.9,
+    isAttacking: false,
+    isWindUp: false,
+    isRanged: false,
+    threatWeight: 1.0,
+  };
+  const weakHostile: EntitySnapshot = {
+    id: 'boss_1',
+    position: { x: 1.5, y: 0, z: 0 },
+    velocity: { x: 0, y: 0, z: 0 },
+    healthRatio: 0.1, // Vulnerable, normally triggers EXECUTE_FINISHER
+    staminaRatio: 0.5,
+    isAttacking: false,
+    isWindUp: false,
+    isRanged: false,
+    threatWeight: 2.0,
+  };
+
+  const shadow = brain.tick(self, [weakHostile], PROTAGONIST_OPERATIVE, 'TACTICAL', 'SHADOW_SURVIVAL');
+  assert.equal(shadow.stance, 'DEFENSIVE');
+  assert.notEqual(shadow.selectedUtilityAction, 'EXECUTE_FINISHER');
+  assert.notEqual(shadow.selectedUtilityAction, 'STRIKE_COMBO');
+
+  const grind = brain.tick(
+    self,
+    [],
+    PROTAGONIST_OPERATIVE,
+    'TACTICAL',
+    'GRIND_AUTOPILOT',
+    { x: 50, y: 0, z: 0 }
+  );
+  assert.equal(grind.immediateCommand, 'CRUISE_OR_LOOT');
+  assert.ok(grind.steeringMove.x > 0.9, 'Should steer directly toward open-world waypoint');
 });

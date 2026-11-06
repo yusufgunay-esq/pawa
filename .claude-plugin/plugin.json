@@ -1,14 +1,14 @@
 {
-  "name": "pawa",
-  "displayName": "PAWA — Persona-Aligned World Autonomy",
+  "name": "automa",
+  "displayName": "AUTOMA — Autonomous Play Architecture",
   "version": "1.0.0",
-  "description": "Reverse engineer single-player games with REA and inject a 4-layer autonomous protagonist brain (GOAP + Compensated Utility AI + Context Steering) with Tactical, Cinematic Live, and Cinematic Resolve modes.",
+  "description": "Reverse engineer single-player games with REA and inject a 4-layer, user-configurable autonomous game brain (GOAP + Compensated Utility AI + Context Steering) with Tactical, Cinematic Live, and Cinematic Resolve modes.",
   "author": {
     "name": "Yusuf Günay"
   },
   "license": "MPL-2.0",
   "keywords": [
-    "pawa",
+    "automa",
     "game-ai",
     "goap",
     "utility-ai",

@@ -1,5 +1,6 @@
 {
-  "personas": [
+  "$comment": "OPTIONAL STARTING TEMPLATES — not a taxonomy. Every label here is an example the agent may fork, re-tune from REA evidence, or ignore entirely by authoring a profile with its own playstyle label. No preset is a required choice and no game is expected to match one.",
+  "presets": [
     {
       "id": "covert_operative",
       "name": "Covert Espionage Operative",
@@ -35,6 +36,30 @@
       "preferredRange": 2.8,
       "defaultPresentationMode": "TACTICAL",
       "notes": "Replaces naive 'F5 charge-nearest' bots in sandbox battle simulators with formation-aware positioning, directional blocking, and threat-weighted target selection."
+    },
+    {
+      "id": "arcane_scholar",
+      "name": "Arcane Scholar",
+      "archetype": "ARCANE_SCHOLAR",
+      "aggression": 0.46,
+      "discipline": 0.90,
+      "cinematicFlair": 0.88,
+      "reactionDelayMs": 120,
+      "preferredRange": 8.0,
+      "defaultPresentationMode": "TACTICAL",
+      "notes": "Kite-first spellcaster: keeps a wide ring, spends on control and area denial before damage, and treats stamina/mana as the binding constraint rather than health."
+    },
+    {
+      "id": "ranged_skirmisher",
+      "name": "Ranged Skirmisher",
+      "archetype": "RANGED_SKIRMISHER",
+      "aggression": 0.62,
+      "discipline": 0.88,
+      "cinematicFlair": 0.70,
+      "reactionDelayMs": 90,
+      "preferredRange": 12.0,
+      "defaultPresentationMode": "TACTICAL",
+      "notes": "Bow/gun hit-and-run: fires from max effective range, repositions after every volley, and refuses melee unless cornered."
     }
   ]
 }

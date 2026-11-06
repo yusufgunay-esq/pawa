@@ -1,11 +1,28 @@
-# PAWA Target Report: <Game Title> (<Version / Platform>)
+# AUTOMA Target Report: <Game Title> (<Version / Platform>)
 
 - **Target Slug:** `<game-slug>`
 - **Status:** `RECON` | `PROTOTYPE` | `VERIFIED`
-- **Brain Runtime Linked:** `pawa-brain-cs` | `pawa-brain-cpp` | `pawa-brain-lua` | `pawa-brain-ts`
+- **Brain Runtime Linked:** `automa-brain-cs` | `automa-brain-cpp` | `automa-brain-lua` | `automa-brain-ts`
 - **Strategy Tier Used:** `S1` | `S2` | `S3` | `S4` | `S5`
-- **Default Persona Profile:** `covert_operative` | `spartan_mercenary` | `tactical_commander`
+- **Default Profile Profile:** `<game-slug>` (authored per protagonist — see `profile.json`; free-form `archetype` label, **presets are only starting points**)
 - **Supported Presentation Modes:** `TACTICAL`, `CINEMATIC_LIVE`, `CINEMATIC_RESOLVE`
+
+---
+
+## 0. Profile Derivation (No Fixed Archetype)
+
+| Parameter | Value | Evidence it was derived from (symbol / timing / gameplay observation) |
+|---|---|---|
+| `archetype` (free-form label) | | |
+| `preferredRange` | | |
+| `aggression` | | |
+| `discipline` | | |
+| `cinematicFlair` | | |
+| `reactionDelayMs` | | |
+
+- [ ] Profile is **not** a byte-identical copy of a template in `schemas/profiles.json`
+- [ ] `node scripts/validate-profiles.mjs <game-slug>` passes
+
 
 ---
 
@@ -34,7 +51,7 @@
 
 ## 3. Strategy Justification & Architecture Notes
 
-Explain why the selected strategy tier (`S1`–`S5`) was chosen and how the shared `PawaBrain` kernel interfaces with the target's state and action hooks.
+Explain why the selected strategy tier (`S1`–`S5`) was chosen and how the shared `AutomaBrain` kernel interfaces with the target's state and action hooks.
 
 ---
 

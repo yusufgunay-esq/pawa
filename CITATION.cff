@@ -1,14 +1,14 @@
 cff-version: 1.2.0
-message: "If you use PAWA or its 4-Layer Cognitive Brain in your research, mods, or autonomous agent benchmarks, please cite it as below."
-title: "PAWA: Persona-Aligned World Autonomy for Single-Player Games"
-abstract: "An open-source cognitive architecture and reverse-engineering protocol that equips AI coding agents to inject 4-layer protagonist autonomy (Orchestrator, Regressive A* GOAP, Compensated Utility AI, and 16-Slot Context Steering) with user-selectable Tactical and Cinematic presentation modes into existing single-player games."
+message: "If you use AUTOMA or its 4-Layer Cognitive Brain in your research, mods, or autonomous agent benchmarks, please cite it as below."
+title: "AUTOMA: Autonomous Play Architecture for Single-Player Games"
+abstract: "An open-source cognitive architecture and reverse-engineering protocol that equips AI coding agents to inject 4-layer, user-configurable game autonomy (Orchestrator, Regressive A* GOAP, Compensated Utility AI, and 16-Slot Context Steering) with user-selectable Tactical and Cinematic presentation modes into existing single-player games."
 authors:
   - family-names: "Günay"
     given-names: "Yusuf"
 version: 1.0.0
 date-released: "2026-11-05"
 license: MPL-2.0
-repository-code: "https://github.com/yusufgunay-esq/pawa"
+repository-code: "https://github.com/yusufgunay-esq/automa"
 keywords:
   - game-ai
   - goap
