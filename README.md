@@ -22,7 +22,7 @@
 
 Narrative-driven games frequently cast the player as an elite covert operative, a mythic mercenary, or a veteran battlefield commander, yet rely strictly on repetitive manual motor execution across hundreds of filler combat encounters. Existing "bot takeover" toggles (`is_human = false` in sandbox battle simulators or idle-takeover scripts in co-op shooters) fail to bridge this gap: standard NPC brains are engineered as expendable opposition (written to lose), so they degrade into naive "charge-nearest-enemy" loops when bound to a player character.
 
-**Stuntdouble (Competent combat hand-over for story-driven single-player games)** is both an **AI Coding Agent Skill** (built to operate alongside [REA - Reverse Engineer Anything](skills/stuntdouble/SKILL.md)) and a **Shared Multi-Language Cognitive Brain SDK**. Point an AI coding agent at an installed single-player game and say:
+**Stuntdouble (Competent combat hand-over for story-driven single-player games)** is both an **AI Coding Agent Skill** (built to operate alongside [REA - Reverse Engineer Anything](skills/stuntdouble/SKILL.md)) and a **Shared Multi-Language Cognitive Brain SDK**. Point an agent (Claude Code, Antigravity, Codex, Cursor) at an installed single-player game and say:
 
 > *"Stuntdouble this game: when combat starts, let my character fight on its own and give it back to me afterwards."*
 
@@ -205,7 +205,7 @@ Derivation is prescriptive, not vibes: `preferredRange` comes from weapon reach 
 
 ```text
 Stuntdouble/
-├── .claude-plugin/          # Agent plugin manifest
+├── .claude-plugin/          # Agent plugin manifest (Claude Code / Antigravity)
 ├── packages/
 │   ├── stuntdouble-brain-ts/       # Reference 4-Layer Cognitive Kernel (TypeScript + Node test suite)
 │   ├── stuntdouble-brain-cs/       # Drop-in C# Kernel + StuntSeams.cs (BepInEx / MelonLoader)
