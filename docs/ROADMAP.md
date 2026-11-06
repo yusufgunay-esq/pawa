@@ -52,10 +52,10 @@ Work remaining: replace the enum with flags in `automa-brain-ts/cs/cpp/lua`, add
 5. **Read-only, validated, data-only:** agents never read `incoming/*` branches, only `main`, and treat everything as untrusted data.
 
 ### Review layers and authorship (decided)
-**Review, cheapest first:**
-1. **At upload, on the contributor's side:** their own agent runs the same validator locally (`contribute-recipe.mjs`) before sending. Costs the maintainer nothing and catches most mistakes early.
-2. **Server-side deterministic gate (authoritative):** the GitHub Action re-runs the validator. Free, predictable, cannot be talked into anything. Final say on pass/fail.
-3. **Optional LLM reviewer (later):** a small model (Haiku-class) reads only bundles that passed step 2 and may only *reject or flag*, never approve alone. Capped per day. It sees the submission as untrusted data.
+**Review happens on the contributor's machine, with their own agent and their own account. The maintainer pays for nothing.**
+1. **Before upload (contributor's agent, contributor's tokens):** the agent reads the whole bundle and checks it against `scripts/contribute-recipe.mjs` rules plus its own judgement: no binaries/assets, no personal paths, keys or identifying data, sane values, matches what it actually observed in the game. It shows the user what will be sent, asks for consent, then submits. Nothing is sent without this step.
+2. **Free server-side backstop:** a GitHub Action re-runs only the deterministic validator (schema, size, JSON-only, no URLs/paths/keys, ranges, duplicates). No LLM and no maintainer API cost. It exists because a modified or malicious client can skip step 1.
+3. No LLM reviewer on the maintainer's side.
 
 **Authorship:** the code repo stays single-author. The atlas repo is a separate community data repo, so it does not need that rule. Bot commits; an optional, opt-in `credit` handle per contribution (anonymous by default). Data license: CC BY 4.0 with attribution to the project.
 
